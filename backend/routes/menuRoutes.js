@@ -8,7 +8,7 @@ import {
     getMenuItemById
 } from '../controllers/menuController.js';
 
-import { protectRestaurant } from '../middlewares/restaurantAuth.js';
+import protectRestaurant from '../middlewares/restaurantAuth.js';
 
 const router = express.Router();
 

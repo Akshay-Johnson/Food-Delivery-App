@@ -23,13 +23,14 @@ const reviewSchema = new mongoose.Schema(
             type: String,
             default: ''
         },
-        indexes: [
-            { customerId: 1, restaurantId: 1 },
-            { unique: true }
-        ]
-
     },
     { timestamps: true }
+);
+
+
+reviewSchema.index(
+    { customerId: 1, restaurantId: 1 },
+    { unique: true }
 );
 
 export default mongoose.model('Review', reviewSchema);

@@ -1,4 +1,6 @@
 import Restaurant from '../models/restaurantModel.js';
+import Menu from '../models/menuModel.js';
+
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -67,7 +69,7 @@ export const loginRestaurant = async (req, res) => {
 // Get restaurant profile
 export const getRestaurantProfile = async (req, res) => {
     try {
-        const restaurant = await Restaurant.findById(req.user._id).select('-password');
+        const restaurant = await Restaurant.findById(req.user.id).select('-password');
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
@@ -82,7 +84,7 @@ export const getRestaurantProfile = async (req, res) => {
 // Update restaurant profile
 export const updateRestaurantProfile = async (req, res) => {
     try {
-        const restaurant = await Restaurant.findById(req.user._id);
+        const restaurant = await Restaurant.findById(req.user.id);
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
@@ -138,14 +140,21 @@ export const getRestaurantById = async (req, res) => {
             return res.status(404).json({ message: 'Restaurant not found' });
         }
 
-        res.status(200).json(restaurant);
+        //fetch menu items for the restaurant
+        const menuItems = await Menu.find({ restaurant: restaurant._id });
+
+        res.status(200).json({ 
+            restaurant, 
+            menuItems 
+        });
+        
     } catch (error) {
         res.status(500).json({ message: 'error fetching restaurant', error });
     }
 };
 
 //add categories to restaurant
-export const addCaregory = async (req, res) => {
+export const addCategory = async (req, res) => {
     try {
         const restaurant = await Restaurant.findById(req.user.id);
         if (!restaurant) {
@@ -215,3 +224,26 @@ export const getCategories = async (req, res) => {
     }
 };
 
+//Public - Search restaurants
+export const searchRestaurants = async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query || query.trim() === '') {
+            return res.status(400).json({ message: 'Search query is required' });
+        }
+
+        const searchText = query.trim();
+
+        const restaurants = await Restaurant.find({
+            $or: [
+                { name: { $regex: searchText, $options: 'i' } },
+                { categories: { $regex: searchText, $options: 'i' } },
+            ],
+        }).select('-password');
+                
+        res.status(200).json(restaurants);
+
+    } catch (error) {
+        res.status(500).json({ message: 'error searching restaurants', error });
+    }
+};

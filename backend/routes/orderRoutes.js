@@ -11,8 +11,11 @@ import auth from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 router.post('/create', auth, createOrder);
+
 router.get('/my-orders', auth, getMyOrders);
-router.get('/:id', auth, getOrderById);
+
 router.get('/track/:id', auth, trackOrderStatus);
+
+router.get('/:id', auth, getOrderById);
 
 export default router;

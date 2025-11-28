@@ -7,14 +7,18 @@ import {
     markReady,
 } from '../controllers/orderController.js';
 
-import { protectRestaurant } from '../middlewares/restaurantAuth.js';
+import restaurantAuth from '../middlewares/restaurantAuth.js';
 
 const router = express.Router();
 
-router.get("/",protectRestaurant, getRestaurantOrders);
-router.put("/accept/:id", protectRestaurant, acceptOrder);
-router.put("/reject/:id", protectRestaurant, rejectOrder);
-router.put("/preparing/:id", protectRestaurant, markPreparing);
-router.put("/ready/:id", protectRestaurant, markReady);
+router.get("/", restaurantAuth, getRestaurantOrders);
+
+router.put("/accept/:id", restaurantAuth, acceptOrder);
+
+router.put("/reject/:id", restaurantAuth, rejectOrder);
+
+router.put("/preparing/:id", restaurantAuth, markPreparing);
+
+router.put("/ready/:id", restaurantAuth, markReady);
 
 export default router;

@@ -33,7 +33,7 @@ app.use(cookieParser());
 
 //routes 
 
-//cutomer routes
+//customer routes
 app.use('/api/customers', customerRoutes);
 
 //address routes
@@ -52,7 +52,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 
 //restaurant order routes
-app.use('/api/restaurant/orders',restaurantOrderRoutes);
+app.use('/api/restaurants/orders',restaurantOrderRoutes);
 
 //delivery agent routes
 app.use('/api/agents', deliveryAgentRoutes);

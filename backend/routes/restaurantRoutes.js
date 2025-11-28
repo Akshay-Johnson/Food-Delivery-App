@@ -7,30 +7,37 @@ import {
     updateRestaurantProfile,
     getAllRestaurants,
     getRestaurantById,
-    addCaregory,
+    addCategory,
     removeCategory,
     getCategories,
+    searchRestaurants
     
 
 } from '../controllers/restaurantController.js';
-import { protectRestaurant } from '../middlewares/restaurantAuth.js';
+
+import restaurantAuth from '../middlewares/restaurantAuth.js';
 
 const router = express.Router();
 
 router.post('/register', registerRestaurant);
 router.post('/login', loginRestaurant);
 
-router.get('/profile', protectRestaurant, getRestaurantProfile);
-router.put('/profile', protectRestaurant, updateRestaurantProfile);
+//private restaurant routes
+router.get('/profile', restaurantAuth, getRestaurantProfile);
+router.put('/profile', restaurantAuth, updateRestaurantProfile);
 
+//public listings
 router.get('/', getAllRestaurants);
-router.get('/:id', getRestaurantById);
 
-router.post('/categories', protectRestaurant, addCaregory);
-router.delete("/category", protectRestaurant, removeCategory);
+//search restaurants
+router.get('/search', searchRestaurants);
 
+//category routes
 router.get('/:id/categories', getCategories);
+router.post('/categories', restaurantAuth, addCategory);
+router.delete("/categories", restaurantAuth, removeCategory);
 
-
+//get restaurant by id
+router.get('/:id', getRestaurantById);
 
 export default router;

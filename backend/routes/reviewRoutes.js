@@ -10,7 +10,10 @@ router.post('/:restaurantId', auth, postReview);
 //get all reviews for a restaurant
 router.get('/:restaurantId', getReviews);
 
+//update a review
 router.put("/:restaurantId/:reviewId", auth, updateReview);
+
+//delete a review
 router.delete("/:restaurantId/:reviewId", auth, deleteReview);
 
 

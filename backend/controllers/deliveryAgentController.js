@@ -67,7 +67,12 @@ export const loginAgent = async (req, res) => {
 export const getAgentProfile = async (req, res) => {
     try {
         const agent = await DeliveryAgent.findById(req.user.id).select('-password');
-        res.status(200).json({ agent });
+        if (!agent) {
+            return res.status(404).json({ message: 'Delivery agent not found' });
+        }
+
+        return res.status(200).json({ agent });
+        
     } catch (error) {
         res.status(500).json({ message: 'Error fetching delivery agent profile' });
     }
@@ -96,6 +101,10 @@ export const updateAgentLocation = async (req, res) => {
         const agent = await DeliveryAgent.findById(req.user.id);
 
         const { lat, lng } = req.body;
+
+        if (lat === undefined || lng === undefined) {
+            return res.status(400).json({ message: 'Latitude and Longitude are required' });
+        }
 
         agent.location = { lat , lng };
         await agent.save();
