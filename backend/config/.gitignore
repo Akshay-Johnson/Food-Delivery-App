@@ -1,0 +1,63 @@
+# ===========================================
+# Node & Backend
+# ===========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+logs/
+*.log
+
+# ===========================================
+# Env & Secrets
+# ===========================================
+.env
+.env.local
+.env.*.local
+*.env
+*.key
+*.pem
+*.p12
+*.crt
+
+# **Google Cloud / Firebase keys**
+serviceAccount*.json
+*service-account*.json
+*gcp*.json
+firebase-key.json
+*credentials*.json
+*.json
+
+# IMPORTANT: Don't ignore ALL JSON files if you need config JSONs in repo.
+# If you DO need JSON config files committed, remove the last "*.json" line.
+
+# ===========================================
+# Frontend (React / Vite / Next)
+# ===========================================
+.vite/
+.vite-cache/
+.eslintcache
+.cache/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# ===========================================
+# OS / Editor trash
+# ===========================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ===========================================
+# Misc
+# ===========================================
+temp/
+tmp/
