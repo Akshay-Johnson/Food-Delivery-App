@@ -31,7 +31,11 @@ const deliveryAgentschema = new mongoose.Schema({
             type: Number,
             default: null
         }
+    },
+    fcmToken: {
+        type: String,
     }
+
 }, { timestamps: true });
 
 const DeliveryAgent = mongoose.model('DeliveryAgent', deliveryAgentschema);

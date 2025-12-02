@@ -15,6 +15,7 @@ import {
 
 } from '../controllers/restaurantController.js';
 
+import { getRestaurantOrders , getAssignedOrders, assignOrderToAgent } from '../controllers/orderController.js';
 import restaurantAuth from '../middlewares/restaurantAuth.js';
 
 const router = express.Router();
@@ -26,6 +27,12 @@ router.post('/login', loginRestaurant);
 router.get('/profile', restaurantAuth, getRestaurantProfile);
 router.put('/profile', restaurantAuth, updateRestaurantProfile);
 
+router.get('/orders', restaurantAuth, getRestaurantOrders);
+
+router.put('/assign/orders', restaurantAuth, getAssignedOrders);
+
+router.put('/orders/assign/:orderId', restaurantAuth, assignOrderToAgent);
+
 //public listings
 router.get('/', getAllRestaurants);
 
@@ -33,9 +40,9 @@ router.get('/', getAllRestaurants);
 router.get('/search', searchRestaurants);
 
 //category routes
-router.get('/:id/categories', getCategories);
 router.post('/categories', restaurantAuth, addCategory);
 router.delete("/categories", restaurantAuth, removeCategory);
+router.get('/:id/categories', getCategories);
 
 //get restaurant by id
 router.get('/:id', getRestaurantById);

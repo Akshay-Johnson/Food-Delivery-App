@@ -10,7 +10,9 @@ export const protectAdmin = async (req, res, next) => {
         } 
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
         const admin = await Admin.findById(decoded.id);
+
         if (!admin) {
             return res.status(401).json({ message: 'Not authorized, admin not found' });
         }
@@ -20,4 +22,4 @@ export const protectAdmin = async (req, res, next) => {
     } catch (error) {
         res.status(401).json({ message: 'Not authorized, token failed' });
     }
-}
+};

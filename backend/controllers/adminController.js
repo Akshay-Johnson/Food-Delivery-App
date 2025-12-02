@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 //admin registration
@@ -25,9 +25,12 @@ export const registerAdmin = async (req, res) => {
 
         const admin = await Admin.create({ name, email , password: hashedPassword });
 
+        const token = generateToken(admin._id);
+
         res.status(201).json({
             message : 'Admin registered successfully',
             admin,
+            token,
         });
     } catch (error) {
         res.status(500).json({ message: 'error registering admin' });
@@ -49,9 +52,14 @@ export const loginAdmin = async (req, res) => {
         if (!match) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
+
         const token = generateToken(admin._id);
 
-        res.json({message: 'Admin logged in successfully', token });
+        res.json({
+            message: 'Admin logged in successfully',
+            token,
+            admin,
+         });
     } catch (error) {
         res.status(500).json({ message: 'Error logging in admin' });
     }
@@ -81,9 +89,9 @@ export const updateRestaurantStatus = async (req, res) => {
         restaurant.status = status;
         await restaurant.save();
 
-        res.json({ message: `Restaurant updated to ${status}` });
+        res.json({ message: `Restaurant updated to ${status}`, restaurant });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating restaurant status' });
+        res.status(500).json({ message: 'Error updating restaurant status',error: error.message });
     }
 };
 
@@ -93,7 +101,7 @@ export const getAllCustomers = async (req, res) => {
         const customers = await Customer.find().select('-password');
         res.json(customers);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching customers' });
+        res.status(500).json({ message: 'Error fetching customers', error: error.message });
     }
 };
 
@@ -113,7 +121,7 @@ export const updateAgentStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body; // 'approved' or 'blocked'
 
-        let agent = await DeliveryAgent.findById(id);
+        const agent = await DeliveryAgent.findById(id);
         if (!agent) {
             return res.status(404).json({ message: 'Delivery Agent not found' });
         }
@@ -134,9 +142,10 @@ export const getAllOrders = async (req, res) => {
         .populate('customerId', 'name email')
         .populate('restaurantId', 'name email')
         .populate('deliveryAgentId', 'name email');
+
         res.json(orders);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching orders' });
+        res.status(500).json({ message: 'Error fetching orders',error: error.message });
     }
 };
         

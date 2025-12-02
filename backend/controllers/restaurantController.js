@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '24h',
+        expiresIn: '30d',
     });
 }
 
@@ -209,8 +209,8 @@ export const removeCategory = async (req, res) => {
 //get categories of restaurant
 export const getCategories = async (req, res) => {
     try {
-        const {restaurantId} = req.params;
-        const restaurant = await Restaurant.findById(restaurantId).select('categories');
+        const { id } = req.params;
+        const restaurant = await Restaurant.findById(id).select('categories');
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });

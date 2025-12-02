@@ -21,6 +21,9 @@ const customerSchema = new mongoose.Schema({
   profileImage: {
     type: String,
   },
+  fcmToken: {
+    type: String,
+  },
   
 },
   { timestamps: true }
