@@ -8,7 +8,8 @@ const __dirname = path.dirname(__filename);
 
 // Load the service account key JSON file
 
-const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
+const serviceAccountPath = "C:\\Users\\aksha\\Downloads\\serviceAccountKey.json";
+  
 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
 // Initialize the Firebase admin SDK

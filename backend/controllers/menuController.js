@@ -108,3 +108,13 @@ export const getMenuItemById = async (req, res) => {
         res.status(500).json({ message: 'Error fetching menu item', error: error.message });
     }
 };
+
+//PUBLIC : get recommended dishes
+export const getRecommendedDishes = async (req, res) => {
+    try {
+        const dishes = await Menu.find().limit(10);
+        res.json(dishes);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching recommended dishes', error: error.message });
+    }
+};

@@ -18,6 +18,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 
 
@@ -29,8 +30,14 @@ const app = express();
 
 
 //middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', //frontend address
+  credentials: true,
+}));
+
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 //routes 
@@ -68,6 +75,9 @@ app.use('/api/admin', adminRoutes);
 //uploads
 app.use('/api/upload', uploadRoutes);
 app.use('/uploads', express.static('uploads'));
+
+//search routes
+app.use('/api/search', searchRoutes);
 
 //post review customer 
 app.use('/api/reviews', reviewRoutes);

@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@layer components {
+  .nav-btn {
+    @apply px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 
+           text-white rounded-md hover:bg-white/20 transition;
+  }
+
+  .hero-btn {
+    @apply px-6 py-3 rounded-lg shadow-md backdrop-blur-sm border border-white/20 
+           text-white text-3xl font-bold transition;
+  }
+}
