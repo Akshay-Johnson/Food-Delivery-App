@@ -1,15 +1,20 @@
 import { Search, Utensils, Coffee, Pizza, IceCream, Truck } from "lucide-react";
 import { useState, useEffect } from "react";
-import api from "../../api/axiosInstance";
+import api from "../../../api/axiosInstance";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function CustomerDashboard() {
   const [restaurants, setRestaurants] = useState([]);
   const [dishes, setDishes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState({ restaurants: [], dishes: [] });
+  const [searchResults, setSearchResults] = useState({
+    restaurants: [],
+    dishes: [],
+  });
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const navigate = useNavigate();
 
   //fetch restaurants & dishes
   useEffect(() => {
@@ -38,46 +43,48 @@ export default function CustomerDashboard() {
   };
 
   const performSearch = async (text) => {
-  setSearchQuery(text);
+    setSearchQuery(text);
 
-  if (text.trim() === "") {
-    setIsSearching(false);
-    setSearchResults({ restaurants: [], dishes: [] });
-    return;
-  }
+    if (text.trim() === "") {
+      setIsSearching(false);
+      setSearchResults({
+        restaurants: filteredRestaurants,
+        dishes: filteredDishes,
+      });
+      return;
+    }
 
-  try {
-    const response = await api.get(`/api/search?query=${text}`);
+    try {
+      const response = await api.get(`/api/search?query=${text}`);
 
-    // merge backend results + local matches
-    const mergedDishResults = [
-      ...response.data.dishes,
-      ...dishes.filter(
-        (d) =>
-          d.name.toLowerCase().includes(text.toLowerCase()) ||
-          d.category?.toLowerCase().includes(text.toLowerCase())
-      ),
-    ];
+      // merge backend results + local matches
+      const mergedDishResults = [
+        ...response.data.dishes,
+        ...dishes.filter(
+          (d) =>
+            d.name.toLowerCase().includes(text.toLowerCase()) ||
+            d.category?.toLowerCase().includes(text.toLowerCase())
+        ),
+      ];
 
-    setSearchResults({
-      restaurants: response.data.restaurants,
-      dishes: mergedDishResults,
-    });
+      setSearchResults({
+        restaurants: response.data.restaurants,
+        dishes: mergedDishResults,
+      });
 
-    setIsSearching(true);
-  } catch (error) {
-    console.error("Search error:", error);
+      setIsSearching(true);
+    } catch (error) {
+      console.error("Search error:", error);
 
-    // fallback purely to local matching
-    setSearchResults({
-      restaurants: filteredRestaurants,
-      dishes: filteredDishes,
-    });
+      // fallback purely to local matching
+      setSearchResults({
+        restaurants: filteredRestaurants,
+        dishes: filteredDishes,
+      });
 
-    setIsSearching(true);
-  }
-};
-
+      setIsSearching(true);
+    }
+  };
 
   const filteredRestaurants = restaurants.filter((r) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -88,8 +95,25 @@ export default function CustomerDashboard() {
   );
 
   const categoryDishes = selectedCategory
-    ? dishes.filter((d) => d.category?.toLowerCase() === selectedCategory.toLowerCase())
+    ? dishes.filter(
+        (d) => d.category?.toLowerCase() === selectedCategory.toLowerCase()
+      )
     : dishes;
+
+  const addToCart = async (dish) => {
+    try {
+      await api.post("/api/cart/add", {
+        itemId: dish._id,
+        name: dish.name,
+        price: dish.price,
+        quantity: 1,
+      });
+      alert("Dish added to cart!");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Failed to add dish to cart.");
+    }
+  };
 
   return (
     <div
@@ -105,7 +129,6 @@ export default function CustomerDashboard() {
 
       {/* ========= PAGE CONTENT ========= */}
       <div className="relative z-10">
-
         {/* NAVBAR */}
         <header className="bg-black/50 border-b border-white/30 shadow-md p-5 flex justify-between items-center  top-0 z-20">
           <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
@@ -113,6 +136,20 @@ export default function CustomerDashboard() {
           <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition">
             <Truck size={18} />
             Track Order
+          </button>
+
+          <button
+            onClick={() => navigate("/customer/profile")}
+            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/20 transition"
+          >
+            My Profile
+          </button>
+
+          <button
+            onClick={() => navigate("/customer/cart")}
+            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/20 transition"
+          >
+            Cart
           </button>
         </header>
 
@@ -146,7 +183,11 @@ export default function CustomerDashboard() {
                 <h4 className="font-semibold mb-2">Restaurants</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {searchResults.restaurants.map((r) => (
-                    <div key={r._id} className="bg-white text-black shadow rounded-xl p-4">
+                    <div
+                      key={r._id}
+                      onClick={() => navigate(`/customer/restaurant/${r._id}`)}
+                      className="bg-white text-black shadow rounded-xl p-4"
+                    >
                       <p className="font-bold">{r.name}</p>
                       <p className="text-gray-600 text-sm">{r.description}</p>
                     </div>
@@ -161,8 +202,14 @@ export default function CustomerDashboard() {
                 <h4 className="font-semibold mb-2 mt-4">Dishes</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                   {searchResults.dishes.map((d) => (
-                    <div key={d._id} className="bg-white text-black p-3 rounded-xl shadow">
-                      <img src={d.image || "/assets/dishimage.jpg"} className="h-24 w-full object-cover rounded-lg" />
+                    <div
+                      key={d._id}
+                      className="bg-white text-black p-3 rounded-xl shadow"
+                    >
+                      <img
+                        src={d.image || "/assets/dishimage.jpg"}
+                        className="h-24 w-full object-cover rounded-lg"
+                      />
                       <p className="font-semibold mt-2">{d.name}</p>
                       <p className="text-gray-700 text-sm">₹{d.price}</p>
                     </div>
@@ -174,7 +221,9 @@ export default function CustomerDashboard() {
             {/* No results */}
             {searchResults.restaurants.length === 0 &&
               searchResults.dishes.length === 0 && (
-                <p className="text-gray-300 text-center mt-4">No results found.</p>
+                <p className="text-gray-300 text-center mt-4">
+                  No results found.
+                </p>
               )}
           </section>
         )}
@@ -187,7 +236,8 @@ export default function CustomerDashboard() {
             {filteredRestaurants.map((r) => (
               <div
                 key={r._id}
-                className="bg-black/40 text-white border border-white/30 rounded-xl shadow hover:shadow-xl transition overflow-hidden"
+                onClick={() => navigate(`/customer/restaurant/${r._id}`)}
+                className="bg-white text-black shadow rounded-xl p-4"
               >
                 <img
                   src={r.image || `/assets/restaurantimage.jpeg`}
@@ -212,10 +262,26 @@ export default function CustomerDashboard() {
 
           <div className="grid grid-cols-4 gap-4">
             {[
-              { name: "Pizza", icon: Pizza, image: "/assets/categories/pizza.jpg" },
-              { name: "Desserts", icon: IceCream, image: "/assets/categories/dessert.jpg" },
-              { name: "Meals", icon: Utensils, image: "/assets/categories/meal.jpg" },
-              { name: "Drinks", icon: Coffee, image: "/assets/categories/drinks.jpg" },
+              {
+                name: "Pizza",
+                icon: Pizza,
+                image: "/assets/categories/pizza.jpg",
+              },
+              {
+                name: "Desserts",
+                icon: IceCream,
+                image: "/assets/categories/dessert.jpg",
+              },
+              {
+                name: "Meals",
+                icon: Utensils,
+                image: "/assets/categories/meal.jpg",
+              },
+              {
+                name: "Drinks",
+                icon: Coffee,
+                image: "/assets/categories/drinks.jpg",
+              },
             ].map((c, i) => (
               <div
                 key={i}
@@ -238,13 +304,17 @@ export default function CustomerDashboard() {
 
         {/* CATEGORY / RECOMMENDED DISHES */}
         <h3 className="text-xl font-bold mb-10 mt-20 ml-6">
-          {selectedCategory ? `${selectedCategory} Dishes` : "Recommended For You"}
+          {selectedCategory
+            ? `${selectedCategory} Dishes`
+            : "Recommended For You"}
         </h3>
 
         <section className="px-6 mt-12 mb-20">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {categoryDishes.map((dish) => {
-              const restaurant = restaurants.find((r) => r._id === dish.restaurantId);
+              const restaurant = restaurants.find(
+                (r) => r._id === dish.restaurantId
+              );
 
               return (
                 <div
@@ -263,11 +333,15 @@ export default function CustomerDashboard() {
                   <p className="text-white/70 text-sm italic">
                     By: {restaurant ? restaurant.name : "Unknown"}
                   </p>
+                  <button
+                    onClick={() => addToCart(dish)}
+                    className="bg-green-600 hover:bg-green-700 px-3 py-1 mt-2 rounded text-white"
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               );
             })}
-
-
           </div>
         </section>
       </div>

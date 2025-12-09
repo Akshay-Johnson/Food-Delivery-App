@@ -16,9 +16,9 @@ import restaurantOrderRoutes from './routes/restaurantOrderRoutes.js';
 import deliveryAgentRoutes from './routes/deliveryAgentRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 
 
@@ -44,6 +44,12 @@ app.use(cookieParser());
 
 //customer routes
 app.use('/api/customers', customerRoutes);
+
+//upload routes
+app.use('/api/upload', uploadRoutes);
+
+//serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 
 //address routes
 app.use('/api/address', addressRoutes);

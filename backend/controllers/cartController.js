@@ -8,7 +8,7 @@ const calculateTotal = (items) => {
 //add item to cart
 export const addToCart = async (req, res) => {
     try{
-        const customerId = req.user.id;
+        const customerId = req.customer.id;
         const { itemId , name, price, quantity } = req.body;
 
         let cart = await Cart.findOne({ customerId });
@@ -21,6 +21,7 @@ export const addToCart = async (req, res) => {
         });
         return res.status(201).json(cart);
         }
+
         const existingItem = cart.items.find(i => i.itemId.toString() === itemId);
 
         if(existingItem){
@@ -41,7 +42,7 @@ export const addToCart = async (req, res) => {
 //update item quantity 
 export const updateCartItem = async (req, res) => {
     try{
-        const customerId = req.user.id; 
+        const customerId = req.customer.id; 
         const { quantity } = req.body;
         const { itemId} = req.params;
 
@@ -69,7 +70,7 @@ export const updateCartItem = async (req, res) => {
 //remove item from cart
 export const removeCartItem = async (req, res) => {
     try{
-        const customerId = req.user.id; 
+        const customerId = req.customer.id; 
         const { itemId} = req.params;
 
         let cart = await Cart.findOne({ customerId });
@@ -91,22 +92,23 @@ export const removeCartItem = async (req, res) => {
 //get cart by customer ID
 export const getCart = async (req, res) => {
     try{
-        const customerId = req.user.id;
+        const customerId = req.customer.id;
         const cart = await Cart.findOne({ customerId });
+        console.log("customer in request:", req.customer);
 
         if(!cart){
-            return res.status(404).json({ message: 'Cart not found' });
+            return res.status(404).json({ items: [], totalPrice: 0 });          
         }
         res.json(cart);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching cart', error: error.message });    
+    } catch (error) {   
+        res.status(500).json({ message: 'Error fetching cart', error: error.message });
     }
 };
 
 //clear cart
 export const clearCart = async (req, res) => {
     try{
-        const customerId = req.user.id;
+        const customerId = req.customer.id;
         const cart = await Cart.findOne({ customerId });
 
         if(!cart){

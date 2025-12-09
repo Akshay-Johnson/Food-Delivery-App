@@ -43,3 +43,52 @@ export const loginCustomer = async (req, res) => {
         res.status(500).json({message: "Something went wrong"});
     }
 };
+
+// Get Customer Profile
+export const getCustomerProfile = async (req, res) => {
+  try {
+    console.log("AUTH CUSTOMER:", req.customer);   // 🟢 IMPORTANT DEBUG LOG
+
+    const user = await Customer.findById(req.customer.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    res.json(user);
+
+  } catch (error) {
+    console.log("REQ CUSTOMER =", req.customer);
+
+    res.status(500).json({ message: "Error fetching profile" });
+  }
+};
+
+//edit customer profile 
+export const editProfile = async (req, res) => {
+  try {
+
+    const customerId = req.customer.id;
+    const updates = {};
+
+    if (req.body.name) updates.name = req.body.name;
+    if (req.body.phone) updates.phone = req.body.phone;
+    if (req.body.profileImage) updates.profileImage = req.body.profileImage;
+    if (req.body.password) updates.password = await bcrypt.hash(req.body.password, 12);
+
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+      customerId,
+      updates,
+      { new: true }
+    ).select("-password");
+
+    if (!updatedCustomer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    res.json({ message: "Profile updated successfully", user: updatedCustomer });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error updating profile" });
+  }
+};

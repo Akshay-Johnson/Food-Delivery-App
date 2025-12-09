@@ -247,3 +247,27 @@ export const searchRestaurants = async (req, res) => {
         res.status(500).json({ message: 'error searching restaurants', error });
     }
 };
+
+//get restaurant details 
+export const getRestaurantDetails = async (req, res) => {
+    try {
+        const restaurantId = req.params.id;
+
+        const restaurant = await Restaurant.findById(restaurantId);
+        if (!restaurant) {
+            return res.status(404).json({ message: 'Restaurant not found' });
+        }
+
+        //fetch menu items for the restaurant
+        const dishes = await Menu.find({ restaurantId });
+
+        res.json({
+            restaurant,
+            dishes,
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'error fetching restaurant details', error });
+    }
+};
+        

@@ -10,7 +10,8 @@ import {
     addCategory,
     removeCategory,
     getCategories,
-    searchRestaurants
+    searchRestaurants,
+    getRestaurantDetails,
     
 
 } from '../controllers/restaurantController.js';
@@ -46,5 +47,8 @@ router.get('/:id/categories', getCategories);
 
 //get restaurant by id
 router.get('/:id', getRestaurantById);
+
+//get restaurant details
+router.get('/:id/details', getRestaurantDetails);
 
 export default router;

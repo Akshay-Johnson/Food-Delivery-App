@@ -1,9 +1,10 @@
 import Address from "../models/addressModel.js";
+import mongoose from "mongoose";
 
 //add new address
 export const addAddress = async (req, res) => {
     try {
-        const customerId = req.user.id;
+        const customerId = req.customer.id;
 
 
         const {
@@ -47,7 +48,7 @@ export const addAddress = async (req, res) => {
 //get all addresses
 export const getAddresses = async (req, res) => {
     try {
-        const customerId = req.user.id;
+        const customerId = req.customer.id;
 
         const addresses = await Address.find({ customerId });
         res.status(200).json(addresses);
@@ -76,5 +77,43 @@ export const deleteAddress = async (req, res) => {
     }
 };
 
+export const setDefaultAddress = async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const addressId = req.params.id;
 
+    console.log("customerId:", customerId);
+    console.log("addressId:", addressId);
 
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(addressId)) {
+      return res.status(400).json({ message: "Invalid address ID" });
+    }
+
+    // Remove default from all addresses
+    await Address.updateMany(
+      { customerId },      // <-- MUST MATCH schema field
+      { $set: { isDefault: false } }
+    );
+
+    // Set selected default
+    const updated = await Address.findByIdAndUpdate(
+      addressId,
+      { isDefault: true },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    return res.json({
+      message: "Default address updated",
+      address: updated,
+    });
+
+  } catch (error) {
+    console.log("SET DEFAULT ERROR:", error);
+    return res.status(500).json({ message: "Server error in setting default", error });
+  }
+};
