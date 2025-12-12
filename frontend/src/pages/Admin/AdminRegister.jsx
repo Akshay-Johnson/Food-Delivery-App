@@ -11,12 +11,13 @@ export default function AdminRegister() {
         email: '',
         password: '',
     });
+    const navigate = useNavigate();
 
     const submit = async (e) => {
         e.preventDefault();
 
         try {
-            await api.post('/api/admin/register', form);
+            await api.post('/api/admins/register', form);
             alert("Admin Registered Successfully");
             navigate("/admin/login");
         } catch (error) {

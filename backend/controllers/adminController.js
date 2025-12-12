@@ -42,28 +42,32 @@ export const loginAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const  admin = await Admin.findOne({ email });
+        const admin = await Admin.findOne({ email });
         
         if (!admin) {
-            return res.status(400).json({ message: 'Admin not found ' });
+            return res.status(400).json({ message: 'Admin not found' });
         }
 
-        const match = await bcrypt.compare(password, admin.password);
-        if (!match) {
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
         const token = generateToken(admin._id);
 
+        // Remove password field
+        const { password: pw, ...adminData } = admin._doc;
+
         res.json({
             message: 'Admin logged in successfully',
             token,
-            admin,
-         });
+            admin: adminData
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error logging in admin' });
     }
 };
+
 
 //get all restaurants
 export const getAllRestaurants = async (req, res) => {

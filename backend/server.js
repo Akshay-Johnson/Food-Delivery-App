@@ -76,7 +76,7 @@ app.use('/api/agents', deliveryAgentRoutes);
 app.use('/api/payments',paymentRoutes);
 
 //admin routes
-app.use('/api/admin', adminRoutes);
+app.use('/api/admins', adminRoutes);
 
 //uploads
 app.use('/api/upload', uploadRoutes);

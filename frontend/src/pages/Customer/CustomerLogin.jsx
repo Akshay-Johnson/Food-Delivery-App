@@ -2,8 +2,8 @@ import { useState } from "react";
 import AuthLayout from "../../layouts/AuthLayout";
 import RoleSwitcher from "../../components/RoleSwitcher";
 import AuthInput from "../../components/AuthInput";
-import api from "../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function CustomerLogin() {
   const [form, setForm] = useState({
@@ -12,18 +12,14 @@ export default function CustomerLogin() {
   });
 
   const navigate = useNavigate();
+  const { Login } = useAuth();
 
   const submit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await api.post("/api/customers/login", form);
-
-      // ⭐ Save token
-      localStorage.setItem("token", res.data.token);
-
-      alert("Customer Logged In Successfully");
-      window.location.href = "/customer/dashboard";
+      await Login("customer", form);
+      navigate("/customer/dashboard");
     } catch (error) {
       console.error("Login Failed:", error);
       alert(error.response?.data?.message || "Login Failed");

@@ -1,4 +1,15 @@
-import { Search, Utensils, Coffee, Pizza, IceCream, Truck } from "lucide-react";
+import {
+  Search,
+  Utensils,
+  Coffee,
+  Pizza,
+  IceCream,
+  Truck,
+  User,
+  ShoppingCart,
+  LogOut,
+} from "lucide-react";
+
 import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
@@ -130,27 +141,39 @@ export default function CustomerDashboard() {
       {/* ========= PAGE CONTENT ========= */}
       <div className="relative z-10">
         {/* NAVBAR */}
-        <header className="bg-black/50 border-b border-white/30 shadow-md p-5 flex justify-between items-center  top-0 z-20">
+        <header className="bg-black/50 border-b border-white/30 shadow-md p-5 flex items-center gap-4 top-0 z-20 ml-auto">
           <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
+
+          <button
+            onClick={() => navigate("/customer/profile")}
+            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/30 transition"
+          >
+            <User size={18} />
+          </button>
+
+          <button
+            onClick={() => navigate("/customer/cart")}
+            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/30  transition "
+          >
+            <ShoppingCart size={18} />
+          </button>
 
           <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition">
             <Truck size={18} />
             Track Order
           </button>
 
-          <button
-            onClick={() => navigate("/customer/profile")}
-            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/20 transition"
+          
+          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+            onClick={() => {
+              localStorage.removeItem("customerToken");
+              navigate("/customer/login");
+            }}
           >
-            My Profile
+            <LogOut size={18} />
+            Logout
           </button>
 
-          <button
-            onClick={() => navigate("/customer/cart")}
-            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/20 transition"
-          >
-            Cart
-          </button>
         </header>
 
         {/* WELCOME SECTION */}
@@ -186,7 +209,7 @@ export default function CustomerDashboard() {
                     <div
                       key={r._id}
                       onClick={() => navigate(`/customer/restaurant/${r._id}`)}
-                      className="bg-white text-black shadow rounded-xl p-4"
+                      className="bg-white text-black shadow rounded-xl p-4 cursor-pointer hover:scale-105 hover:shadow-xl transition"
                     >
                       <p className="font-bold">{r.name}</p>
                       <p className="text-gray-600 text-sm">{r.description}</p>
@@ -204,7 +227,7 @@ export default function CustomerDashboard() {
                   {searchResults.dishes.map((d) => (
                     <div
                       key={d._id}
-                      className="bg-white text-black p-3 rounded-xl shadow"
+                      className="bg-white text-black p-3 rounded-xl shadow cursor-pointer hover:scale-105 hover:shadow-xl transition"
                     >
                       <img
                         src={d.image || "/assets/dishimage.jpg"}
@@ -227,34 +250,6 @@ export default function CustomerDashboard() {
               )}
           </section>
         )}
-
-        {/* POPULAR RESTAURANTS */}
-        <section className="px-6 mt-10">
-          <h3 className="text-xl font-bold mb-4">Popular Restaurants</h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRestaurants.map((r) => (
-              <div
-                key={r._id}
-                onClick={() => navigate(`/customer/restaurant/${r._id}`)}
-                className="bg-white text-black shadow rounded-xl p-4"
-              >
-                <img
-                  src={r.image || `/assets/restaurantimage.jpeg`}
-                  className="h-40 w-full object-cover"
-                  alt={r.name}
-                />
-                <div className="p-4">
-                  <h4 className="font-semibold text-lg">{r.name}</h4>
-                  <p className="text-gray-600 text-sm">{r.description}</p>
-                  <p className="mt-2 text-yellow-600 font-bold">
-                    ⭐ {r.averageRating?.toFixed(1)} ({r.totalReviews} reviews)
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* CATEGORIES */}
         <section className="px-6 mt-20">
@@ -342,6 +337,34 @@ export default function CustomerDashboard() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* POPULAR RESTAURANTS */}
+        <section className="px-6 mt-10 mb-10">
+          <h3 className="text-xl font-bold mb-4">Popular Restaurants</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredRestaurants.map((r) => (
+              <div
+                key={r._id}
+                onClick={() => navigate(`/customer/restaurant/${r._id}`)}
+                className="bg-black/40 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
+              >
+                <img
+                  src={r.image || `/assets/restaurantimage.jpeg`}
+                  className="h-40 w-full object-cover"
+                  alt={r.name}
+                />
+                <div className="p-4">
+                  <h4 className="font-semibold text-lg">{r.name}</h4>
+                  <p className="text-gray-600 text-sm">{r.description}</p>
+                  <p className="mt-2 text-yellow-600 font-bold">
+                    ⭐ {r.averageRating?.toFixed(1)} ({r.totalReviews} reviews)
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       </div>

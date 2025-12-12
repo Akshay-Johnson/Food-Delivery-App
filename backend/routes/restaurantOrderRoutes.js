@@ -5,11 +5,14 @@ import {
     rejectOrder,
     markPreparing,
     markReady,
+    assignOrderToAgent
 } from '../controllers/orderController.js';
 
 import restaurantAuth from '../middlewares/restaurantAuth.js';
 
 const router = express.Router();
+
+router.post('/assign-agent/:orderId', restaurantAuth, assignOrderToAgent);
 
 router.get("/", restaurantAuth, getRestaurantOrders);
 

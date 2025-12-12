@@ -11,6 +11,8 @@ export default function AgentRegister() {
         email: '',
         password: '',
         phone: '',
+        vehicleType: '',
+        vehicleNumber: ''
     });
 
     const navigate = useNavigate();
@@ -62,6 +64,20 @@ export default function AgentRegister() {
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
+                <AuthInput
+                    label="Vehicle Type"
+                    placeholder="Enter your vehicle type"
+                    value={form.vehicleType}
+                    onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
+                />
+
+                <AuthInput
+                    label="Vehicle Number"
+                    placeholder="Enter your vehicle number"
+                    value={form.vehicleNumber}
+                    onChange={(e) => setForm({ ...form, vehicleNumber: e.target.value })}
+                />
+
 
                 <div className="flex gap-3 mt-4">
                     <button className="w-1/2 bg-blue-600 text-white py-2 rounded-md">

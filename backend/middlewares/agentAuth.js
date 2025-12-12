@@ -20,6 +20,10 @@ export const protectAgent = async (req, res, next) => {
             return res.status(401).json({ message: 'Agent not found, authorization denied' });
         }
 
+        if( agent.status === 'blocked' ) {
+            return res.status(403).json({ message: 'Agent is blocked by Admin' });
+        }
+
         req.agent = agent;
         next();
     } catch (error) {

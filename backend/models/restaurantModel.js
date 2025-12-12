@@ -27,7 +27,7 @@ const restaurantSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: 'active',
+        default: 'approved',
     },
     categories: {
         type: [String],
@@ -45,7 +45,20 @@ const restaurantSchema = new mongoose.Schema({
     },
     fcmToken: {
         type: String,
-    }
+    },
+    description: {
+        type: String,
+    },
+    cuisineType: {
+        type: String,
+    },
+    openingTime: {
+        type: String,
+    },
+    closingTime: {
+        type: String,
+    },
+
 
 }, {
     timestamps: true,
