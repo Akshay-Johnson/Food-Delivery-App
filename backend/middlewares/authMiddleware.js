@@ -21,7 +21,7 @@ const protectCustomer = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Attach customer ID
-    req.customer = { id: decoded.id };
+    req.user = { id: decoded.id };
 
     next();
 

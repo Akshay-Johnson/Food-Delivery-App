@@ -1,6 +1,7 @@
 import Cart from "../models/cartModel.js";
 import Order from "../models/orderModel.js";
 import Customer from "../models/customerModel.js";
+import DeliveryAgent from "../models/deliveryAgentModel.js";
 import {
   sendOrderPlacedEmail,
   sendOrderStatusUpdateEmail,
@@ -13,7 +14,7 @@ import { sendPushNotification } from "../utils/sendpush.js";
 export const createOrder = async (req, res) => {
   try {
     const customerId = req.user.id;
-    const { restaurantId, address } = req.body;
+    const { addressId } = req.body;
 
     const cart = await Cart.findOne({ customerId });
 
@@ -21,7 +22,8 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    //prevent duplicate orders
+      const restaurantId = cart.restaurantId;
+
     const existingPendingOrder = await Order.findOne({
       customerId,
       restaurantId,
@@ -38,10 +40,10 @@ export const createOrder = async (req, res) => {
 
     const order = await Order.create({
       customerId,
-      restaurantId,
+      restaurantId : cart.restaurantId,
       items: cart.items,
       totalPrice: cart.totalPrice,
-      address,
+      address: addressId,
       status: "pending",
     });
 
@@ -82,7 +84,7 @@ export const getMyOrders = async (req, res) => {
 //get single order
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate('restaurantId', 'name');
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -304,47 +306,50 @@ export const markReady = async (req, res) => {
 //assign order to delivery agent (for restaurant owners)
 export const assignOrderToAgent = async (req, res) => {
   try {
-    const restaurantId = req.user.id;
     const { orderId } = req.params;
     const { agentId } = req.body;
 
+    console.log("ASSIGN AGENT HIT");
+    console.log("Order ID:", orderId);
+    console.log("Agent ID:", agentId);
+
     if (!agentId) {
-      return res.status(400).json({ message: "Delivery agent ID is required" });
+      return res.status(400).json({ message: "agentId is required" });
     }
 
-    //find order
-    const order = await Order.findOne({ _id: orderId, restaurantId });
+    const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    //assign agent and mark ready
-    order.deliveryAgentId = agentId;
+    const agent = await DeliveryAgent.findById(agentId);
+
+    if (!agent) {
+      return res.status(404).json({ message: "Delivery agent not found" });
+    }
+
+    // Assign agent
+    order.deliveryAgent = agentId;
     order.status = "ready";
+
     await order.save();
 
-    //push notification
-    await sendPushNotification({
-      token: order.fcmToken,
-      title: "Order Assigned to Delivery Agent",
-      body: `Your order ${order._id} has been assigned to a delivery agent.`,
-      data: {
-        orderId: order._id.toString(),
-        status: "assigned",
-      },
-    });
-
     res.status(200).json({
-      message: "Order assigned to delivery agent successfully",
+      message: "Agent assigned successfully",
       order,
     });
+
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error assigning order to delivery agent", error });
+    console.error("ASSIGN AGENT ERROR:", error);
+    res.status(500).json({
+      message: "Failed to assign agent",
+      error: error.message,
+      stack: error.stack,
+    });
   }
 };
+
 
 ////////////////////////////////// Delivery Agent Controllers ////////////////////////////
 
@@ -431,3 +436,4 @@ export const markOrderDelivered = async (req, res) => {
     res.status(500).json({ message: "Error updating order status", error });
   }
 };
+

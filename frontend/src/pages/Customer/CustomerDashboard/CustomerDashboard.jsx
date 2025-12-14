@@ -118,6 +118,7 @@ export default function CustomerDashboard() {
         name: dish.name,
         price: dish.price,
         quantity: 1,
+        restaurantId: dish.restaurantId,
       });
       alert("Dish added to cart!");
     } catch (error) {
@@ -156,6 +157,12 @@ export default function CustomerDashboard() {
             className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/30  transition "
           >
             <ShoppingCart size={18} />
+          </button>
+
+          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+            onClick={() => navigate("/customer/orders")}>
+            <Truck size={18} />
+             Orders
           </button>
 
           <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition">

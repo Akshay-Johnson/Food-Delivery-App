@@ -7,7 +7,6 @@ import {
   LogOut,
   UtensilsCrossed,
   Bike,
-  UserPlus,
 } from "lucide-react";
 
 export default function RestaurantDashboard() {
@@ -25,13 +24,11 @@ export default function RestaurantDashboard() {
 
   return (
     <div className="flex min-h-screen text-white">
-
       {/* Sidebar */}
       <div className="w-64 bg-black/80 border-r border-white/20 p-6 space-y-6">
         <h1 className="text-3xl font-bold text-blue-500 mb-10">DineX</h1>
 
         <nav className="space-y-2">
-
           <NavLink to="/restaurant/dashboard" className={navItem}>
             <LayoutDashboard size={18} /> Dashboard Overview
           </NavLink>
@@ -48,20 +45,13 @@ export default function RestaurantDashboard() {
             <ClipboardList size={18} /> Orders
           </NavLink>
 
-          {/* NEW: View all delivery agents */}
           <NavLink to="/restaurant/dashboard/agents" className={navItem}>
             <Bike size={18} /> Delivery Agents
-          </NavLink>
-
-          {/* NEW: Assign agent to orders */}
-          <NavLink to="/restaurant/dashboard/assign-agent" className={navItem}>
-            <UserPlus size={18} /> Assign Agent
           </NavLink>
 
           <NavLink to="/restaurant/dashboard/profile" className={navItem}>
             <User size={18} /> Restaurant Profile
           </NavLink>
-
         </nav>
 
         <button
@@ -76,7 +66,6 @@ export default function RestaurantDashboard() {
       <div className="flex-1 bg-black/90 p-6">
         <Outlet />
       </div>
-
     </div>
   );
 }

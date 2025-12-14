@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 //add new address
 export const addAddress = async (req, res) => {
     try {
-        const customerId = req.customer.id;
+        const customerId = req.user.id;
 
 
         const {
@@ -48,7 +48,7 @@ export const addAddress = async (req, res) => {
 //get all addresses
 export const getAddresses = async (req, res) => {
     try {
-        const customerId = req.customer.id;
+        const customerId = req.user.id;
 
         const addresses = await Address.find({ customerId });
         res.status(200).json(addresses);
@@ -79,7 +79,7 @@ export const deleteAddress = async (req, res) => {
 
 export const setDefaultAddress = async (req, res) => {
   try {
-    const customerId = req.customer.id;
+    const customerId = req.user.id;
     const addressId = req.params.id;
 
     console.log("customerId:", customerId);

@@ -60,14 +60,15 @@ app.use('/api/cart', cartRoutes);
 //restaurant routes
 app.use('/api/restaurants', restaurantRoutes); 
 
+//restaurant order routes
+app.use('/api/restaurants', restaurantOrderRoutes);
+
 //menu routes
 app.use('/api/menu', menuRoutes);
 
 //order routes
 app.use('/api/orders', orderRoutes);
 
-//restaurant order routes
-app.use('/api/restaurants/orders',restaurantOrderRoutes);
 
 //delivery agent routes
 app.use('/api/agents', deliveryAgentRoutes);

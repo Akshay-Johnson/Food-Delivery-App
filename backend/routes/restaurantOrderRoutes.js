@@ -1,27 +1,33 @@
-import express from 'express';
+import express from "express";
 import {
-    getRestaurantOrders,
-    acceptOrder,
-    rejectOrder,
-    markPreparing,
-    markReady,
-    assignOrderToAgent
-} from '../controllers/orderController.js';
-
-import restaurantAuth from '../middlewares/restaurantAuth.js';
+  getRestaurantOrders,
+  acceptOrder,
+  rejectOrder,
+  markPreparing,
+  markReady,
+  assignOrderToAgent,
+} from "../controllers/orderController.js";
+import restaurantAuth from "../middlewares/restaurantAuth.js";
 
 const router = express.Router();
 
-router.post('/assign-agent/:orderId', restaurantAuth, assignOrderToAgent);
+// list orders
+router.get("/orders", restaurantAuth, getRestaurantOrders);
 
-router.get("/", restaurantAuth, getRestaurantOrders);
+router.post('/orders/assign-agent/:orderId', restaurantAuth, assignOrderToAgent);
 
-router.put("/accept/:id", restaurantAuth, acceptOrder);
 
-router.put("/reject/:id", restaurantAuth, rejectOrder);
+// status updates
+router.put("/orders/:id/accept", restaurantAuth, acceptOrder);
+router.put("/orders/:id/preparing", restaurantAuth, markPreparing);
+router.put("/orders/:id/ready", restaurantAuth, markReady);
+router.put("/orders/:id/reject", restaurantAuth, rejectOrder);
 
-router.put("/preparing/:id", restaurantAuth, markPreparing);
-
-router.put("/ready/:id", restaurantAuth, markReady);
+// assign agent
+router.post(
+  "/orders/:id/assign-agent",
+  restaurantAuth,
+  assignOrderToAgent
+);
 
 export default router;

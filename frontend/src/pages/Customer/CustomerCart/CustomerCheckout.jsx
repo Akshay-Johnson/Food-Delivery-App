@@ -19,6 +19,7 @@ export default function CustomerCheckout() {
     try {
       const addressRes = await api.get("/api/address");
       const cartRes = await api.get("/api/cart");
+          console.log("CART DATA:", cartRes.data);
 
       setAddresses(addressRes.data);
       setCart(cartRes.data);
@@ -32,12 +33,30 @@ export default function CustomerCheckout() {
   };
 
   const placeOrder = async () => {
-    if (!selectedAddress) return alert("Please select a delivery address!");
+    if (!selectedAddress) {
+      return alert("Please select a delivery address!");
+    }
 
-    if (!paymentMethod) return alert("Please select payment method!");
+    if (!paymentMethod) {
+      return alert("Please select payment method!");
+    }
+
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return alert("Your cart is empty!");
+    }
+
+    const restaurantId =
+      cart.restaurantId ||
+      cart.items[0]?.restaurantId ||
+      cart.items[0]?.restaurant;
+
+    if (!restaurantId) {
+      return alert("Restaurant information missing. Please try again.");
+    }
 
     try {
-      const res = await api.post("/api/orders/create", {
+      await api.post("/api/orders/create", {
+        restaurantId,
         addressId: selectedAddress,
         paymentMethod,
       });
@@ -45,8 +64,11 @@ export default function CustomerCheckout() {
       alert("Order placed successfully!");
       navigate("/customer/orders");
     } catch (error) {
-      console.error("Order error:", error);
-      alert("Failed to place order.");
+      console.error("Order error:", error.response?.data || error.message);
+      alert(
+        error.response?.data?.message ||
+          "Failed to place order. Please try again."
+      );
     }
   };
 

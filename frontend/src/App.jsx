@@ -12,6 +12,8 @@ import CustomerAddressList from "./pages/Customer/CusomerAddress/CustomerAddress
 import CustomerAddAddress from "./pages/Customer/CusomerAddress/CustomerAddAddress.jsx";
 import CustomerEditAddress from "./pages/Customer/CusomerAddress/CustomerEditAddress.jsx";
 import RestaurantDetails from "./pages/Customer/RestaurantDetails/RestaurantDetails.jsx";
+import CustomerOrders from "./pages/Customer/CustomerCart/CustomerOrders.jsx";
+import CustomerOrderDetails from "./pages/Customer/CustomerCart/CustomerOrderDetails";
 
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminRegister from "./pages/Admin/AdminRegister.jsx";
@@ -81,6 +83,11 @@ export default function App() {
         <Route path="/customer/cart" element={<CustomerCart />} />
         <Route path="/customer/checkout" element={<CustomerCheckout />} />
         <Route path="/customer/payment" element={<CustomerPayment />} />
+        <Route path="/customer/orders" element={<CustomerOrders />} />
+        <Route
+          path="/customer/orders/:orderId"
+          element={<CustomerOrderDetails />}
+        />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -98,14 +105,13 @@ export default function App() {
         <Route path="/restaurant/register" element={<RestaurantRegister />} />
 
         <Route path="/restaurant/dashboard" element={<RestaurantDashboard />}>
-          // Nested Routes for Restaurant Dashboard
           <Route index element={<DashboardHome />} />
           <Route path="menu" element={<MenuManagement />} />
           <Route path="menu/add" element={<AddMenuItem />} />
           <Route path="menu/edit/:id" element={<EditMenuItem />} />
           <Route path="orders" element={<Orders />} />
-          <Route path="profile" element={<RestaurantProfile />} />
           <Route path="assign-agent/:orderId" element={<AssignAgent />} />
+          <Route path="profile" element={<RestaurantProfile />} />
           <Route path="agents" element={<RestaurantAgents />} />
         </Route>
 

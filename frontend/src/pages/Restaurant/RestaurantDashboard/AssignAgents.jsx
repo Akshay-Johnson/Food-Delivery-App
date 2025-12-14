@@ -12,10 +12,12 @@ export default function AssignAgent() {
 
   const loadAgents = async () => {
     try {
-      const res = await api.get("/api/admins/agents");
+      // ✅ correct endpoint for restaurant
+      const res = await api.get("/api/agents/available");
       setAgents(res.data);
     } catch (error) {
       console.error("Failed to load agents:", error);
+      alert("Unable to load delivery agents");
     } finally {
       setLoading(false);
     }
@@ -23,7 +25,7 @@ export default function AssignAgent() {
 
   const assignAgent = async (agentId) => {
     try {
-      await api.put(`/api/restaurants/orders/assign/${orderId}`, {
+      await api.post(`/api/restaurants/orders/assign-agent/${orderId}`, {
         agentId,
       });
 
@@ -31,7 +33,7 @@ export default function AssignAgent() {
       navigate("/restaurant/dashboard/orders");
     } catch (error) {
       console.error("Assignment failed:", error);
-      alert("Failed to assign agent");
+      alert(error.response?.data?.message || "Failed to assign agent");
     }
   };
 
@@ -39,7 +41,9 @@ export default function AssignAgent() {
     loadAgents();
   }, []);
 
-  if (loading) return <p className="text-white">Loading agents...</p>;
+  if (loading) {
+    return <p className="text-white">Loading agents...</p>;
+  }
 
   return (
     <div className="text-white">
@@ -47,30 +51,35 @@ export default function AssignAgent() {
         Assign Agent to Order #{orderId}
       </h1>
 
-      <div className="grid grid-cols-3 gap-6">
-        {agents
-          .filter((a) => a.status === "available")
-          .map((agent) => (
-            <div
-              key={agent._id}
-              className="bg-white/10 p-5 rounded-xl border border-white/20"
-            >
-              <div className="flex items-center gap-4">
-                <Bike className="text-yellow-400" size={40} />
-                <div>
-                  <h2 className="text-xl font-semibold">{agent.name}</h2>
-                  <p className="text-gray-300">{agent.phone}</p>
-                </div>
-              </div>
+      {agents.length === 0 && (
+        <p className="text-gray-400">No available agents</p>
+      )}
 
-              <button
-                onClick={() => assignAgent(agent._id)}
-                className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded flex items-center gap-2"
-              >
-                <UserCheck size={18} /> Assign Agent
-              </button>
+      <div className="grid grid-cols-3 gap-6">
+        {agents.map((agent) => (
+          <div
+            key={agent._id}
+            className="bg-white/10 p-5 rounded-xl border border-white/20"
+          >
+            <div className="flex items-center gap-4">
+              <Bike className="text-yellow-400" size={40} />
+              <div>
+                <h2 className="text-xl font-semibold">{agent.name}</h2>
+                <p className="text-gray-300">{agent.phone}</p>
+                <p className="text-sm text-gray-400">
+                  {agent.vehicleType} • {agent.vehicleNumber}
+                </p>
+              </div>
             </div>
-          ))}
+
+            <button
+              onClick={() => assignAgent(agent._id)}
+              className="mt-4 w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded flex items-center justify-center gap-2"
+            >
+              <UserCheck size={18} /> Assign Agent
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

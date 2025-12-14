@@ -49,7 +49,7 @@ export const getCustomerProfile = async (req, res) => {
   try {
     console.log("AUTH CUSTOMER:", req.customer);   // 🟢 IMPORTANT DEBUG LOG
 
-    const user = await Customer.findById(req.customer.id).select("-password");
+    const user = await Customer.findById(req.user.id).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "Customer not found" });
@@ -68,7 +68,7 @@ export const getCustomerProfile = async (req, res) => {
 export const editProfile = async (req, res) => {
   try {
 
-    const customerId = req.customer.id;
+    const customerId = req.user.id;
     const updates = {};
 
     if (req.body.name) updates.name = req.body.name;

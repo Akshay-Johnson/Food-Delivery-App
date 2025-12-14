@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadOrders();
@@ -11,7 +13,7 @@ export default function Orders() {
 
   const loadOrders = async () => {
     try {
-      const res = await api.get("/api/restaurants/orders"); // ✅ correct backend route
+      const res = await api.get("/api/restaurants/orders");
       setOrders(res.data.orders);
     } catch (error) {
       console.error(
@@ -25,13 +27,10 @@ export default function Orders() {
 
   const updateStatus = async (orderId, status) => {
     try {
-      await api.put(`/api/orders/${orderId}`, { status });
+      await api.put(`/api/restaurants/orders/${orderId}/${status}`);
       loadOrders();
     } catch (error) {
-      console.error(
-        "Status update failed:",
-        error.response?.data || error.message
-      );
+      console.error(error.response?.data || error.message);
       alert("Failed to update order status");
     }
   };
@@ -76,23 +75,34 @@ export default function Orders() {
               </ul>
 
               <div className="flex justify-between items-center">
-                <p className="font-bold text-green-400">
-                  ₹{order.totalAmount}
-                </p>
+                <p className="font-bold text-green-400">₹{order.totalAmount}</p>
 
-                <select
-                  value={order.status}
-                  onChange={(e) =>
-                    updateStatus(order._id, e.target.value)
-                  }
-                  className="bg-black/40 border border-white/20 px-3 py-1 rounded"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Preparing">Preparing</option>
-                  <option value="Ready">Ready</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={order.status}
+                    onChange={(e) => updateStatus(order._id, e.target.value)}
+                    className="bg-black border border-white px-3 py-1 rounded"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="preparing">Preparing</option>
+                    <option value="ready">Ready</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+
+                  {order.status === "ready" && (
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/restaurant/dashboard/assign-agent/${order._id}`
+                        )
+                      }
+                      className="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm"
+                    >
+                      Assign Agent
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
