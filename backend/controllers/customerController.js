@@ -1,6 +1,7 @@
 import Customer from '../models/customerModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { sendPushNotification } from "../utils/sendpush.js";
 
 // Register Customer
 export const registerCustomer = async (req, res) => {
@@ -90,5 +91,59 @@ export const editProfile = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Error updating profile" });
+  }
+};
+
+// Save FCM Token
+export const saveFCMToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({ message: "FCM token is required" });
+    }
+
+    const customer = await Customer.findById(req.user.id);
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    customer.fcmToken = fcmToken;
+    await customer.save();
+
+    res.json({ message: "FCM token saved successfully" });
+  } catch (error) {
+    console.error("Save FCM Token Error:", error);
+    res.status(500).json({ message: "Failed to save FCM token" });
+  }
+};
+
+
+
+
+export const testCustomerPush = async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.user.id);
+
+    if (!customer || !customer.fcmToken) {
+      return res.status(400).json({
+        message: "No FCM token found for this customer",
+      });
+    }
+
+    await sendPushNotification({
+      token: customer.fcmToken,
+      title: "Test Push Successful",
+      body: "Push notifications are working correctly 🎉",
+      data: {
+        type: "test",
+      },
+    });
+
+    res.json({ message: "Test push sent successfully" });
+  } catch (error) {
+    console.error("TEST PUSH ERROR:", error);
+    res.status(500).json({ message: "Failed to send test push" });
   }
 };

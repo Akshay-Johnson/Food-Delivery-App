@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { useEffect } from "react";
+
+import { initForegroundPush } from "./utils/foregroundPush";
+
 //login and register for customer
 import CustomerLogin from "./pages/Customer/CustomerLogin.jsx";
 import CustomerRegister from "./pages/Customer/CustomerRegister.jsx";
@@ -54,6 +58,10 @@ import AgentProfile from "./pages/DeliveryAgent/AgentDashboard/AgentProfile.jsx"
 import Home from "./pages/Home/Home.jsx";
 
 export default function App() {
+  useEffect(() => {
+    initForegroundPush();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

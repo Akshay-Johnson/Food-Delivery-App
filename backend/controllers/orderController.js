@@ -22,7 +22,7 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-      const restaurantId = cart.restaurantId;
+    const restaurantId = cart.restaurantId;
 
     const existingPendingOrder = await Order.findOne({
       customerId,
@@ -40,7 +40,7 @@ export const createOrder = async (req, res) => {
 
     const order = await Order.create({
       customerId,
-      restaurantId : cart.restaurantId,
+      restaurantId: cart.restaurantId,
       items: cart.items,
       totalPrice: cart.totalPrice,
       address: addressId,
@@ -62,6 +62,18 @@ export const createOrder = async (req, res) => {
       totalAmount: order.totalPrice,
     });
 
+    if (customer.fcmToken) {
+      await sendPushNotification({
+        token: customer.fcmToken,
+        title: "Order Placed",
+        body: `Your order ${order._id} has been placed successfully.`,
+        data: {
+          orderId: order._id.toString(),
+          status: "pending",
+        },
+      });
+    }
+
     res.status(201).json({ message: "Order created successfully", order });
   } catch (error) {
     res.status(500).json({ message: "error creating order", error });
@@ -73,7 +85,9 @@ export const getMyOrders = async (req, res) => {
   try {
     const customerId = req.user.id;
 
-    const orders = await Order.find({ customerId }).sort({ createdAt: -1 });
+    const orders = await Order.find({ customerId })
+      .populate("restaurantId", "name")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({ orders });
   } catch (error) {
@@ -84,7 +98,10 @@ export const getMyOrders = async (req, res) => {
 //get single order
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate('restaurantId', 'name');
+    const order = await Order.findById(req.params.id).populate(
+      "restaurantId",
+      "name"
+    );
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -120,12 +137,36 @@ export const getRestaurantOrders = async (req, res) => {
   try {
     const restaurantId = req.user.id;
 
-    const orders = await Order.find({ restaurantId }).sort({ createdAt: -1 });
+    const orders = await Order.find({ restaurantId })
+      .populate("customerId", "name email phone")
+      .sort({ createdAt: -1 });
+
     res.status(200).json({ orders });
   } catch (error) {
     res
       .status(500)
       .json({ message: "Error fetching restaurant orders", error });
+  }
+};
+
+// get single order for restaurant owner
+export const getRestaurantOrderById = async (req, res) => {
+  try {
+    const restaurantId = req.user.id;
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      restaurantId,
+    }).populate("deliveryAgentId", "name phone vehicleType vehicleNumber");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching order", error });
   }
 };
 
@@ -240,7 +281,7 @@ export const markPreparing = async (req, res) => {
 
     //push notification
     await sendPushNotification({
-    token: customer.fcmToken,
+      token: customer.fcmToken,
       title: "Order Preparing",
       body: `Your order ${order._id} is being prepared by the restaurant.`,
       data: {
@@ -329,17 +370,32 @@ export const assignOrderToAgent = async (req, res) => {
       return res.status(404).json({ message: "Delivery agent not found" });
     }
 
+    if (agent.status !== "available") {
+      return res
+        .status(400)
+        .json({ message: "Delivery agent is not available" });
+    }
+
+    if (order.deliveryAgentId) {
+      return res.status(400).json({
+        message: "Order already assigned to an agent",
+      });
+    }
+
     // Assign agent
-    order.deliveryAgent = agentId;
+    order.deliveryAgentId = agentId;
     order.status = "ready";
 
     await order.save();
+
+    await DeliveryAgent.findByIdAndUpdate(agentId, {
+      status: "on-delivery",
+    });
 
     res.status(200).json({
       message: "Agent assigned successfully",
       order,
     });
-
   } catch (error) {
     console.error("ASSIGN AGENT ERROR:", error);
     res.status(500).json({
@@ -350,7 +406,6 @@ export const assignOrderToAgent = async (req, res) => {
   }
 };
 
-
 ////////////////////////////////// Delivery Agent Controllers ////////////////////////////
 
 //get assigned orders for delivery agent
@@ -358,9 +413,12 @@ export const getAssignedOrders = async (req, res) => {
   try {
     const agentId = req.user.id;
 
-    const orders = await Order.find({ deliveryAgentId: agentId }).sort({
-      createdAt: -1,
-    });
+    const orders = await Order.find({ deliveryAgentId: agentId })
+      .populate("customerId", "name phone")
+      .populate("restaurantId", "name address")
+      .sort({
+        createdAt: -1,
+      });
 
     res.status(200).json({ orders });
   } catch (error) {
@@ -419,6 +477,10 @@ export const markOrderDelivered = async (req, res) => {
     order.status = "delivered";
     await order.save();
 
+    await DeliveryAgent.findByIdAndUpdate(agentId, {
+      status: "available",
+    });
+
     const customer = await Customer.findById(order.customerId);
     //push notification
     await sendPushNotification({
@@ -436,4 +498,3 @@ export const markOrderDelivered = async (req, res) => {
     res.status(500).json({ message: "Error updating order status", error });
   }
 };
-

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getRestaurantOrders,
+  getRestaurantOrderById,
   acceptOrder,
   rejectOrder,
   markPreparing,
@@ -14,20 +15,20 @@ const router = express.Router();
 // list orders
 router.get("/orders", restaurantAuth, getRestaurantOrders);
 
-router.post('/orders/assign-agent/:orderId', restaurantAuth, assignOrderToAgent);
+// ✅ get single order (FIXES 404)
+router.get("/orders/:orderId", restaurantAuth, getRestaurantOrderById);
 
+// assign agent (KEEP ONE)
+router.post(
+  "/orders/assign-agent/:orderId",
+  restaurantAuth,
+  assignOrderToAgent
+);
 
 // status updates
 router.put("/orders/:id/accept", restaurantAuth, acceptOrder);
 router.put("/orders/:id/preparing", restaurantAuth, markPreparing);
 router.put("/orders/:id/ready", restaurantAuth, markReady);
 router.put("/orders/:id/reject", restaurantAuth, rejectOrder);
-
-// assign agent
-router.post(
-  "/orders/:id/assign-agent",
-  restaurantAuth,
-  assignOrderToAgent
-);
 
 export default router;

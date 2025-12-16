@@ -1,44 +1,65 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import { Bike, UserCheck } from "lucide-react";
 
 export default function AssignAgent() {
   const { orderId } = useParams();
-  const navigate = useNavigate();
 
   const [agents, setAgents] = useState([]);
+  const [assignedAgentId, setAssignedAgentId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
 
+  // Load available agents
   const loadAgents = async () => {
     try {
-      // ✅ correct endpoint for restaurant
       const res = await api.get("/api/agents/available");
       setAgents(res.data);
     } catch (error) {
       console.error("Failed to load agents:", error);
       alert("Unable to load delivery agents");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const assignAgent = async (agentId) => {
+  // Load order to check if already assigned
+  const loadOrder = async () => {
     try {
-      await api.post(`/api/restaurants/orders/assign-agent/${orderId}`, {
-        agentId,
-      });
+      const res = await api.get(`/api/restaurants/orders/${orderId}`);
+      setAssignedAgentId(res.data?.assignedAgent?._id || null);
+    } catch (error) {
+      console.error("Failed to load order:", error);
+    }
+  };
 
+  // Assign agent
+  const assignAgent = async (agentId) => {
+    if (assignedAgentId) return;
+
+    try {
+      setAssigning(true);
+
+      await api.post(
+        `/api/restaurants/orders/assign-agent/${orderId}`,
+        { agentId }
+      );
+
+      setAssignedAgentId(agentId);
       alert("Agent assigned successfully");
-      navigate("/restaurant/dashboard/orders");
     } catch (error) {
       console.error("Assignment failed:", error);
       alert(error.response?.data?.message || "Failed to assign agent");
+    } finally {
+      setAssigning(false);
     }
   };
 
   useEffect(() => {
-    loadAgents();
+    const init = async () => {
+      await Promise.all([loadAgents(), loadOrder()]);
+      setLoading(false);
+    };
+    init();
   }, []);
 
   if (loading) {
@@ -56,30 +77,50 @@ export default function AssignAgent() {
       )}
 
       <div className="grid grid-cols-3 gap-6">
-        {agents.map((agent) => (
-          <div
-            key={agent._id}
-            className="bg-white/10 p-5 rounded-xl border border-white/20"
-          >
-            <div className="flex items-center gap-4">
-              <Bike className="text-yellow-400" size={40} />
-              <div>
-                <h2 className="text-xl font-semibold">{agent.name}</h2>
-                <p className="text-gray-300">{agent.phone}</p>
-                <p className="text-sm text-gray-400">
-                  {agent.vehicleType} • {agent.vehicleNumber}
-                </p>
-              </div>
-            </div>
+        {agents.map((agent) => {
+          const isAssigned = assignedAgentId === agent._id;
+          const isDisabled = assignedAgentId && !isAssigned;
 
-            <button
-              onClick={() => assignAgent(agent._id)}
-              className="mt-4 w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded flex items-center justify-center gap-2"
+          return (
+            <div
+              key={agent._id}
+              className={`p-5 rounded-xl border border-white/20
+                ${isAssigned ? "bg-green-900/30" : "bg-white/10"}
+              `}
             >
-              <UserCheck size={18} /> Assign Agent
-            </button>
-          </div>
-        ))}
+              <div className="flex items-center gap-4">
+                <Bike
+                  className={isAssigned ? "text-green-400" : "text-yellow-400"}
+                  size={40}
+                />
+                <div>
+                  <h2 className="text-xl font-semibold">{agent.name}</h2>
+                  <p className="text-gray-300">{agent.phone}</p>
+                  <p className="text-sm text-gray-400">
+                    {agent.vehicleType} • {agent.vehicleNumber}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                disabled={isAssigned || isDisabled || assigning}
+                onClick={() => assignAgent(agent._id)}
+                className={`mt-4 w-full px-4 py-2 rounded flex items-center justify-center gap-2 transition
+                  ${
+                    isAssigned
+                      ? "bg-gray-600 cursor-not-allowed"
+                      : isDisabled
+                      ? "bg-gray-800 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }
+                `}
+              >
+                <UserCheck size={18} />
+                {isAssigned ? "Assigned" : "Assign Agent"}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

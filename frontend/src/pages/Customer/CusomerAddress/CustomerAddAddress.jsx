@@ -26,9 +26,14 @@ export default function CustomerAddAddress() {
   return (
     <div className="min-h-screen bg-black/90 text-white p-6">
       <h1 className="text-3xl font-bold mb-6">Add Address</h1>
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 bg-white/10 px-4 py-2 rounded hover:bg-white/20"
+      >
+        ← Back
+      </button>
 
       <form onSubmit={submit} className="space-y-4 max-w-md">
-
         {Object.keys(form).map((key) => (
           <div key={key}>
             <label className="text-gray-300 capitalize">{key}</label>
@@ -36,9 +41,7 @@ export default function CustomerAddAddress() {
             <input
               type="text"
               value={form[key]}
-              onChange={(e) =>
-                setForm({ ...form, [key]: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               className="w-full mt-1 px-3 py-2 rounded bg-black/40 border border-white/20 outline-none"
             />
           </div>

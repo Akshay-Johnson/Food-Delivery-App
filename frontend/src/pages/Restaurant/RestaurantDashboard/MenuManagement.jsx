@@ -6,6 +6,10 @@ import { useNavigate } from "react-router-dom";
 export default function MenuManagement() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 🔍 NEW
+  const [search, setSearch] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,7 +18,7 @@ export default function MenuManagement() {
 
   const loadMenu = async () => {
     try {
-      const res = await api.get("/api/menu/my/menu"); // ✅ correct backend route
+      const res = await api.get("/api/menu/my/menu");
       setItems(res.data);
     } catch (error) {
       console.error("Failed to load menu:", error.response?.data || error.message);
@@ -24,8 +28,7 @@ export default function MenuManagement() {
   };
 
   const deleteItem = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete this item?");
-    if (!confirm) return;
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
       await api.delete(`/api/menu/${id}`);
@@ -36,13 +39,26 @@ export default function MenuManagement() {
     }
   };
 
+  // 🔍 FILTER LOGIC
+  const filteredItems = items.filter((item) => {
+    const q = search.toLowerCase();
+
+    return (
+      item.name?.toLowerCase().includes(q) ||
+      item.category?.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      String(item.price).includes(q)
+    );
+  });
+
   if (loading) {
     return <p className="text-white p-6">Loading menu...</p>;
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Manage Menu</h2>
 
         <button
@@ -53,11 +69,20 @@ export default function MenuManagement() {
         </button>
       </div>
 
-      {items.length === 0 ? (
-        <p className="text-gray-400">No menu items added yet.</p>
+      {/* 🔍 SEARCH */}
+      <input
+        type="text"
+        placeholder="Search menu items..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full mb-6 px-4 py-2 rounded bg-black/40 border border-white/20 text-white placeholder-gray-400"
+      />
+
+      {filteredItems.length === 0 ? (
+        <p className="text-gray-400">No matching menu items found.</p>
       ) : (
         <div className="grid grid-cols-3 gap-6">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <div
               key={item._id}
               className="bg-white/10 p-4 rounded-xl border border-white/20"
@@ -68,11 +93,13 @@ export default function MenuManagement() {
               />
 
               <h3 className="mt-2 font-semibold">{item.name}</h3>
+
               <p className="text-gray-300 text-sm mt-1">
                 {item.description}
               </p>
 
               <p className="text-gray-300 text-sm mt-1">₹{item.price}</p>
+
               <p className="text-xs text-gray-400 mt-1">
                 Category: {item.category}
               </p>
@@ -80,9 +107,7 @@ export default function MenuManagement() {
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={() =>
-                    navigate(
-                      `/restaurant/dashboard/menu/edit/${item._id}`
-                    )
+                    navigate(`/restaurant/dashboard/menu/edit/${item._id}`)
                   }
                   className="bg-blue-600 px-3 py-1 rounded flex items-center gap-1"
                 >

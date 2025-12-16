@@ -23,6 +23,7 @@ const customerSchema = new mongoose.Schema({
   },
   fcmToken: {
     type: String,
+    default: null,
   },
   
 },

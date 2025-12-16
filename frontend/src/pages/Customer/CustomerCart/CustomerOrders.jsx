@@ -24,32 +24,36 @@ export default function CustomerOrders() {
 
   const statusColor = (status) => {
     switch (status) {
-      case "pending": return "bg-yellow-500";
-      case "accepted": return "bg-blue-500";
-      case "preparing": return "bg-purple-500";
-      case "ready": return "bg-orange-500";
-      case "picked": return "bg-indigo-500";
-      case "delivered": return "bg-green-600";
-      case "rejected": return "bg-red-600";
-      default: return "bg-gray-500";
+      case "pending":
+        return "bg-yellow-500";
+      case "accepted":
+        return "bg-blue-500";
+      case "preparing":
+        return "bg-purple-500";
+      case "ready":
+        return "bg-orange-500";
+      case "picked":
+        return "bg-indigo-500";
+      case "delivered":
+        return "bg-green-600";
+      case "rejected":
+        return "bg-red-600";
+      default:
+        return "bg-gray-500";
     }
   };
 
-  if (loading) {
-    return <p className="p-6 text-white">Loading orders...</p>;
-  }
+  if (loading) return <p className="p-6 text-white">Loading orders...</p>;
 
   return (
     <div className="min-h-screen bg-black/90 text-white p-6">
       <h1 className="text-3xl font-bold mb-6">My Orders</h1>
-      <nav className="mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-blue-400 hover:underline"
-        >
-          &larr; Back
-        </button>
-      </nav>
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 bg-white/10 px-4 py-2 rounded hover:bg-white/20"
+      >
+        ← Back
+      </button>
 
       {orders.length === 0 ? (
         <p className="text-gray-300">You have not placed any orders yet.</p>
@@ -61,9 +65,14 @@ export default function CustomerOrders() {
               className="bg-white/10 border border-white/20 rounded-xl p-5"
             >
               <div className="flex justify-between items-center mb-3">
-                <p className="font-semibold">Order ID: {order._id}</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  {order.items.map((item) => item.name).join(", ")}
+                </h3>
+
                 <span
-                  className={`text-sm px-3 py-1 rounded-full ${statusColor(order.status)}`}
+                  className={`text-sm px-3 py-1 rounded-full ${statusColor(
+                    order.status
+                  )}`}
                 >
                   {order.status.toUpperCase()}
                 </span>
@@ -72,25 +81,17 @@ export default function CustomerOrders() {
               <p className="text-sm text-gray-300 mb-2">
                 Ordered on {new Date(order.createdAt).toLocaleString()}
               </p>
+              <p className="text-sm text-gray-300">
+                From: {order.restaurantId?.name}
+              </p>
+              <p className="font-bold mt-3">Total: ₹{order.totalPrice}</p>
 
-              <div className="space-y-2">
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm">
-                    <span>{item.name} × {item.quantity}</span>
-                    <span>₹{item.price * item.quantity}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-between items-center mt-4">
-                <p className="font-bold">Total: ₹{order.totalPrice}</p>
-                <button
-                  onClick={() => navigate(`/customer/orders/${order._id}`)}
-                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-                >
-                  View Details
-                </button>
-              </div>
+              <button
+                onClick={() => navigate(`/customer/orders/${order._id}`)}
+                className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+              >
+                View Details
+              </button>
             </div>
           ))}
         </div>

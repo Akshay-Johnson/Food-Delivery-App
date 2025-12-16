@@ -36,6 +36,12 @@ export default function CustomerCart() {
   return (
     <div className="min-h-screen bg-black/80 text-white p-6">
       <h1 className="text-3xl font-bold mb-4">Your Cart</h1>
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 bg-white/10 px-4 py-2 rounded hover:bg-white/20"
+      >
+        ← Back
+      </button>
 
       {cart.items.length === 0 ? (
         <p>Your cart is empty.</p>

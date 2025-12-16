@@ -178,16 +178,22 @@ export const updateAgentLocation = async (req, res) => {
   }
 };
 
-//getall agents - for restaurant to view
+// get all agents for restaurant view
 export const getAvailableAgents = async (req, res) => {
   try {
     const agents = await DeliveryAgent.find({
-      status: "approved",
+      approvalStatus: "approved",
+      status: "available",
       isActive: true,
     });
 
     res.json(agents);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching agents", err });
+    res.status(500).json({
+      message: "Error fetching agents",
+      error: err.message,
+    });
   }
 };
+
+

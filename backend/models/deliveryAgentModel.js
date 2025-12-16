@@ -28,15 +28,23 @@ const deliveryAgentschema = new mongoose.Schema(
       required: true,
     },
 
+    approvalStatus: {
+      type: String,
+      enum: ["approved", "blocked"],
+      default: "approved",
+    },
+
+    status: {
+      type: String,
+      enum: ["available", "on-delivery"],
+      default: "available",
+    },
+
     isActive: {
       type: Boolean,
       default: true,
     },
 
-    status: {
-      type: String,
-      default: "available",
-    },
     location: {
       lat: {
         type: Number,

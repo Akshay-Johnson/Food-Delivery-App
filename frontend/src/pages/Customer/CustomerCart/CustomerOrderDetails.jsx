@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
+import { listenToAgentLocation } from "../../../services/liveTracking";
 
 export default function CustomerOrderDetails() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [agentLocation, setAgentLocation] = useState(null);
 
   useEffect(() => {
     fetchOrder();
@@ -22,6 +24,19 @@ export default function CustomerOrderDetails() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!order?.deliveryAgentId) return;
+
+    const unsubscribe = listenToAgentLocation(
+      order.deliveryAgentId,
+      (location) => {
+        setAgentLocation(location);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [order?.deliveryAgentId]);
 
   if (loading) {
     return <p className="p-6 text-white">Loading order...</p>;
@@ -56,9 +71,9 @@ export default function CustomerOrderDetails() {
           <strong>Placed On:</strong>{" "}
           {new Date(order.createdAt).toLocaleString()}
         </p>
-       <p>
-  <strong>Ordered From:</strong> {order.restaurantId?.name}
-</p>
+        <p>
+          <strong>Ordered From:</strong> {order.restaurantId?.name}
+        </p>
 
         <hr className="my-4 border-white/20" />
 
@@ -75,10 +90,33 @@ export default function CustomerOrderDetails() {
                 <p className="text-sm text-white/70">Qty: {item.quantity}</p>
               </div>
               <p className="font-bold">₹{item.price * item.quantity}</p>
-              
             </div>
           ))}
         </div>
+        {order.deliveryAgentId && (
+          <>
+            <hr className="my-4 border-white/20" />
+
+            <h2 className="text-xl font-semibold mb-2">
+              Live Delivery Tracking
+            </h2>
+
+            {agentLocation ? (
+              <div className="bg-black/40 p-4 rounded-lg">
+                <p>
+                  <strong>Agent Latitude:</strong> {agentLocation.lat}
+                </p>
+                <p>
+                  <strong>Agent Longitude:</strong> {agentLocation.lng}
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-400">
+                Waiting for delivery agent location...
+              </p>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
