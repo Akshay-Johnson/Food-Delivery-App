@@ -11,8 +11,6 @@ export default function AgentRegister() {
         email: '',
         password: '',
         phone: '',
-        vehicleType: '',
-        vehicleNumber: ''
     });
 
     const navigate = useNavigate();
@@ -23,7 +21,7 @@ export default function AgentRegister() {
         try {
             await api.post('/api/agents/register', form); 
             alert("Agent Registered Successfully");
-            navigate("/agent/login");  // redirect after register
+            navigate("/agent/login"); 
         } catch (error) {
             console.error("Registration Failed:", error);
             alert(error.response?.data?.message || "Registration Failed");
@@ -64,19 +62,7 @@ export default function AgentRegister() {
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
-                <AuthInput
-                    label="Vehicle Type"
-                    placeholder="Enter your vehicle type"
-                    value={form.vehicleType}
-                    onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
-                />
-
-                <AuthInput
-                    label="Vehicle Number"
-                    placeholder="Enter your vehicle number"
-                    value={form.vehicleNumber}
-                    onChange={(e) => setForm({ ...form, vehicleNumber: e.target.value })}
-                />
+            
 
 
                 <div className="flex gap-3 mt-4">

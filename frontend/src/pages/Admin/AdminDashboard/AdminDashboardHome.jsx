@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../../../context/AuthContext";
 import api from "../../../api/axiosInstance";
 
 export default function AdminDashboardHome() {
+  const { role, loading } = useAuth();
+
   const [stats, setStats] = useState({
     restaurants: 0,
     customers: 0,
@@ -13,7 +16,7 @@ export default function AdminDashboardHome() {
     try {
       const [r, c, a, o] = await Promise.all([
         api.get("/api/admins/restaurants"),
-        api.get("/api/admins/customers"),  
+        api.get("/api/admins/customers"),
         api.get("/api/admins/agents"),
         api.get("/api/admins/orders"),
       ]);
@@ -30,8 +33,10 @@ export default function AdminDashboardHome() {
   };
 
   useEffect(() => {
-    loadStats();
-  }, []);
+    if (!loading && role === "admin") {
+      loadStats();
+    }
+  }, [loading, role]);
 
   return (
     <div>

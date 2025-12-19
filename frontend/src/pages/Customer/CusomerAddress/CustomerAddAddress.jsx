@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import AddressForm from "./AddressForm";
 
 export default function CustomerAddAddress() {
   const navigate = useNavigate();
@@ -24,33 +25,13 @@ export default function CustomerAddAddress() {
   };
 
   return (
-    <div className="min-h-screen bg-black/90 text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">Add Address</h1>
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 bg-white/10 px-4 py-2 rounded hover:bg-white/20"
-      >
-        ← Back
-      </button>
-
-      <form onSubmit={submit} className="space-y-4 max-w-md">
-        {Object.keys(form).map((key) => (
-          <div key={key}>
-            <label className="text-gray-300 capitalize">{key}</label>
-
-            <input
-              type="text"
-              value={form[key]}
-              onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-              className="w-full mt-1 px-3 py-2 rounded bg-black/40 border border-white/20 outline-none"
-            />
-          </div>
-        ))}
-
-        <button className="w-full bg-blue-600 py-2 rounded-md hover:bg-blue-700">
-          Save Address
-        </button>
-      </form>
-    </div>
+    <AddressForm
+      title="Add Address"
+      form={form}
+      setForm={setForm}
+      onSubmit={submit}
+      onBack={() => navigate(-1)}
+      submitText="Save Address"
+    />
   );
 }

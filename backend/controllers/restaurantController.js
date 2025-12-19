@@ -286,3 +286,23 @@ export const getRestaurantDetails = async (req, res) => {
       .json({ message: "error fetching restaurant details", error });
   }
 };
+
+//save FCM token
+export const saveFCMToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({ message: "FCM token required" });
+    }
+
+    // use restaurant from middleware
+    req.restaurant.fcmToken = fcmToken;
+    await req.restaurant.save();
+
+    res.json({ message: "FCM token saved successfully" });
+  } catch (error) {
+    console.error("Save FCM token error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import { listenToAgentLocation } from "../../../services/liveTracking";
+import {Link } from "react-router-dom";
+import { Home } from "lucide-react";
 
 export default function CustomerOrderDetails() {
   const { orderId } = useParams();
@@ -47,13 +49,24 @@ export default function CustomerOrderDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-black/80 text-white p-6">
+    <div className="min-h-screen bg-[url('/assets/cart/cart.jpg')] bg-cover bg-center text-white p-6">
+        <div className="absolute inset-0 bg-black/60 pointer-events-none"></div>
+      <div className="relative z-10 max-w-3xl mx-auto p-6">
+        
+      <div className="mb-6 flex justify-end gap-2">
+
+      <Link to="/customer/dashboard">
+      <button className="bg-blue-600 px-4 py-3 rounded hover:bg-blue-700">
+        <Home size={18} /> 
+      </button>
+      </Link>
       <button
         onClick={() => navigate(-1)}
-        className="mb-4 bg-white/10 px-4 py-2 rounded hover:bg-white/20"
+        className="mb-4 bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
       >
         ← Back
       </button>
+      </div>
 
       <h1 className="text-2xl font-bold mb-4">Order Details</h1>
 
@@ -118,6 +131,7 @@ export default function CustomerOrderDetails() {
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }

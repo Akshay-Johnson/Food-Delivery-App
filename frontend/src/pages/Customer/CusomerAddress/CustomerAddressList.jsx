@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Trash, Edit, Star, Loader } from "lucide-react";
-import { use } from "react";
+import { Plus, Trash, Edit, Star, Loader, Home } from "lucide-react";
 
 export default function CustomerAddressList() {
   const [addresses, setAddresses] = useState([]);
@@ -41,29 +40,36 @@ export default function CustomerAddressList() {
   };
 
   return (
-    <div className="min-h-screen bg-black/90 text-white p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-[url('/assets/address/address.jpg')] text-white p-6">
+      <div className="flex justify-between items-center mb-20">
         <h1 className="text-4xl font-extrabold">My Addresses</h1>
-
-        <Link
-          to="/customer/address/add"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
-        >
-          <Plus /> Add New Address
-        </Link>
+        <div className="flex gap-4">
+           <Link
+            to="/customer/dashboard"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            <Home /> Home
+          </Link>
+          <Link
+            to="/customer/address/add"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            <Plus /> Add New Address
+          </Link>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            ← Back
+          </button>{" "}
+        </div>
       </div>
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 bg-white/10 px-4 py-2 rounded hover:bg-white/20"
-      >
-        ← Back
-      </button>
       {addresses.length === 0 && <p>No addresses found. Please add one.</p>}
 
       {addresses.map((address) => (
         <div
           key={address._id}
-          className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 mb-4 shadow-lg border border-white/20 relative"
+          className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 mb-4 shadow-lg border border-black border-2 relative"
         >
           <div className="flex justify-between">
             <div className="pointer-events-auto">
@@ -72,6 +78,7 @@ export default function CustomerAddressList() {
               <p className="text-gray-300">
                 {address.addressLine1}, {address.city}, {address.state} –{" "}
                 {address.pincode}
+                {address.type && ` (${address.type})`}
               </p>
 
               {address.isDefault && (

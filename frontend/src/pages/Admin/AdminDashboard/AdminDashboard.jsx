@@ -1,15 +1,16 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Building2, Truck, ScrollText, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Truck, ScrollText, LogOut, MessageSquare } from "lucide-react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-    navigate("/admin/login");
-  };
+const logout = () => {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("role");
+  localStorage.removeItem("user");
+  navigate("/admin/login");
+};
+
 
   return (
     <div className="flex min-h-screen text-white">
@@ -38,6 +39,11 @@ export default function AdminDashboard() {
           <Link to="/admin/dashboard/orders" className="flex items-center gap-3 hover:text-blue-400">
             <ScrollText /> Orders
           </Link>
+
+          <Link to="/admin/dashboard/reviews" className="flex items-center gap-3 hover:text-blue-400">
+            <MessageSquare /> Reviews
+          </Link>
+
         </nav>
 
         <button

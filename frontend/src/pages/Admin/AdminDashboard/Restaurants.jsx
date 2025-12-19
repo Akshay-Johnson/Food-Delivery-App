@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Restaurants() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
+  const { role, loading } = useAuth();
 
   const loadData = async () => {
     const res = await api.get("/api/admins/restaurants");
@@ -16,8 +18,10 @@ export default function Restaurants() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!loading && role === "admin") {
+      loadData();
+    }
+  }, [loading, role]);
 
   // 🔍 FILTER LOGIC
   const filteredRestaurants = list.filter((r) => {

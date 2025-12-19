@@ -12,11 +12,10 @@ const generateToken = (id) => {
 // ✅ REGISTER DELIVERY AGENT
 export const registerAgent = async (req, res) => {
   try {
-    const { name, email, phone, password, vehicleType, vehicleNumber } =
-      req.body;
+    const { name, email, phone, password } = req.body;
 
-    if (!vehicleType || !vehicleNumber) {
-      return res.status(400).json({ message: "Vehicle details are required" });
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const exists = await DeliveryAgent.findOne({ email });
@@ -24,16 +23,15 @@ export const registerAgent = async (req, res) => {
       return res.status(400).json({ message: "Delivery agent already exists" });
     }
 
+    // ✅ HASH AND USE IT
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const agent = await DeliveryAgent.create({
       name,
       email,
       phone,
-      password: hashedPassword,
-      vehicleType,
-      vehicleNumber,
-      status: "approved",
+      password: hashedPassword, // ✅ FIX
+      approvalStatus: "approved",
       isActive: true,
     });
 
@@ -47,24 +45,23 @@ export const registerAgent = async (req, res) => {
         name: agent.name,
         email: agent.email,
         phone: agent.phone,
-        vehicleType: agent.vehicleType,
-        vehicleNumber: agent.vehicleNumber,
-        status: agent.status,
+        approvalStatus: agent.approvalStatus,
       },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error registering delivery agent", error });
+    console.error("REGISTER AGENT ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 // ✅ LOGIN DELIVERY AGENT
 export const loginAgent = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const agent = await DeliveryAgent.findOne({ email });
+    const agent = await DeliveryAgent.findOne({ email }).select("+password");
+
     if (!agent) {
       return res.status(400).json({ message: "Agent not found" });
     }
@@ -90,8 +87,6 @@ export const loginAgent = async (req, res) => {
         name: agent.name,
         email: agent.email,
         phone: agent.phone,
-        vehicleType: agent.vehicleType,
-        vehicleNumber: agent.vehicleNumber,
         status: agent.status,
       },
     });

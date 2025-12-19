@@ -45,6 +45,7 @@ const restaurantSchema = new mongoose.Schema({
     },
     fcmToken: {
         type: String,
+        default: null,
     },
     description: {
         type: String,

@@ -10,8 +10,8 @@ import CustomerRegister from "./pages/Customer/CustomerRegister.jsx";
 
 //dashboard and others
 import CustomerDashboard from "./pages/Customer/CustomerDashboard/CustomerDashboard.jsx";
-import CustomerProfile from "./pages/Customer/CustomerProfile.jsx";
-import CustomerProfileEdit from "./pages/Customer/CustomerProfileEdit.jsx";
+import CustomerProfile from "./pages/Customer/CustomerProfile/CustomerProfile.jsx";
+import CustomerProfileEdit from "./pages/Customer/CustomerProfile/CustomerProfileEdit.jsx";
 import CustomerAddressList from "./pages/Customer/CusomerAddress/CustomerAddressList.jsx";
 import CustomerAddAddress from "./pages/Customer/CusomerAddress/CustomerAddAddress.jsx";
 import CustomerEditAddress from "./pages/Customer/CusomerAddress/CustomerEditAddress.jsx";
@@ -34,14 +34,15 @@ import RestaurantRegister from "./pages/Restaurant/RestaurantRegister.jsx";
 
 //dashboard and others for restaurant
 import RestaurantDashboard from "./pages/Restaurant/RestaurantDashboard/RestaurantDashboard.jsx";
-import DashboardHome from "./pages/Restaurant/RestaurantDashboard/DashBoardHome.jsx";
-import MenuManagement from "./pages/Restaurant/RestaurantDashboard/MenuManagement.jsx";
-import AddMenuItem from "./pages/Restaurant/RestaurantDashboard/AddMenuItem.jsx";
-import EditMenuItem from "./pages/Restaurant/RestaurantDashboard/EditMenuItem.jsx";
-import Orders from "./pages/Restaurant/RestaurantDashboard/Orders.jsx";
-import RestaurantProfile from "./pages/Restaurant/RestaurantDashboard/RestaurantProfile.jsx";
-import AssignAgent from "./pages/Restaurant/RestaurantDashboard/AssignAgents.jsx";
-import RestaurantAgents from "./pages/Restaurant/RestaurantDashboard/RestaurantAgents.jsx";
+import DashboardHome from "./pages/Restaurant/RestaurantDashboard/RestaurantHome/DashBoardHome.jsx";
+import MenuManagement from "./pages/Restaurant/RestaurantDashboard/RestaurantMenu/MenuManagement.jsx";
+import AddMenuItem from "./pages/Restaurant/RestaurantDashboard/RestaurantMenu/AddMenuItem.jsx";
+import EditMenuItem from "./pages/Restaurant/RestaurantDashboard/RestaurantMenu/EditMenuItem.jsx";
+import Orders from "./pages/Restaurant/RestaurantDashboard/RestaurantOrders/Orders.jsx";
+import RestaurantProfile from "./pages/Restaurant/RestaurantDashboard/RestaurantProfile/RestaurantProfile.jsx";
+import AssignAgent from "./pages/Restaurant/RestaurantDashboard/RestaurantOrders/AssignAgents.jsx";
+import RestaurantAgents from "./pages/Restaurant/RestaurantDashboard/RestaurantAgents/RestaurantAgents.jsx";
+import RestaurantReviews from "./pages/Restaurant/RestaurantDashboard/RestaurantReviews/RestaurantReviews.jsx";
 
 import CustomerCart from "./pages/Customer/CustomerCart/CustomerCart.jsx";
 import CustomerCheckout from "./pages/Customer/CustomerCart/CustomerCheckout.jsx";
@@ -54,6 +55,7 @@ import AgentDashboard from "./pages/DeliveryAgent/AgentDashboard/AgentDashboard.
 import AgentDashboardHome from "./pages/DeliveryAgent/AgentDashboard/AgentDashboardHome.jsx";
 import AgentOrders from "./pages/DeliveryAgent/AgentDashboard/AgentOrders.jsx";
 import AgentProfile from "./pages/DeliveryAgent/AgentDashboard/AgentProfile.jsx";
+import AdminReviews from "./pages/Admin/AdminDashboard/AdminReviews.jsx";
 
 import Home from "./pages/Home/Home.jsx";
 
@@ -106,6 +108,7 @@ export default function App() {
           <Route path="customers" element={<Customers />} />
           <Route path="agents" element={<AdminAgents />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="reviews" element={<AdminReviews />} />
         </Route>
 
         {/* Restaurant Routes */}
@@ -121,6 +124,7 @@ export default function App() {
           <Route path="assign-agent/:orderId" element={<AssignAgent />} />
           <Route path="profile" element={<RestaurantProfile />} />
           <Route path="agents" element={<RestaurantAgents />} />
+          <Route path="reviews" element={<RestaurantReviews />} />
         </Route>
 
         {/* Agent Routes */}

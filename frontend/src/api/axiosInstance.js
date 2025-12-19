@@ -5,11 +5,20 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  console.log("Attaching token to request:", token);
+  let tokenKey = null;
+  if (role === "customer") tokenKey = "customerToken";
+  if (role === "restaurant") tokenKey = "restaurantToken";
+  if (role === "agent") tokenKey = "agentToken";
+  if (role === "admin") tokenKey = "adminToken";
 
-  if (token) {
+  const token = tokenKey ? localStorage.getItem(tokenKey) : null;
+
+  const isAuthRoute =
+    config.url.includes("/login") || config.url.includes("/register");
+
+  if (token && !isAuthRoute) {
     config.headers.Authorization = `Bearer ${token}`;
   } else {
     delete config.headers.Authorization;

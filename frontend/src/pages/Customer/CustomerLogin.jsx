@@ -19,13 +19,13 @@ export default function CustomerLogin() {
     e.preventDefault();
 
     try {
-      await Login("customer", form);
+      const data = await Login("customer", form);
+      console.log("LOGIN SUCCESS", data);
 
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         await registerFCMToken();
       }
-
 
       navigate("/customer/dashboard");
     } catch (error) {
@@ -33,8 +33,6 @@ export default function CustomerLogin() {
       alert(error.response?.data?.message || "Login Failed");
     }
   };
-
-
 
   return (
     <AuthLayout title="Customer Login">
@@ -68,21 +66,6 @@ export default function CustomerLogin() {
           </Link>
         </div>
       </form>
-      <button
-  onClick={async () => {
-    const permission = await Notification.requestPermission();
-    console.log("Permission:", permission);
-
-    if (permission === "granted") {
-      await registerFCMToken();
-      alert("Notifications enabled");
-    }
-  }}
-  className="bg-green-600 text-white px-4 py-2 rounded"
->
-  Enable Notifications
-</button>
-
 
       <RoleSwitcher />
     </AuthLayout>

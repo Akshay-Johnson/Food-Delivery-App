@@ -21,11 +21,11 @@ const deliveryAgentschema = new mongoose.Schema(
     },
     vehicleType: {
       type: String,
-      required: true,
+      default: "",
     },
     vehicleNumber: {
       type: String,
-      required: true,
+      default: "",
     },
 
     approvalStatus: {

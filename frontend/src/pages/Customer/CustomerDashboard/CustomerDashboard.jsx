@@ -8,11 +8,12 @@ import {
   User,
   ShoppingCart,
   LogOut,
+  Home,
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function CustomerDashboard() {
   const [restaurants, setRestaurants] = useState([]);
@@ -25,6 +26,16 @@ export default function CustomerDashboard() {
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState("all");
+  const [sortBy, setSortBy] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  const [restaurantPage, setRestaurantPage] = useState(1);
+  const restaurantsPerPage = 6;
+
   const navigate = useNavigate();
 
   //fetch restaurants & dishes
@@ -97,19 +108,65 @@ export default function CustomerDashboard() {
     }
   };
 
-  const filteredRestaurants = restaurants.filter((r) =>
-    r.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRestaurants = searchQuery.trim()
+    ? restaurants.filter((r) =>
+        r.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : restaurants;
+
+  const restaurantTotalPages = Math.ceil(
+    filteredRestaurants.length / restaurantsPerPage
   );
+
+  const paginatedRestaurants = filteredRestaurants.slice(
+    (restaurantPage - 1) * restaurantsPerPage,
+    restaurantPage * restaurantsPerPage
+  );
+
+  // Reset page when search changes OR restaurant list changes
+  useEffect(() => {
+    setRestaurantPage(1);
+  }, [searchQuery, restaurants]);
 
   const filteredDishes = dishes.filter((d) =>
     d.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const categoryDishes = selectedCategory
+  let categoryDishes = selectedCategory
     ? dishes.filter(
         (d) => d.category?.toLowerCase() === selectedCategory.toLowerCase()
       )
-    : dishes;
+    : [...dishes];
+
+  /* ===== PRICE FILTER ===== */
+  if (priceRange !== "all") {
+    categoryDishes = categoryDishes.filter((d) => {
+      if (priceRange === "low") return d.price < 200;
+      if (priceRange === "mid") return d.price >= 200 && d.price <= 400;
+      if (priceRange === "high") return d.price > 400;
+      return true;
+    });
+  }
+
+  /* ===== SORT ===== */
+  if (sortBy === "priceLow") {
+    categoryDishes.sort((a, b) => a.price - b.price);
+  }
+
+  if (sortBy === "priceHigh") {
+    categoryDishes.sort((a, b) => b.price - a.price);
+  }
+
+  const totalPages = Math.ceil(categoryDishes.length / itemsPerPage);
+
+  const paginatedDishes = categoryDishes.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, priceRange, sortBy, searchQuery]);
 
   const addToCart = async (dish) => {
     try {
@@ -127,6 +184,7 @@ export default function CustomerDashboard() {
     }
   };
 
+
   return (
     <div
       className="relative min-h-screen text-white flex flex-col"
@@ -140,47 +198,81 @@ export default function CustomerDashboard() {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-xl"></div>
 
       {/* ========= PAGE CONTENT ========= */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex-justify-end ">
         {/* NAVBAR */}
-        <header className="bg-black/50 border-b border-white/30 shadow-md p-5 flex items-center gap-4 top-0 z-20 ml-auto">
+        <header className="bg-black/50 border-b border-white/30 shadow-md p-5 flex items-end gap-4 top-0 z-20 ml-auto">
           <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
+          <div className="flex justify-end flex-wrap gap-4 ml-auto">
+            <button
+              onClick={() => navigate("/customer/profile")}
+              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+            >
+              <User size={18} />
 
-          <button
-            onClick={() => navigate("/customer/profile")}
-            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/30 transition"
-          >
-            <User size={18} />
-          </button>
+              <span
+                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
+                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
+              >
+                Profile
+              </span>
+            </button>
 
-          <button
-            onClick={() => navigate("/customer/cart")}
-            className="bg-white/10 px-4 py-2 rounded-md hover:bg-white/30  transition "
-          >
-            <ShoppingCart size={18} />
-          </button>
+            <button
+              onClick={() => navigate("/customer/address")}
+              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+            >
+              <Home size={18} />
 
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
-            onClick={() => navigate("/customer/orders")}>
-            <Truck size={18} />
-             Orders
-          </button>
+              <span
+                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
+                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
+              >
+                Address
+              </span>
+            </button>
 
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition">
-            <Truck size={18} />
-            Track Order
-          </button>
+            <button
+              onClick={() => navigate("/customer/cart")}
+              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+            >
+              <ShoppingCart size={18} />
+              <span
+                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
+                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
+              >
+                Cart
+              </span>
+            </button>
 
-          
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
-            onClick={() => {
-              localStorage.removeItem("customerToken");
-              navigate("/customer/login");
-            }}
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
+            <button
+              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+              onClick={() => navigate("/customer/orders")}
+            >
+              <Truck size={18} />
+              <span
+                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
+                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
+              >
+                Orders
+              </span>
+            </button>
 
+            <button
+              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+              onClick={() => {
+                localStorage.removeItem("customerToken");
+                navigate("/customer/login");
+              }}
+            >
+              <LogOut size={18} />
+              <span
+                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
+                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
+              >
+                Logout
+              </span>
+            </button>
+          </div>
         </header>
 
         {/* WELCOME SECTION */}
@@ -189,17 +281,83 @@ export default function CustomerDashboard() {
           <p className="text-gray-300">What would you like to eat today?</p>
 
           {/* ======= FIXED SEARCH BAR ======= */}
-          <div className="mt-4 flex items-center bg-white/20 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
-            <Search className="text-gray-200" />
+          <div className="mt-4 flex items-center gap-2">
+            {/* SEARCH */}
+            <div className="flex flex-1 items-center bg-white/20 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
+              <Search className="text-gray-200" />
 
-            <input
-              type="text"
-              placeholder="Search for dishes or restaurants..."
-              value={searchQuery}
-              onChange={(e) => performSearch(e.target.value)}
-              className="flex-1 px-3 py-2 text-white placeholder-gray-300 bg-transparent outline-none"
-            />
+              <input
+                type="text"
+                placeholder="Search for dishes or restaurants..."
+                value={searchQuery}
+                onChange={(e) => performSearch(e.target.value)}
+                className="flex-1 px-3 py-2 text-white placeholder-gray-300 bg-transparent outline-none"
+              />
+            </div>
+
+            {/* FILTER BUTTON */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="bg-white/20 backdrop-blur-lg border border-white/30 px-5 py-3 rounded-full hover:bg-white/30 transition font-medium"
+            >
+              Filters
+            </button>
           </div>
+
+          {showFilters && (
+            <div className="mt-4 bg-black/60 backdrop-blur-lg border border-white/20 rounded-xl p-4 max-w-xl">
+              <h4 className="font-semibold mb-3">Filter Options</h4>
+
+              {/* PRICE */}
+              <div className="mb-3">
+                <label className="block text-sm mb-1">Price Range</label>
+                <select
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(e.target.value)}
+                  className="w-full bg-black/40 border border-white/30 rounded px-3 py-2"
+                >
+                  <option value="all">All</option>
+                  <option value="low">Below ₹200</option>
+                  <option value="mid">₹200 – ₹400</option>
+                  <option value="high">Above ₹400</option>
+                </select>
+              </div>
+
+              {/* SORT */}
+              <div className="mb-3">
+                <label className="block text-sm mb-1">Sort By</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full bg-black/40 border border-white/30 rounded px-3 py-2"
+                >
+                  <option value="">None</option>
+                  <option value="priceLow">Price: Low → High</option>
+                  <option value="priceHigh">Price: High → Low</option>
+                </select>
+              </div>
+
+              {/* ACTIONS */}
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => {
+                    setPriceRange("all");
+                    setSortBy("");
+                  }}
+                  className="px-4 py-2 bg-white/20 rounded hover:bg-white/30"
+                >
+                  Reset
+                </button>
+
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* SEARCH RESULTS */}
@@ -313,7 +471,7 @@ export default function CustomerDashboard() {
 
         <section className="px-6 mt-12 mb-20">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-            {categoryDishes.map((dish) => {
+            {paginatedDishes.map((dish) => {
               const restaurant = restaurants.find(
                 (r) => r._id === dish.restaurantId
               );
@@ -345,6 +503,40 @@ export default function CustomerDashboard() {
               );
             })}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
+              >
+                Prev
+              </button>
+
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-4 py-2 rounded ${
+                    currentPage === i + 1
+                      ? "bg-blue-600"
+                      : "bg-white/20 hover:bg-white/30"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
 
         {/* POPULAR RESTAURANTS */}
@@ -352,7 +544,7 @@ export default function CustomerDashboard() {
           <h3 className="text-xl font-bold mb-4">Popular Restaurants</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRestaurants.map((r) => (
+            {paginatedRestaurants.map((r) => (
               <div
                 key={r._id}
                 onClick={() => navigate(`/customer/restaurant/${r._id}`)}
@@ -373,6 +565,39 @@ export default function CustomerDashboard() {
               </div>
             ))}
           </div>
+          {restaurantTotalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                disabled={restaurantPage === 1}
+                onClick={() => setRestaurantPage((p) => p - 1)}
+                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
+              >
+                Prev
+              </button>
+
+              {Array.from({ length: restaurantTotalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setRestaurantPage(i + 1)}
+                  className={`px-4 py-2 rounded ${
+                    restaurantPage === i + 1
+                      ? "bg-blue-600"
+                      : "bg-white/20 hover:bg-white/30"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={restaurantPage === restaurantTotalPages}
+                onClick={() => setRestaurantPage((p) => p + 1)}
+                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </div>

@@ -75,8 +75,10 @@ export default function CustomerCheckout() {
   if (!cart) return <p className="text-white p-6">Loading checkout...</p>;
 
   return (
-    <div className="min-h-screen bg-black/90 text-white p-4">
+    <div className="min-h-screen bg-[url('/assets/cart/cart.jpg')] bg-cover bg-center text-white p-4">
+        <div className="absolute inset-0 bg-black/60 pointer-events-none"></div>
       {/* TOP BAR */}
+      <div className="relative z-10 max-w-3xl mx-auto p-6">
       <div className="flex items-center gap-3 mb-4">
         <ArrowLeft
           size={26}
@@ -114,10 +116,10 @@ export default function CustomerCheckout() {
       </div>
 
       <button
-        onClick={() => navigate("/customer/address/add")}
+        onClick={() => navigate("/customer/address")}
         className="w-full bg-blue-600 py-2 mt-2 rounded-lg hover:bg-blue-700"
       >
-        Add New Address
+        Change Address
       </button>
 
       {/* CART SUMMARY */}
@@ -175,6 +177,7 @@ export default function CustomerCheckout() {
       >
         Place Order
       </button>
+    </div>
     </div>
   );
 }
