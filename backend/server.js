@@ -19,6 +19,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import contactRoutes from "./routes/contactRoutes.js";
 
 
 
@@ -88,6 +89,9 @@ app.use('/api/search', searchRoutes);
 
 //post review customer 
 app.use('/api/reviews', reviewRoutes);
+
+//contact routes
+app.use("/api/contact", contactRoutes);
 
 app.get('/', (req, res) => {
   res.send('Food Delivery App Backend is running');

@@ -1,8 +1,8 @@
 import Navbar from "./navbar";
 import Hero from "./hero";
 import About from "./about";
-import HowItWorks from "./howitworks";
 import Testimonials from "./testimonials";
+import ContactUs from "./contactus";
 
 export default function Home() {
   return (
@@ -11,6 +11,7 @@ export default function Home() {
       <Hero />
       <About />
       <Testimonials />
+      <ContactUs />
     </div>
   );
 }
