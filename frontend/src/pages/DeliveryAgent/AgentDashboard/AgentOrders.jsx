@@ -61,7 +61,7 @@ export default function AgentOrders() {
           {orders.map((order) => (
             <div
               key={order._id}
-              className="bg-white/10 p-4 rounded-xl border border-white/20"
+              className="bg-black/70 p-4 rounded-xl border border-white/20 w-sm"
             >
               <h3 className="font-semibold">Order ID: {order._id}</h3>
               <p>Customer: {order.customerId?.name || "N/A"}</p>

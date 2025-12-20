@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Upload } from "lucide-react";
+import  { Home } from "lucide-react";
 
 export default function CustomerEditProfile() {
   const [form, setForm] = useState({
@@ -67,99 +69,109 @@ export default function CustomerEditProfile() {
   if (loading) return <p className="p-6 text-white">Loading...</p>;
 
   return (
-    <div
-      className="
-  relative
-  min-h-screen
-  text-white
-  p-6
-  bg-cover
-  bg-center
-  bg-[url('/assets/profile/editprofile.jpg')]
-"
-    >
-      <div className="absolute inset-0 bg-black/10"></div>
+    <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white">
+      {/* BLUR OVERLAY */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
-      <div className="relative z-20">
+      {/* CONTENT */}
+      <div className="relative z-10">
+        <div className="absolute inset-0 bg-black/10"></div>
 
-      <h1 className="text-3xl font-bold mb-16 mt-10 text-center">
-        Edit Profile
-      </h1>
+        <div className="relative z-20">
+          <h1 className="text-3xl font-bold pb-25 pt-10 text-center">
+            Edit Profile
+          </h1>
 
-      <div className=" bg-black/90 rounded-xl p-6 border border-black border-2 max-w-md mx-auto ">
-        <div className="flex justify-end  mb-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"
-        >
-          ← Back
-        </button>
-        </div>
+          <div className=" bg-black/90 rounded-xl p-6 border border-white border-2 max-w-md mx-auto ">
+            <div className="flex justify-end  mb-4 gap-2">
 
-        <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className="text-sm text-gray-300">Profile Image </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full px-3 py-2 mt-1 rounded bg-white border border-white/40 text-black outline-none"
-            />
+              <Link to="/customer/dashboard">
+              <button
+                className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"
+              >
+                <Home />
+              </button>
+            </Link>
+              <button
+                onClick={() => navigate(-1)}
+                className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"
+              >
+                ← Back
+              </button>
+            </div>
 
-            {/* Display current profile image */}
-            {form.profileImage && (
-              <img
-                src={form.profileImage}
-                alt="Profile"
-                className="mt-2 w-14 h-14 object-cover rounded-full"
-              />
-            )}
+            <form onSubmit={submit} className="space-y-4">
+              <div className="flex flex-col justify-center items-center ">
+                {/* Display current profile image */}
+                {form.profileImage && (
+                  <img
+                    src={form.profileImage}
+                    alt="Profile"
+                    className="mb-4 w-20 h-20 object-cover "
+                  />
+                )}
+
+                <label className="inline-flex items-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white transition">
+                  <Upload size={16} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              <div>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 mt-1 rounded bg-white/5 border border-white text-white "
+                  value={form.name}
+                  placeholder="Name"
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <input
+                  type="password"
+                  className="w-full px-3 py-2 mt-1 rounded bg-white/5 border border-white/40 text-white outline-none"
+                  placeholder="New Password"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 mt-1 rounded bg-white/5 border border-white/40 text-white outline-none"
+                  placeholder="Phone"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 py-2 rounded-md hover:bg-blue-700 transition"
+                >
+                  Save Changes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/customer/profile")}
+                  className="flex-1 bg-red-600 py-2 rounded-md hover:bg-red-700 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div>
-            <label className="text-sm text-gray-300">Name</label>
-            <input
-              type="text"
-              className="w-full px-3 py-2 mt-1 rounded bg-white border border-white/40 text-black outline-none"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-300">Password</label>
-            <input
-              type="password"
-              className="w-full px-3 py-2 mt-1 rounded bg-white border border-white/40 text-black outline-none"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-300">Phone</label>
-            <input
-              type="text"
-              className="w-full px-3 py-2 mt-1 rounded bg-white border border-white/40 text-black outline-none"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 py-2 rounded-md hover:bg-blue-700 transition"
-          >
-            Save Changes
-          </button>
-        </form>
-
-        <button
-          className="mt-4 w-full bg-black/40 py-2 rounded-md hover:bg-gray-700"
-          onClick={() => navigate("/customer/profile")}
-        >
-          Cancel
-        </button>
         </div>
       </div>
     </div>

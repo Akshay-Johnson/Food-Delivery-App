@@ -20,6 +20,12 @@ export default function RestaurantReviews() {
     loadReviews();
   }, []);
 
+  const report = async (id) => {
+    if (!window.confirm("Report this review to admin?")) return;
+    await api.put(`/api/reviews/restaurant/${id}/report`);
+    alert("Review reported");
+  };
+
   if (loading) return <p className="text-white">Loading reviews...</p>;
 
   return (
@@ -34,9 +40,18 @@ export default function RestaurantReviews() {
             key={r._id}
             className="bg-black/70 border border-white/20 rounded-lg p-4 w-sm max-w-2xl"
           >
-            <div className="flex justify-between items-center mb-1">
-              <p className="font-semibold">{r.customerId?.name}</p>
-              <span className="text-sm text-gray-400">
+            <div className="flex items-between items-center mb-1 ">
+              <img
+                className="w-15 h-15 object-cover rounded-full border-2 border-white/30 mr-4"
+                src={
+                  r.customerId?.profileImage?.trim()
+                    ? r.customerId.profileImage
+                    : "/assets/default-avatar.png"
+                }
+              />
+
+              <p className="font-semibold ">{r.customerId?.name}</p>
+              <span className="text-sm text-gray-400 gap-2 ml-auto">
                 {new Date(r.createdAt).toLocaleDateString()}
               </span>
             </div>
@@ -52,8 +67,19 @@ export default function RestaurantReviews() {
                 />
               ))}
             </div>
-
             <p className="text-white/80">{r.comment}</p>
+            {r.isFlagged ? (
+              <span className="mt-3 inline-flex items-center gap-1 text-sm text-red-400">
+                🚩 Reported
+              </span>
+            ) : (
+              <button
+                onClick={() => report(r._id)}
+                className="mt-3 text-sm text-red-400 hover:text-red-500"
+              >
+                Report to Admin
+              </button>
+            )}
           </div>
         ))}
       </div>

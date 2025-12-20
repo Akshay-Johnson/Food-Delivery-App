@@ -32,21 +32,25 @@ export default function CustomerProfile() {
   if (!user) return <p className="p-6 text-white">Loading...</p>;
 
   return (
-    <div
-      className="min-h-screen  bg-cover
-  bg-center
-  bg-[url('/assets/profile/editprofile.jpg')] text-white p-6 flex justify-center"
-    >
+
+
+  <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white flex items-center justify-center py-12 px-4 ">
+  {/* BLUR OVERLAY */}
+  <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+
+  {/* CONTENT */}
+  <div className="relative z-10">
+
       <div className="w-full max-w-lg">
         {/* Header */}
-        <div className="text-center mb-32">
+        <div className="text-center pb-5">
           <h1 className="text-4xl  font-extrabold tracking-wide bg-gradient-to-r from-blue-400 to-blue-600 text-white bg-clip-text drop-shadow-lg">
             My Profile
           </h1>
         </div>
 
         {/* Card */}
-        <div className="  bg-black/90 rounded-2xl p-8 shadow-2xl border border-black border-2  transition-all  hover:scale-[1.01]">
+        <div className="  bg-black/90 rounded-2xl p-8 shadow-2xl border border-white   transition-all  hover:scale-[1.01]">
           {/* Avatar Section */}
           <div className="flex justify-end gap-2">
             <Link to="/customer/dashboard">
@@ -107,7 +111,7 @@ export default function CustomerProfile() {
           </div>
 
           {/* Buttons */}
-          <div className="mt-8 flex flex-row gap-6">
+          <div className="flex justify-between mt-10 gap-4 h-8 text-sm">
             <button
               onClick={() => navigate("/customer/profile/edit")}
               className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg shadow-lg shadow-blue-900/40 transition-all"
@@ -135,8 +139,10 @@ export default function CustomerProfile() {
               Logout
             </button>
           </div>
+
         </div>
       </div>
     </div>
+  </div>
   );
 }

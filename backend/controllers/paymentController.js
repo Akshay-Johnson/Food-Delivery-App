@@ -36,35 +36,32 @@ export const createPaymentOrder = async (req, res) => {
 //verify payment
 export const verifyPayment = async (req, res) => {
     try {
-        const {
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature,
-        } = req.body;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-        const sign = razorpay_order_id + "|" + razorpay_payment_id;
-
-        const expectedSign = crypto
+        // 1. Generate the expected signature
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
             .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-            .update(sign)
+            .update(body.toString())
             .digest("hex");
-        
-        if (expectedSign === razorpay_signature) {
 
+        // 2. Compare signatures
+        if (expectedSignature === razorpay_signature) {
+            // 3. Save to database (This is likely where it's crashing)
             await Payment.create({
                 orderId: razorpay_order_id,
                 paymentId: razorpay_payment_id,
                 signature: razorpay_signature,
-                status: 'success',
+                status: "captured",
             });
 
-            return res.json({ message: 'Payment verified successfully' });
+            return res.status(200).json({ success: true, message: "Payment verified successfully" });
+        } else {
+            return res.status(400).json({ success: false, message: "Invalid signature" });
         }
-
-        res.status(400).json({ message: 'Invalid signature ' });
-
     } catch (error) {
-        res.status(500).json({ message: 'payment verification failed', error });
+        console.error("Verify Error:", error); // LOOK AT YOUR BACKEND TERMINAL FOR THIS LOG
+        res.status(500).json({ message: "Error verifying payment", error: error.message });
     }
 };
 

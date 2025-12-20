@@ -34,7 +34,12 @@ export default function CustomerCart() {
   if (!cart) return <p className="text-white p-6">Loading Cart...</p>;
 
   return (
-    <div className="relative min-h-screen bg-[url('/assets/cart/cart.jpg')] bg-cover bg-center text-white">
+    <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white pt-10">
+      {/* BLUR OVERLAY */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+
+      {/* CONTENT */}
+      <div className="relative z-10"></div>
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60 pointer-events-none"></div>
 
@@ -131,7 +136,7 @@ export default function CustomerCart() {
               </div>
 
               <button
-                className="  w-full bg-green-600 py-3 rounded-lg text-lg font-semibold hover:bg-green-500 transition"
+                className="  w-full bg-blue-600 py-3 rounded-lg text-lg font-semibold hover:bg-green-500 transition"
                 onClick={() => navigate("/customer/checkout")}
               >
                 Proceed to Checkout

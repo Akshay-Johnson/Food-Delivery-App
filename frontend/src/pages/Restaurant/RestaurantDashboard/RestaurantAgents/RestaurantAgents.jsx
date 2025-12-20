@@ -64,7 +64,15 @@ export default function RestaurantAgents() {
               className="bg-black/70 p-2 w-sm max-w-2xl rounded-xl border border-white/20"
             >
               <div className="flex items-center gap-4">
-                <User2 className="text-blue-400" size={40} />
+                <img 
+                  src={
+                    agent.image && agent.image.trim() !== ""
+                      ? agent.image
+                      : "/assets/agent-avatar.png"
+                  }
+                  alt={`${agent.name}'s Avatar`}
+                  className="w-10 h-10 object-cover border-1 border-black"
+                />
                 <div>
                   <h2 className="text-xl font-semibold">{agent.name}</h2>
                   <p className="text-sm text-gray-300">{agent.email}</p>

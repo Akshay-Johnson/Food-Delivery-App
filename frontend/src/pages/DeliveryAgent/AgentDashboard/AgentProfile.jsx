@@ -25,16 +25,17 @@ export default function AgentProfile() {
     try {
       const res = await api.get("/api/agents/profile");
 
-      setForm({
+      setForm((prev) => ({
+        ...prev,
         name: res.data.agent.name || "",
         email: res.data.agent.email || "",
         phone: res.data.agent.phone || "",
         password: "",
         vehicleType: res.data.agent.vehicleType || "",
         vehicleNumber: res.data.agent.vehicleNumber || "",
-        image: res.data.agent.image || "",
+        image: res.data.agent.image ?? prev.image, // 🔥 KEY LINE
         status: res.data.agent.status || "",
-      });
+      }));
     } catch (error) {
       console.error("Failed to load agent profile:", error);
     } finally {
@@ -65,10 +66,25 @@ export default function AgentProfile() {
   const submit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      name: form.name,
+      phone: form.phone,
+      vehicleType: form.vehicleType,
+      vehicleNumber: form.vehicleNumber,
+    };
+
+    if (form.password) {
+      payload.password = form.password;
+    }
+
+    if (form.image) {
+      payload.image = form.image;
+    }
+
     try {
-      await api.put("/api/agents/profile", form);
+      await api.put("/api/agents/profile", payload);
       alert("Profile updated successfully");
-      loadProfile();
+      await loadProfile();
     } catch (error) {
       console.error("Profile update failed:", error);
       alert("Update failed");
@@ -78,52 +94,54 @@ export default function AgentProfile() {
   if (loading) return <p className="text-white p-6">Loading profile...</p>;
 
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-3xl font-bold mb-6">Agent Profile</h1>
-
-      <div className="bg-white/10 p-6 rounded-xl border border-white/20 max-w-2xl">
+    <div className="p-6 text-white flex items-center m-auto justify-center mt-15">
+      <div className="bg-black/70 p-6 rounded-xl border border-white/20 w-full max-w-xl">
         <form onSubmit={submit} className="space-y-4">
-
           {/* IMAGE */}
           <div className="flex flex-col items-center">
             <img
-              src={form.image || "/assets/agent-avatar.png"}
-              className="w-36 h-36 rounded-full object-cover border border-white/30"
+              src={
+                form.image && form.image.trim() !== ""
+                  ? form.image
+                  : "/assets/agent-avatar.png"
+              }
+              alt="Agent Avatar"
+              className="w-40 h-40 object-cover border border-white/30"
             />
 
             <label className="mt-3 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
               <Upload size={16} />
-              Upload Image
-              <input type="file" className="hidden" onChange={handleImageUpload} />
+              <input
+                type="file"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
             </label>
           </div>
 
           {/* NAME */}
-          <div>
-            <label className="text-sm">Name</label>
+          <div className="flex items-end gap-2">
             <input
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.name}
+              placeholder="Name"
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
-          </div>
 
-          {/* PHONE */}
-          <div>
-            <label className="text-sm">Phone</label>
             <input
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.phone}
+              placeholder="Phone"
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
           </div>
 
           {/* PASSWORD */}
           <div>
-            <label className="text-sm">New Password</label>
             <input
               type="password"
               autoComplete="current-password"
+              placeholder="New Password"
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -132,20 +150,22 @@ export default function AgentProfile() {
 
           {/* VEHICLE TYPE */}
           <div>
-            <label className="text-sm">Vehicle Type</label>
             <input
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.vehicleType}
-              onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
+              placeholder="Vehicle Type (e.g., Bike, Car)"
+              onChange={(e) =>
+                setForm({ ...form, vehicleType: e.target.value })
+              }
             />
           </div>
 
           {/* VEHICLE NUMBER */}
           <div>
-            <label className="text-sm">Vehicle Number</label>
             <input
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.vehicleNumber}
+              placeholder="Vehicle Number (e.g., ABC-1234)"
               onChange={(e) =>
                 setForm({ ...form, vehicleNumber: e.target.value })
               }
@@ -153,11 +173,10 @@ export default function AgentProfile() {
           </div>
 
           {/* SUBMIT */}
-          <button className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2">
+          <button className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2 m-auto">
             <Save size={18} />
             Save Changes
           </button>
-
         </form>
       </div>
     </div>

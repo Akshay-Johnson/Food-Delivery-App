@@ -45,10 +45,18 @@ export default function AddressForm({
   };
 
   return (
-    <div className="min-h-screen bg-[url('/assets/address/address.jpg')] bg-cover bg-center
-                    text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center
+                    text-white flex items-center justify-center p-6 ">
+
+      {/* BLUR OVERLAY */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+
+      {/* CONTENT */}
+      <div className="relative z-10"></div>
+
+
       <div className="w-full max-w-lg bg-white/5 backdrop-blur-xl
-                      border border-white/10 rounded-2xl shadow-2xl p-8">
+                      border border-white rounded-2xl shadow-2xl p-8">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

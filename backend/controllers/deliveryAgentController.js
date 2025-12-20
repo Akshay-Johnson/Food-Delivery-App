@@ -1,6 +1,7 @@
 import DeliveryAgent from "../models/deliveryAgentModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Order from "../models/orderModel.js";
 
 // Generate Token
 const generateToken = (id) => {
@@ -54,7 +55,6 @@ export const registerAgent = async (req, res) => {
   }
 };
 
-
 // ✅ LOGIN DELIVERY AGENT
 export const loginAgent = async (req, res) => {
   try {
@@ -95,20 +95,23 @@ export const loginAgent = async (req, res) => {
   }
 };
 
-// ✅ GET AGENT PROFILE
 export const getAgentProfile = async (req, res) => {
   try {
-    const agent = await DeliveryAgent.findById(req.user.id).select("-password");
+    const agent = await DeliveryAgent.findById(req.user.id)
+      .select("name email phone vehicleType vehicleNumber status image");
 
     if (!agent) {
-      return res.status(404).json({ message: "Delivery agent not found" });
+      return res.status(404).json({ message: "Agent not found" });
     }
 
     res.status(200).json({ agent });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching delivery agent profile" });
+    console.error("Get agent profile error:", error);
+    res.status(500).json({ message: "Error fetching agent profile" });
   }
 };
+
+
 
 // ✅ UPDATE AGENT PROFILE (WITH PASSWORD SUPPORT)
 export const updateAgentProfile = async (req, res) => {
@@ -118,18 +121,38 @@ export const updateAgentProfile = async (req, res) => {
       return res.status(404).json({ message: "Agent not found" });
     }
 
-    agent.name = req.body.name || agent.name;
-    agent.phone = req.body.phone || agent.phone;
-    agent.status = req.body.status || agent.status;
-    agent.vehicleType = req.body.vehicleType || agent.vehicleType;
-    agent.vehicleNumber = req.body.vehicleNumber || agent.vehicleNumber;
-    agent.image = req.body.image || agent.image;
+    if (req.body.name !== undefined) {
+      agent.name = req.body.name;
+    }
+
+    if (req.body.phone !== undefined) {
+      agent.phone = req.body.phone;
+    }
+
+    if (req.body.status !== undefined) {
+      agent.status = req.body.status;
+    }
+
+    if (req.body.vehicleType !== undefined) {
+      agent.vehicleType = req.body.vehicleType;
+    }
+
+    if (req.body.vehicleNumber !== undefined) {
+      agent.vehicleNumber = req.body.vehicleNumber;
+    }
+
+    console.log("Incoming image:", req.body.image);
+
+    if (req.body.image !== undefined) {
+      agent.image = req.body.image;
+    }
 
     if (req.body.password) {
       agent.password = await bcrypt.hash(req.body.password, 10);
     }
 
     await agent.save();
+    console.log("Saved image:", agent.image);
 
     res.json({
       message: "Profile updated successfully",
@@ -141,9 +164,11 @@ export const updateAgentProfile = async (req, res) => {
         vehicleType: agent.vehicleType,
         vehicleNumber: agent.vehicleNumber,
         status: agent.status,
+        image: agent.image,
       },
     });
   } catch (error) {
+    console.error("Update agent profile error:", error);
     res.status(500).json({ message: "Error updating profile" });
   }
 };
@@ -191,4 +216,32 @@ export const getAvailableAgents = async (req, res) => {
   }
 };
 
+export const getAgentDashboardStats = async (req, res) => {
+  try {
+    const agentId = req.user.id;
 
+    // Active (assigned / picked) orders
+    const assignedOrders = await Order.countDocuments({
+      deliveryAgentId: agentId,
+      status: { $in: ["assigned", "picked"] },
+    });
+
+    // Completed (delivered) orders
+    const completedOrders = await Order.countDocuments({
+      deliveryAgentId: agentId,
+      status: "delivered",
+    });
+
+    const agent = await DeliveryAgent.findById(agentId);
+
+    res.json({
+      assignedOrders,
+      completedOrders,
+      status: agent.status, // available / on-delivery
+      approvalStatus: agent.approvalStatus,
+    });
+  } catch (error) {
+    console.error("Agent dashboard error:", error);
+    res.status(500).json({ message: "Failed to load dashboard stats" });
+  }
+};

@@ -26,7 +26,7 @@ import uploadRoutes from './routes/uploadRoutes.js';
 connectDB();
 
 const app = express();
-
+console.log("Razorpay Key Loaded:", process.env.RAZORPAY_KEY_ID ? "Yes" : "No");
 
 
 //middleware

@@ -306,3 +306,13 @@ export const saveFCMToken = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//get restaurant reviews for owner
+export const getRestaurantReviewsForOwner = async (req, res) => {
+  const reviews = await Review.find({
+    restaurantId: req.restaurant._id,
+    isHidden: false,
+  }).populate("customerId", "name");
+
+  res.json(reviews);
+};

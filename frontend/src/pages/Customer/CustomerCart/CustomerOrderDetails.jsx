@@ -49,8 +49,11 @@ export default function CustomerOrderDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-[url('/assets/cart/cart.jpg')] bg-cover bg-center text-white p-6">
-        <div className="absolute inset-0 bg-black/60 pointer-events-none"></div>
+   <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white">
+      {/* BLUR OVERLAY */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
+
+      {/* CONTENT */}
       <div className="relative z-10 max-w-3xl mx-auto p-6">
         
       <div className="mb-6 flex justify-end gap-2">
@@ -70,7 +73,7 @@ export default function CustomerOrderDetails() {
 
       <h1 className="text-2xl font-bold mb-4">Order Details</h1>
 
-      <div className="bg-white/10 border border-white/20 rounded-xl p-6">
+      <div className="bg-black/70 border border-white rounded-xl p-6">
         <p>
           <strong>Order ID:</strong> {order._id}
         </p>

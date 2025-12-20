@@ -85,7 +85,7 @@ export const getReviews = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const reviews = await Review.find({ restaurantId })
-      .populate("customerId", "name email")
+      .populate("customerId", "name email profileImage")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -173,8 +173,9 @@ export const getRestaurantReview = async (req, res) => {
     const restaurantId = req.user.id;
 
     const reviews = await Review.find({ restaurantId })
-      .populate("customerId", "name")
+      .populate("customerId", "name profileImage")
       .sort({ createdAt: -1 });
+      isHidden: false
 
     res.status(200).json(reviews);
   } catch (error) {
@@ -182,5 +183,101 @@ export const getRestaurantReview = async (req, res) => {
       message: "Error fetching restaurant reviews",
       error: error.message,
     });
+  }
+};
+
+
+/* ======================================================
+   ADMIN: GET ALL REVIEWS (WITH CUSTOMER & RESTAURANT)
+====================================================== */
+export const getAllReviewsAdmin = async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate("restaurantId", "name")
+      .populate("customerId", "name email profileImage")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Admin get reviews error:", error);
+    res.status(500).json({ message: "Failed to fetch reviews" });
+  }
+};
+
+/* ======================================================
+   ADMIN: HIDE / UNHIDE REVIEW
+====================================================== */
+export const toggleHideReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isHidden } = req.body;
+
+    if (typeof isHidden !== "boolean") {
+      return res.status(400).json({ message: "Invalid hide value" });
+    }
+
+    const review = await Review.findById(id);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    review.isHidden = isHidden;
+    await review.save();
+
+    res.status(200).json({
+      message: isHidden ? "Review hidden" : "Review unhidden",
+      review,
+    });
+  } catch (error) {
+    console.error("Toggle hide review error:", error);
+    res.status(500).json({ message: "Failed to update review visibility" });
+  }
+};
+
+/* ======================================================
+   ADMIN: FLAG REVIEW AS ABUSIVE
+====================================================== */
+export const flagReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const review = await Review.findById(id);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    review.isFlagged = true;
+    await review.save();
+
+    res.status(200).json({
+      message: "Review flagged successfully",
+      review,
+    });
+  } catch (error) {
+    console.error("Flag review error:", error);
+    res.status(500).json({ message: "Failed to flag review" });
+  }
+};
+
+/* ======================================================
+   RESTAURANT: REPORT REVIEW (REQUEST MODERATION)
+====================================================== */
+export const reportReviewByRestaurant = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const review = await Review.findById(id);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    review.isFlagged = true;
+    await review.save();
+
+    res.status(200).json({
+      message: "Review reported to admin",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to report review" });
   }
 };

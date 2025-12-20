@@ -11,7 +11,8 @@ import {
   getCategories,
   searchRestaurants,
   getRestaurantDetails,
-  saveFCMToken
+  saveFCMToken,
+  getRestaurantReviewsForOwner
 } from "../controllers/restaurantController.js";
 
 import {
@@ -55,5 +56,6 @@ router.get("/:id", getRestaurantById);
 
 //get restaurant details
 router.get("/:id/details", getRestaurantDetails);
+router.get("/reviews", restaurantAuth, getRestaurantReviewsForOwner);
 
 export default router;

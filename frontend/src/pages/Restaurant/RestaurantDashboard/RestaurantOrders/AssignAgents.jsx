@@ -68,14 +68,14 @@ export default function AssignAgent() {
   return (
     <div className="text-white">
       <h1 className="text-3xl font-bold mb-6">
-        Assign Agent to Order #{orderId}
+        Assign Agent to Order
       </h1>
 
       {agents.length === 0 && (
         <p className="text-gray-400">No available agents</p>
       )}
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-6 w-2xl"> 
         {agents.map((agent) => {
           const isAssigned = assignedAgentId === agent._id;
           const isDisabled = assignedAgentId && !isAssigned;
@@ -83,8 +83,8 @@ export default function AssignAgent() {
           return (
             <div
               key={agent._id}
-              className={`p-5 rounded-xl border border-white/20
-                ${isAssigned ? "bg-green-900/30" : "bg-white/10"}
+              className={`p-5 rounded-xl border border-black/70
+                ${isAssigned ? "bg-green-900/10" : "bg-black/70"}
               `}
             >
               <div className="flex items-center gap-4">

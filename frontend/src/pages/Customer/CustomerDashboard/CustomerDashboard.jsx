@@ -283,7 +283,7 @@ export default function CustomerDashboard() {
           {/* ======= FIXED SEARCH BAR ======= */}
           <div className="mt-4 flex items-center gap-2">
             {/* SEARCH */}
-            <div className="flex flex-1 items-center bg-white/20 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
+            <div className="flex flex-1 items-center bg-black/40 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
               <Search className="text-gray-200" />
 
               <input
@@ -298,7 +298,7 @@ export default function CustomerDashboard() {
             {/* FILTER BUTTON */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="bg-white/20 backdrop-blur-lg border border-white/30 px-5 py-3 rounded-full hover:bg-white/30 transition font-medium"
+              className="bg-black/40 backdrop-blur-lg border border-white/30 px-5 py-3 rounded-full hover:bg-white/30 transition font-medium"
             >
               Filters
             </button>
@@ -479,7 +479,7 @@ export default function CustomerDashboard() {
               return (
                 <div
                   key={dish._id}
-                  className="bg-black/40 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
+                  className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
                 >
                   <img
                     src={dish.image || "/assets/dishimage.jpg"}
@@ -495,7 +495,7 @@ export default function CustomerDashboard() {
                   </p>
                   <button
                     onClick={() => addToCart(dish)}
-                    className="bg-green-600 hover:bg-green-700 px-3 py-1 mt-2 rounded text-white"
+                    className="bg-blue-600 hover:bg-green-700 px-3 py-1 mt-2 rounded text-white"
                   >
                     Add to Cart
                   </button>
@@ -548,7 +548,7 @@ export default function CustomerDashboard() {
               <div
                 key={r._id}
                 onClick={() => navigate(`/customer/restaurant/${r._id}`)}
-                className="bg-black/40 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
+                className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
               >
                 <img
                   src={r.image || `/assets/restaurantimage.jpeg`}
@@ -559,7 +559,7 @@ export default function CustomerDashboard() {
                   <h4 className="font-semibold text-lg">{r.name}</h4>
                   <p className="text-gray-600 text-sm">{r.description}</p>
                   <p className="mt-2 text-yellow-600 font-bold">
-                    ⭐ {r.averageRating?.toFixed(1)} ({r.totalReviews} reviews)
+                    ⭐ {r.averageRating?.toFixed(1)} 
                   </p>
                 </div>
               </div>

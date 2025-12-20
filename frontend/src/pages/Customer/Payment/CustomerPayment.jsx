@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
@@ -15,10 +15,10 @@ export default function CustomerPayment() {
   const loadCart = async () => {
     try {
       const res = await api.get("/api/cart");
-      ScatterChart(res.data);
-      setLoading(false);
+      setCart(res.data);
     } catch (e) {
       console.error("Failed to load cart:", e);
+    } finally {
       setLoading(false);
     }
   };
@@ -26,77 +26,83 @@ export default function CustomerPayment() {
   //load razorpay script
   const loadRazorpay = () => {
     return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => {
-        resolve(true);
-      };
-      script.onerror = () => {
-        resolve(false);
-      };
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+
       document.body.appendChild(script);
     });
   };
 
   //start payment
   const handlePayment = async () => {
-    const res = await loadRazorpay();
-    if (!res) {
-      alert("Razorpay SDK failed to load. Are you online?");
+    if (!cart || !cart.items.length) {
+      alert("Cart is empty");
+      return;
+    }
+
+    const loaded = await loadRazorpay();
+    if (!loaded) {
+      alert("Razorpay SDK failed to load");
       return;
     }
 
     try {
-      const orderRes = await api.post("/api/payments/create-order", {
-        amount: cart.totalPrice * 100,
+      // 1️⃣ Create Razorpay order (DO NOT multiply by 100 here)
+      const { data } = await api.post("/api/payments/create-order", {
+        amount: cart.totalPrice,
       });
-
-      const { orderId, amount, currency } = orderRes.data;
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: amount,
-        currency: currency,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.id,
+
         name: "DineX",
         description: "Order Payment",
-        order_id: orderId,
 
-        handler: async function (response) {
-          try {
-            await api.post("/api/orders/create", {
-              cartItems: cart.items,
-              amount: cart.totalPrice,
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature,
-            });
+handler: async (response) => {
+  try {
+    // 1. Verify Payment
+    await api.post("/api/payments/verify", {
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_signature: response.razorpay_signature,
+    });
 
-            //clear cart after successful payment
-            await api.delete("/api/cart/clear");
+    // 2. Create the actual order
+    // FIX: Get restaurantId from the cart object
+    // FIX: Ensure selectedAddress is actually passed (you might need a state for this)
+    await api.post("/api/orders/create", {
+      restaurantId: cart.restaurantId, // Using cart data
+      addressId: cart.addressId || "PASTE_A_VALID_ADDRESS_ID_HERE_FOR_TESTING", 
+      paymentMethod: "ONLINE",
+      paymentId: response.razorpay_payment_id,
+    });
 
-            navigate("/customer/order-success");
-          } catch (error) {
-            console.error("order save failed ", error);
-            alert("Order placement failed. Please contact support.");
-          }
-        },
+    alert("Order placed successfully!");
+    navigate("/customer/orders");
+  } catch (error) {
+    console.error("Final Order Error:", error.response?.data);
+    alert(error.response?.data?.message || "Payment worked, but order failed to save.");
+  }
+},
 
-        prefill: {
-          name: "Customer",
-          email: "email@example.com",
-          contact: "9999999999",
-        },
-
-        theme: {
-          color: "#3399cc",
-        },
+        theme: { color: "#22c55e" },
       };
 
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error) {
-      console.error("Razorpay order failed", error);
-      alert("Payment failed. Please try again.");
+      console.error("Payment error:", error);
+      alert("Payment failed");
     }
   };
 

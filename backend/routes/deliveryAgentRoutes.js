@@ -6,6 +6,7 @@ import {
   updateAgentProfile,
   updateAgentLocation,
   getAvailableAgents,
+  getAgentDashboardStats,
 } from "../controllers/deliveryAgentController.js";
 
 import { protectAgent } from "../middlewares/agentAuth.js";
@@ -22,6 +23,8 @@ const router = express.Router();
 
 router.post("/register", registerAgent);
 router.post("/login", loginAgent);
+
+router.get("/dashboard", protectAgent, getAgentDashboardStats);
 
 //profile
 router.get("/profile", protectAgent, getAgentProfile);

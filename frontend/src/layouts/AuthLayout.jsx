@@ -18,10 +18,11 @@ export default function AuthLayout({ title, children }) {
                     w-full max-w-md 
                     p-8 
                     rounded-2xl 
-                    bg-black/40 
+                    bg-black/70 
                     backdrop-blur-md
                     shadow-2xl
-                    border border-black/10
+                    border border-white
+
                 "
             >
                 <h1 className="text-2xl text-white font-bold mb-6 text-center">

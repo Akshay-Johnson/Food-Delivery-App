@@ -47,11 +47,14 @@ export default function CustomerOrders() {
   if (loading) return <p className="p-6 text-white">Loading orders...</p>;
 
   return (
-    <div className="min-h-screen bg-[url('/assets/cart/cart.jpg')] bg-cover bg-center text-white p-6">
-        <div className="absolute inset-0 bg-black/60 pointer-events-none"></div>
-      <div className="relative z-10 max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">My Orders</h1>
-      <div className="mb-6 flex justify-end gap-2">
+     <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white">
+      {/* BLUR OVERLAY */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
+
+      {/* CONTENT */}
+      <div className="relative z-10 max-w-3xl mx-auto ">
+      
+      <div className="mb-6 flex justify-end gap-2 pt-10">
 
       <Link to="/customer/dashboard">
       <button className="bg-blue-600 px-4 py-3 rounded hover:bg-blue-700">
@@ -66,14 +69,15 @@ export default function CustomerOrders() {
         ← Back
       </button>
       </div>
+      <h1 className="text-3xl font-bold p-6">My Orders</h1>
       {orders.length === 0 ? (
         <p className="text-gray-300">You have not placed any orders yet.</p>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {orders.map((order) => (
             <div
               key={order._id}
-              className="bg-white/10 border border-white/20 rounded-xl p-5"
+              className="bg-black/70 border border-white rounded-xl p-5"
             >
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-semibold mb-2">
