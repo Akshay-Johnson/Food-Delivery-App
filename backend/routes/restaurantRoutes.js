@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   registerRestaurant,
   loginRestaurant,
@@ -12,7 +13,7 @@ import {
   searchRestaurants,
   getRestaurantDetails,
   saveFCMToken,
-  getRestaurantReviewsForOwner
+  getRestaurantReviewsForOwner,
 } from "../controllers/restaurantController.js";
 
 import {
@@ -20,42 +21,108 @@ import {
   getAssignedOrders,
   assignOrderToAgent,
 } from "../controllers/orderController.js";
+
 import restaurantAuth from "../middlewares/restaurantAuth.js";
+import { validate } from "../middlewares/validate.js";
+
+import {
+  restaurantRegisterSchema,
+  restaurantLoginSchema,
+  restaurantUpdateSchema,
+} from "../models/validations/restaurant.js";
 
 const router = express.Router();
 
-router.post("/register", registerRestaurant);
-router.post("/login", loginRestaurant);
+/* =========================
+   AUTH
+========================= */
+router.post(
+  "/register",
+  validate(restaurantRegisterSchema),
+  registerRestaurant
+);
 
-// restaurantRoutes.js
-router.post("/save-fcm-token", restaurantAuth,saveFCMToken); 
+router.post(
+  "/login",
+  validate(restaurantLoginSchema),
+  loginRestaurant
+);
 
-//private restaurant routes
-router.get("/profile", restaurantAuth, getRestaurantProfile);
-router.put("/profile", restaurantAuth, updateRestaurantProfile);
+/* =========================
+   FCM TOKEN
+========================= */
+router.post(
+  "/save-fcm-token",
+  restaurantAuth,
+  saveFCMToken
+);
 
-router.get("/orders", restaurantAuth, getRestaurantOrders);
+/* =========================
+   PRIVATE RESTAURANT ROUTES
+========================= */
+router.get(
+  "/profile",
+  restaurantAuth,
+  getRestaurantProfile
+);
 
-router.put("/assign/orders", restaurantAuth, getAssignedOrders);
+router.put(
+  "/profile",
+  restaurantAuth,
+  validate(restaurantUpdateSchema),
+  updateRestaurantProfile
+);
 
-router.put("/orders/assign/:orderId", restaurantAuth, assignOrderToAgent);
+router.get(
+  "/orders",
+  restaurantAuth,
+  getRestaurantOrders
+);
 
-//public listings
+router.put(
+  "/assign/orders",
+  restaurantAuth,
+  getAssignedOrders
+);
+
+router.put(
+  "/orders/assign/:orderId",
+  restaurantAuth,
+  assignOrderToAgent
+);
+
+router.get(
+  "/reviews",
+  restaurantAuth,
+  getRestaurantReviewsForOwner
+);
+
+/* =========================
+   PUBLIC ROUTES
+========================= */
 router.get("/", getAllRestaurants);
 
-//search restaurants
 router.get("/search", searchRestaurants);
 
-//category routes
-router.post("/categories", restaurantAuth, addCategory);
-router.delete("/categories", restaurantAuth, removeCategory);
 router.get("/:id/categories", getCategories);
 
-//get restaurant by id
+router.get("/:id/details", getRestaurantDetails);
+
 router.get("/:id", getRestaurantById);
 
-//get restaurant details
-router.get("/:id/details", getRestaurantDetails);
-router.get("/reviews", restaurantAuth, getRestaurantReviewsForOwner);
+/* =========================
+   CATEGORY MANAGEMENT
+========================= */
+router.post(
+  "/categories",
+  restaurantAuth,
+  addCategory
+);
+
+router.delete(
+  "/categories",
+  restaurantAuth,
+  removeCategory
+);
 
 export default router;

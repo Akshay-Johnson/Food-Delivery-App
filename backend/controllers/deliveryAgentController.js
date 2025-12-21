@@ -66,10 +66,11 @@ export const loginAgent = async (req, res) => {
       return res.status(400).json({ message: "Agent not found" });
     }
 
-    if (agent.status === "blocked") {
-      return res
-        .status(403)
-        .json({ message: "Your account is blocked by Admin" });
+    // 🔴 BLOCK CHECK
+    if (agent.approvalStatus !== "approved" || !agent.isActive) {
+      return res.status(403).json({
+        message: "Your account is blocked. Please contact admin.",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, agent.password);
@@ -97,8 +98,9 @@ export const loginAgent = async (req, res) => {
 
 export const getAgentProfile = async (req, res) => {
   try {
-    const agent = await DeliveryAgent.findById(req.user.id)
-      .select("name email phone vehicleType vehicleNumber status image");
+    const agent = await DeliveryAgent.findById(req.user.id).select(
+      "name email phone vehicleType vehicleNumber status image"
+    );
 
     if (!agent) {
       return res.status(404).json({ message: "Agent not found" });
@@ -110,8 +112,6 @@ export const getAgentProfile = async (req, res) => {
     res.status(500).json({ message: "Error fetching agent profile" });
   }
 };
-
-
 
 // ✅ UPDATE AGENT PROFILE (WITH PASSWORD SUPPORT)
 export const updateAgentProfile = async (req, res) => {
@@ -243,5 +243,19 @@ export const getAgentDashboardStats = async (req, res) => {
   } catch (error) {
     console.error("Agent dashboard error:", error);
     res.status(500).json({ message: "Failed to load dashboard stats" });
+  }
+};
+
+// ✅ SAVE FCM TOKEN
+export const saveAgentFcmToken = async (req, res) => {
+  try {
+    const agentId = req.user.id;
+    const { fcmToken } = req.body;
+
+    await DeliveryAgent.findByIdAndUpdate(agentId, { fcmToken });
+
+    res.json({ message: "FCM token saved successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to save FCM token", error });
   }
 };

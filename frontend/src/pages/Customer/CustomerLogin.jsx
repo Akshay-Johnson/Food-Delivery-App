@@ -5,12 +5,15 @@ import AuthInput from "../../components/AuthInput";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { registerFCMToken } from "../../services/notification";
+import Toast from "../../components/toast/toast";
 
 export default function CustomerLogin() {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+
+  const [toast, setToast] = useState(null);
 
   const navigate = useNavigate();
   const { Login } = useAuth();
@@ -20,22 +23,37 @@ export default function CustomerLogin() {
 
     try {
       const data = await Login("customer", form);
-      console.log("LOGIN SUCCESS", data);
+      setToast({ type: "success", message: "Login successful 🎉" });
 
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         await registerFCMToken();
       }
-
-      navigate("/customer/dashboard");
+      setTimeout(() => {
+        setToast(null);  
+        navigate("/customer/dashboard");
+      }, 1200);
     } catch (error) {
-      console.error("Login Failed:", error);
-      alert(error.response?.data?.message || "Login Failed");
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Login failed",
+      });
+
+      setTimeout(() => setToast(null), 3000);
+
     }
   };
 
   return (
     <AuthLayout title="Customer Login">
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <form onSubmit={submit}>
         <AuthInput
           label="Email"

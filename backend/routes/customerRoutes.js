@@ -1,29 +1,72 @@
-import express from 'express';
+import express from "express";
+
 import {
-    registerCustomer,
-    loginCustomer,
-    getCustomerProfile,
-    editProfile,
-    saveFCMToken
-} from '../controllers/customerController.js';
+  registerCustomer,
+  loginCustomer,
+  getCustomerProfile,
+  editProfile,
+  saveFCMToken,
+  testCustomerPush,
+} from "../controllers/customerController.js";
 
-import protectCustomer from '../middlewares/authMiddleware.js';
+import protectCustomer from "../middlewares/authMiddleware.js";
+import { validate } from "../middlewares/validate.js";
 
-import { testCustomerPush } from "../controllers/customerController.js";
-
-
-
+import {
+  customerRegisterSchema,
+  customerLoginSchema,
+  customerUpdateSchema,
+} from "../models/validations/customer.js";
 
 const router = express.Router();
 
-router.post('/register',registerCustomer);
-router.post("/login", loginCustomer);
+/* =========================
+   AUTH
+========================= */
+router.post(
+  "/register",
+  validate(customerRegisterSchema),
+  registerCustomer
+);
 
-router.get("/profile", protectCustomer, getCustomerProfile);
-router.put("/profile/edit", protectCustomer, editProfile);
+router.post(
+  "/login",
+  validate(customerLoginSchema),
+  loginCustomer
+);
 
-router.put("/fcm-token", protectCustomer, saveFCMToken);
+/* =========================
+   PROFILE
+========================= */
+router.get(
+  "/profile",
+  protectCustomer,
+  getCustomerProfile
+);
 
-router.post("/test-push", protectCustomer, testCustomerPush);
+router.put(
+  "/profile/edit",
+  protectCustomer,
+  validate(customerUpdateSchema),
+  editProfile
+);
+
+/* =========================
+   FCM
+========================= */
+router.put(
+  "/fcm-token",
+  protectCustomer,
+  saveFCMToken
+);
+
+/* =========================
+   TEST PUSH
+========================= */
+router.post(
+  "/test-push",
+  protectCustomer,
+  testCustomerPush
+);
 
 export default router;

@@ -117,3 +117,20 @@ export const setDefaultAddress = async (req, res) => {
     return res.status(500).json({ message: "Server error in setting default", error });
   }
 };
+
+
+
+export const getDefaultAddress = async (req, res) => {
+  try {
+    const customerId = req.user.id;
+
+    const address = await Address.findOne({
+      customerId,
+      isDefault: true,
+    });
+
+    res.json(address); // can be null
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch default address" });
+  }
+};

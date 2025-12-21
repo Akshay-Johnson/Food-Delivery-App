@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import Toast from "../../../components/toast/toast";
 
 export default function CustomerPayment() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+  
 
   //load cart
   useEffect(() => {
@@ -43,13 +46,13 @@ export default function CustomerPayment() {
   //start payment
   const handlePayment = async () => {
     if (!cart || !cart.items.length) {
-      alert("Cart is empty");
+      setToast({ type: "error", message: "Your cart is empty!" });
       return;
     }
 
     const loaded = await loadRazorpay();
     if (!loaded) {
-      alert("Razorpay SDK failed to load");
+      setToast({ type: "error", message: "Razorpay SDK failed to load" });
       return;
     }
 
@@ -87,11 +90,14 @@ handler: async (response) => {
       paymentId: response.razorpay_payment_id,
     });
 
-    alert("Order placed successfully!");
-    navigate("/customer/orders");
+    setToast({ type: "success", message: "Order placed successfully!" });
+    setTimeout(() => {
+      setToast(null);
+       navigate("/customer/orders");
+    }, 3000);
   } catch (error) {
     console.error("Final Order Error:", error.response?.data);
-    alert(error.response?.data?.message || "Payment worked, but order failed to save.");
+    setToast({ type: "error", message: error.response?.data?.message || "Payment worked, but order failed to save." });
   }
 },
 
@@ -102,7 +108,7 @@ handler: async (response) => {
       razorpay.open();
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Payment failed");
+      setToast({ type: "error", message: "Payment failed" });
     }
   };
 
@@ -111,6 +117,13 @@ handler: async (response) => {
 
   return (
     <div className="min-h-screen bg-black/90 text-white p-6">
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
       <h1 className="text-3xl font-bold mb-6">Checkout & Payment</h1>
 
       <div className="bg-white/10 p-6 rounded-xl border border-white/20 backdrop-blur-lg max-w-lg mx-auto">

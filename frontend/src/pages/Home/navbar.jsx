@@ -12,7 +12,7 @@ export default function Navbar() {
       {/* Home Button */}
       <button 
         onClick={() => scrollTo("home")}
-        className="nav-btn"
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Home
       </button>
@@ -20,7 +20,7 @@ export default function Navbar() {
       {/* About Button */}
       <button 
         onClick={() => scrollTo("about")}
-        className="nav-btn"
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         About
       </button>
@@ -28,10 +28,19 @@ export default function Navbar() {
       {/* Testimonials Button */}
       <button 
         onClick={() => scrollTo("review")}
-        className="nav-btn"
+         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Testimonials
       </button>
+
+      {/* Contact Us Button */}
+      <button 
+        onClick={() => scrollTo("contact")}
+         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+      >
+        Contact Us
+      </button>
+
 
       {/* Login */}
       <Link

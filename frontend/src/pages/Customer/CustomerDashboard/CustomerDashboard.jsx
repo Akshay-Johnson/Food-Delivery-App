@@ -14,6 +14,7 @@ import {
 import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import Toast from "../../../components/toast/toast";
 
 export default function CustomerDashboard() {
   const [restaurants, setRestaurants] = useState([]);
@@ -35,6 +36,8 @@ export default function CustomerDashboard() {
 
   const [restaurantPage, setRestaurantPage] = useState(1);
   const restaurantsPerPage = 6;
+
+  const [toast, setToast] = useState(null);
 
   const navigate = useNavigate();
 
@@ -177,17 +180,23 @@ export default function CustomerDashboard() {
         quantity: 1,
         restaurantId: dish.restaurantId,
       });
-      alert("Dish added to cart!");
+
+      setToast({
+        message: "🍔 Item added to cart!",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add dish to cart.");
+      setToast({
+        message: "Failed to add item to cart.",
+        type: "error",
+      });
     }
   };
 
-
   return (
     <div
-      className="relative min-h-screen text-white flex flex-col"
+      className="relative min-h-screen text-white flex flex-col relative min-h-screen overflow-x-hidden "
       style={{
         backgroundImage: "url('/assets/dishimage.jpg')",
         backgroundSize: "cover",
@@ -195,12 +204,19 @@ export default function CustomerDashboard() {
       }}
     >
       {/* ======= BLUR OVERLAY ======= */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-xl"></div>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-xl "></div>
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* ========= PAGE CONTENT ========= */}
       <div className="relative z-10 flex-justify-end ">
         {/* NAVBAR */}
-        <header className="bg-black/50 border-b border-white/30 shadow-md p-5 flex items-end gap-4 top-0 z-20 ml-auto">
+        <header className="bg-black/70 border-b border-white/30 shadow-md p-5 flex items-end gap-4 top-0 z-20 ml-auto">
           <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
           <div className="flex justify-end flex-wrap gap-4 ml-auto">
             <button
@@ -258,7 +274,7 @@ export default function CustomerDashboard() {
             </button>
 
             <button
-              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+              className="relative group flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-400 transition"
               onClick={() => {
                 localStorage.removeItem("customerToken");
                 navigate("/customer/login");
@@ -283,7 +299,7 @@ export default function CustomerDashboard() {
           {/* ======= FIXED SEARCH BAR ======= */}
           <div className="mt-4 flex items-center gap-2">
             {/* SEARCH */}
-            <div className="flex flex-1 items-center bg-black/40 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
+            <div className="flex flex-1 items-center bg-black/70 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
               <Search className="text-gray-200" />
 
               <input
@@ -298,33 +314,27 @@ export default function CustomerDashboard() {
             {/* FILTER BUTTON */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="bg-black/40 backdrop-blur-lg border border-white/30 px-5 py-3 rounded-full hover:bg-white/30 transition font-medium"
+              className="bg-black/70 backdrop-blur-lg border border-white/30 px-5 py-2 rounded-full hover:bg-white/30 transition font-medium"
             >
               Filters
             </button>
           </div>
 
           {showFilters && (
-            <div className="mt-4 bg-black/60 backdrop-blur-lg border border-white/20 rounded-xl p-4 max-w-xl">
-              <h4 className="font-semibold mb-3">Filter Options</h4>
-
+            <div className="mt-4 bg-black/60 backdrop-blur-lg border border-white/20 rounded-xl p-2 pt-5 max-w-2xl flex items-center justify-center ml-auto">
               {/* PRICE */}
-              <div className="mb-3">
-                <label className="block text-sm mb-1">Price Range</label>
+              <div className="mb-3 flex flex-row gap-4 w-xl">
+                <label className="block  text-sm mb-1">Price Range</label>
                 <select
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
-                  className="w-full bg-black/40 border border-white/30 rounded px-3 py-2"
+                  className="w-full bg-black border border-white rounded px-3 py-2 text-white"
                 >
                   <option value="all">All</option>
                   <option value="low">Below ₹200</option>
                   <option value="mid">₹200 – ₹400</option>
                   <option value="high">Above ₹400</option>
                 </select>
-              </div>
-
-              {/* SORT */}
-              <div className="mb-3">
                 <label className="block text-sm mb-1">Sort By</label>
                 <select
                   value={sortBy}
@@ -335,10 +345,6 @@ export default function CustomerDashboard() {
                   <option value="priceLow">Price: Low → High</option>
                   <option value="priceHigh">Price: High → Low</option>
                 </select>
-              </div>
-
-              {/* ACTIONS */}
-              <div className="flex justify-end gap-2 mt-4">
                 <button
                   onClick={() => {
                     setPriceRange("all");
@@ -417,7 +423,7 @@ export default function CustomerDashboard() {
         )}
 
         {/* CATEGORIES */}
-        <section className="px-6 mt-20">
+        <section className="px-6 mt-10">
           <h3 className="text-xl font-semibold mb-3">Categories</h3>
 
           <div className="grid grid-cols-4 gap-4">
@@ -470,7 +476,7 @@ export default function CustomerDashboard() {
         </h3>
 
         <section className="px-6 mt-12 mb-20">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
             {paginatedDishes.map((dish) => {
               const restaurant = restaurants.find(
                 (r) => r._id === dish.restaurantId
@@ -559,7 +565,7 @@ export default function CustomerDashboard() {
                   <h4 className="font-semibold text-lg">{r.name}</h4>
                   <p className="text-gray-600 text-sm">{r.description}</p>
                   <p className="mt-2 text-yellow-600 font-bold">
-                    ⭐ {r.averageRating?.toFixed(1)} 
+                    ⭐ {r.averageRating?.toFixed(1)}
                   </p>
                 </div>
               </div>

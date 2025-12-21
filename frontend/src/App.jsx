@@ -22,7 +22,6 @@ import CustomerOrderDetails from "./pages/Customer/CustomerCart/CustomerOrderDet
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminRegister from "./pages/Admin/AdminRegister.jsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard/AdminDashboard.jsx";
-import AdminDashboardHome from "./pages/Admin/AdminDashboard/AdminDashboardHome.jsx";
 import Restaurants from "./pages/Admin/AdminDashboard/Restaurants.jsx";
 import Customers from "./pages/Admin/AdminDashboard/Customers.jsx";
 import AdminAgents from "./pages/Admin/AdminDashboard/Agents.jsx";
@@ -34,7 +33,6 @@ import RestaurantRegister from "./pages/Restaurant/RestaurantRegister.jsx";
 
 //dashboard and others for restaurant
 import RestaurantDashboard from "./pages/Restaurant/RestaurantDashboard/RestaurantDashboard.jsx";
-import DashboardHome from "./pages/Restaurant/RestaurantDashboard/RestaurantHome/DashBoardHome.jsx";
 import MenuManagement from "./pages/Restaurant/RestaurantDashboard/RestaurantMenu/MenuManagement.jsx";
 import AddMenuItem from "./pages/Restaurant/RestaurantDashboard/RestaurantMenu/AddMenuItem.jsx";
 import EditMenuItem from "./pages/Restaurant/RestaurantDashboard/RestaurantMenu/EditMenuItem.jsx";
@@ -52,7 +50,6 @@ import AgentLogin from "./pages/DeliveryAgent/AgentLogin.jsx";
 import AgentRegister from "./pages/DeliveryAgent/AgentRegister.jsx";
 
 import AgentDashboard from "./pages/DeliveryAgent/AgentDashboard/AgentDashboard.jsx";
-import AgentDashboardHome from "./pages/DeliveryAgent/AgentDashboard/AgentDashboardHome.jsx";
 import AgentOrders from "./pages/DeliveryAgent/AgentDashboard/AgentOrders.jsx";
 import AgentProfile from "./pages/DeliveryAgent/AgentDashboard/AgentProfile.jsx";
 import AdminReviews from "./pages/Admin/AdminDashboard/AdminReviews.jsx";
@@ -103,7 +100,6 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />}>
-          <Route index element={<AdminDashboardHome />} />
           <Route path="restaurants" element={<Restaurants />} />
           <Route path="customers" element={<Customers />} />
           <Route path="agents" element={<AdminAgents />} />
@@ -116,7 +112,6 @@ export default function App() {
         <Route path="/restaurant/register" element={<RestaurantRegister />} />
 
         <Route path="/restaurant/dashboard" element={<RestaurantDashboard />}>
-          <Route index element={<DashboardHome />} />
           <Route path="menu" element={<MenuManagement />} />
           <Route path="menu/add" element={<AddMenuItem />} />
           <Route path="menu/edit/:id" element={<EditMenuItem />} />
@@ -133,7 +128,6 @@ export default function App() {
 
         <Route path="/agent/dashboard" element={<AgentDashboard />}>
           {/* Nested Routes for Agent Dashboard */}
-          <Route index element={<AgentDashboardHome />} />
           <Route path="orders" element={<AgentOrders />} />
           <Route path="profile" element={<AgentProfile />} />
         </Route>

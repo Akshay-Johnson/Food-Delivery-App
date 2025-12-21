@@ -2,7 +2,8 @@ import { useState } from "react";
 import api from "../../../../api/axiosInstance";
 import { Upload, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Home } from "lucide-react";
+import Toast from "../../../../components/toast/toast";
+
 
 export default function AddMenuItem() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function AddMenuItem() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
   // ✅ IMAGE UPLOAD (matches your backend)
   const handleImageUpload = async (e) => {
@@ -36,7 +38,7 @@ export default function AddMenuItem() {
         "Image upload failed:",
         error.response?.data || error.message
       );
-      alert("Image upload failed");
+      setToast({ type: "error", message: "Image upload failed" });
     }
   };
 
@@ -54,11 +56,16 @@ export default function AddMenuItem() {
         image: form.image,
       });
 
-      alert("Menu item added successfully!");
-      navigate("/restaurant/dashboard/menu");
+      setToast({ type: "success", message: "Menu item added successfully!" });
+      setTimeout(() => {
+        navigate("/restaurant/dashboard/menu");
+        setToast(null);
+      }, 3000);
+    
+     
     } catch (error) {
       console.error("Add menu failed:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Add menu failed");
+      setToast({ type: "error", message: error.response?.data?.message || "Add menu failed" });
     } finally {
       setLoading(false);
     }
@@ -67,6 +74,7 @@ export default function AddMenuItem() {
   return (
     <div className="p-6 text-white">
       <h1 className="text-3xl font-bold mb-6">Add Menu Item</h1>
+      {toast && <Toast type={toast.type} message={toast.message} />}
 
       <div className="bg-black/70 p-6 rounded-2xl border border-white/20 max-w-2xl mx-auto">
         <form onSubmit={submit} className="space-y-4">

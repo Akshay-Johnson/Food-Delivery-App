@@ -3,11 +3,14 @@ import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { ArrowLeft, Star } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
+import Toast from "../../../components/toast/toast";
 
 export default function RestaurantDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const [toast, setToast] = useState(null);
 
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
@@ -61,10 +64,10 @@ export default function RestaurantDetails() {
         quantity: 1,
         restaurantId: dish.restaurantId,
       });
-      alert("Dish added to cart!");
+      setToast({ type: "success", message: "🍔 Dish added to cart!" });
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add dish to cart.");
+      setToast({ type: "error", message: "❌ Failed to add dish to cart." });
     }
   };
 
@@ -101,18 +104,28 @@ export default function RestaurantDetails() {
   };
 
   const deleteReview = async (reviewId) => {
-    if (!confirm("Delete this review?")) return;
-
     try {
       await api.delete(`/api/reviews/${id}/${reviewId}`);
+
+      setToast({
+        type: "success",
+        message: "Review deleted successfully",
+      });
+
       loadReviews();
     } catch (error) {
       console.error("Error deleting review:", error);
+
+      setToast({
+        type: "error",
+        message: "Failed to delete review",
+      });
     }
   };
 
   const submitReview = async () => {
-    if (!rating) return alert("Please select rating");
+    if (!rating)
+      return setToast({ type: "error", message: "Please select rating" });
 
     try {
       await api.post(`/api/reviews/${id}`, {
@@ -137,6 +150,14 @@ export default function RestaurantDetails() {
     <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white">
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* CONTENT */}
       <div className="relative z-10">

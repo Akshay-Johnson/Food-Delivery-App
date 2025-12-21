@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
 import { Upload, Save } from "lucide-react";
+import Toast from "../../../../components/toast/toast";
 
 export default function RestaurantProfile() {
   const [restaurant, setRestaurant] = useState(null);
@@ -18,6 +19,7 @@ export default function RestaurantProfile() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     loadProfile();
@@ -58,10 +60,10 @@ export default function RestaurantProfile() {
 
     try {
       await api.put("/api/restaurants/profile", form);
-      alert("Profile updated!");
+      setToast({ type: "success", message: "Profile updated successfully!" });
       loadProfile();
     } catch (error) {
-      alert("Update failed");
+      setToast({ type: "error", message: "Update failed" });
       console.error(error);
     }
   };
@@ -71,7 +73,7 @@ export default function RestaurantProfile() {
   return (
     <div className="p-6 text-white flex flex-col items-center m-auto">
       <h1 className="text-3xl font-bold mb-6">Restaurant Profile</h1>
-
+      {toast && <Toast type={toast.type} message={toast.message} />}
       <div className="bg-black/70 p-6 rounded-xl border border-white/20 max-w-2xl">
         <form onSubmit={submit} className="space-y-4">
           {/* Image */}
@@ -114,11 +116,8 @@ export default function RestaurantProfile() {
             />
           </div>
 
-  
-
           {/* Description */}
           <div className="flex row gap-2">
-          
             <textarea
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               rows="3"
@@ -128,7 +127,7 @@ export default function RestaurantProfile() {
                 setForm({ ...form, description: e.target.value })
               }
             />
-             <input
+            <input
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.address}
               placeholder="Address"
@@ -138,7 +137,7 @@ export default function RestaurantProfile() {
 
           {/* Address */}
           <div className="flex row gap-2">
-                <input
+            <input
               type="text"
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.password}
@@ -154,7 +153,6 @@ export default function RestaurantProfile() {
                 setForm({ ...form, cuisineType: e.target.value })
               }
             />
-
           </div>
 
           {/* Opening / Closing Time */}

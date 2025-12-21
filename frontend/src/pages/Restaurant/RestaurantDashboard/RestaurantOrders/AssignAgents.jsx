@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../../../api/axiosInstance";
 import { Bike, UserCheck } from "lucide-react";
+import Toast from "../../../../components/toast/toast";
 
 export default function AssignAgent() {
   const { orderId } = useParams();
@@ -10,6 +11,7 @@ export default function AssignAgent() {
   const [assignedAgentId, setAssignedAgentId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
+  const [toast, setToast] = useState(null);
 
   // Load available agents
   const loadAgents = async () => {
@@ -18,7 +20,7 @@ export default function AssignAgent() {
       setAgents(res.data);
     } catch (error) {
       console.error("Failed to load agents:", error);
-      alert("Unable to load delivery agents");
+      setToast({ type: "error", message: "Failed to load agents" });
     }
   };
 
@@ -44,10 +46,16 @@ export default function AssignAgent() {
       });
 
       setAssignedAgentId(agentId);
-      alert("Agent assigned successfully");
+      setToast({ type: "success", message: "Agent assigned successfully!" });
+      setTimeout(() => {
+        setToast(null);
+      }, 3000);
     } catch (error) {
       console.error("Assignment failed:", error);
-      alert(error.response?.data?.message || "Failed to assign agent");
+      setToast({ type: "error", message: error.response?.data?.message || "Failed to assign agent" });
+      setTimeout(() => {
+        setToast(null);
+      }, 3000);
     } finally {
       setAssigning(false);
     }
@@ -70,6 +78,8 @@ export default function AssignAgent() {
       <h1 className="text-3xl font-bold mb-6">
         Assign Agent to Order
       </h1>
+
+      {toast && <Toast type={toast.type} message={toast.message} />}
 
       {agents.length === 0 && (
         <p className="text-gray-400">No available agents</p>

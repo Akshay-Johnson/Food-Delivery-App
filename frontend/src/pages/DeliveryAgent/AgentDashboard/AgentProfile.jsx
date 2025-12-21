@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { Upload, Save } from "lucide-react";
+import Toast from "../../../components/toast/toast";
 
 export default function AgentProfile() {
   const [form, setForm] = useState({
@@ -15,6 +16,7 @@ export default function AgentProfile() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     loadProfile();
@@ -83,11 +85,11 @@ export default function AgentProfile() {
 
     try {
       await api.put("/api/agents/profile", payload);
-      alert("Profile updated successfully");
+      setToast({ type: "success", message: "Profile updated successfully" });
       await loadProfile();
     } catch (error) {
       console.error("Profile update failed:", error);
-      alert("Update failed");
+      setToast({ type: "error", message: "Update failed" });
     }
   };
 
@@ -96,6 +98,13 @@ export default function AgentProfile() {
   return (
     <div className="p-6 text-white flex items-center m-auto justify-center mt-15">
       <div className="bg-black/70 p-6 rounded-xl border border-white/20 w-full max-w-xl">
+        {toast && (
+          <Toast
+            type={toast.type}
+            message={toast.message}
+            onClose={() => setToast(null)}
+          />
+        )}
         <form onSubmit={submit} className="space-y-4">
           {/* IMAGE */}
           <div className="flex flex-col items-center">

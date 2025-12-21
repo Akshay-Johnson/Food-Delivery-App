@@ -4,8 +4,10 @@ import RoleSwitcher from "../../components/RoleSwitcher";
 import AuthInput from "../../components/AuthInput";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Toast from "../../components/toast/toast";
 
 export default function AdminLogin() {
+  const [toast, setToast] = useState(null);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -19,17 +21,31 @@ const submit = async (e) => {
 
   try {
     await Login("admin", form); // AuthContext handles storage
-    alert("Admin Logged In Successfully");
-    navigate("/admin/dashboard");
+    setToast({ type: "success", message: "Login Successful 🎉" });
+    setTimeout(() => {
+      setToast(null);
+      navigate("/admin/dashboard");
+    }, 1200);
   } catch (error) {
     console.error("Login Failed:", error);
-    alert(error.response?.data?.message || "Login Failed");
+    setToast({
+      type: "error",
+      message: error.response?.data?.message || "Login Failed",
+    });
+    setTimeout(() => setToast(null), 3000);
   }
 };
 
 
   return (
     <AuthLayout title="Admin Login">
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
       <form onSubmit={submit}>
         <AuthInput
           label="Email"

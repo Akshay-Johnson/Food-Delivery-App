@@ -4,12 +4,16 @@ import RoleSwitcher from "../../components/RoleSwitcher";
 import AuthInput from "../../components/AuthInput";
 import api from "../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
+import Toast from "../../components/toast/toast";
 
 export default function CustomerRegister() {
+  const [toast, setToast] = useState(null);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phone: "",
   });
 
@@ -18,25 +22,56 @@ export default function CustomerRegister() {
   const submit = async (e) => {
     e.preventDefault();
 
+    if (form.password !== form.confirmPassword) {
+      setToast({ type: "error", message: "Passwords do not match" });
+      setTimeout(() => setToast(null), 3000);
+      return;
+    }
+
     try {
       await api.post("/api/customers/register", form);
-      alert("Customer Registered Successfully");
-      navigate("/customer/login");
+      setToast({ type: "success", message: "Registration successful 🎉" });
+
+      setTimeout(() => {
+        navigate("/customer/login");
+      }, 1200);
     } catch (error) {
-      console.error("Registration Failed:", error);
-      alert(error.response?.data?.message || "Registration Failed");
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Registration failed",
+      });
+
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
   return (
     <AuthLayout title="Customer Register">
-      <form onSubmit={submit}>
-        <AuthInput
-          label="Name"
-          placeholder="Enter your name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
         />
+      )}
+
+      <form onSubmit={submit}>
+        <div className="mb-4 flex flex-row gap-4">
+          <AuthInput
+            label="Name"
+            placeholder="Enter your name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+
+          <AuthInput
+            label="Phone"
+            type="tel"
+            placeholder="Enter your phone number"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+        </div>
 
         <AuthInput
           label="Email"
@@ -46,6 +81,7 @@ export default function CustomerRegister() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
+        <div className="mb-4 flex flex-row gap-4">
         <AuthInput
           label="Password"
           type="password"
@@ -55,12 +91,15 @@ export default function CustomerRegister() {
         />
 
         <AuthInput
-          label="Phone"
-          type="tel"
-          placeholder="Enter your phone number"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          label="Confirm Password"
+          type="password"
+          placeholder="Confirm your password"
+          value={form.confirmPassword}
+          onChange={(e) =>
+            setForm({ ...form, confirmPassword: e.target.value })
+          }
         />
+        </div>
 
         {/* Same row buttons like login */}
         <div className="flex gap-3 mt-4">

@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { MapPin, CreditCard, Wallet, ArrowLeft } from "lucide-react";
+import Toast from "../../../components/toast/toast";
 
 export default function CustomerCheckout() {
   const [addresses, setAddresses] = useState([]);
   const [cart, setCart] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [toast, setToast] = useState(null);
 
   const navigate = useNavigate();
 
@@ -43,8 +45,14 @@ export default function CustomerCheckout() {
 
   // 2. Updated placeOrder function
   const placeOrder = async () => {
-    if (!selectedAddress) return alert("Please select a delivery address!");
-    if (!cart?.items?.length) return alert("Your cart is empty!");
+    if (!selectedAddress) {
+      setToast({ type: "error", message: "Please select a delivery address." });
+      return;
+    }
+    if (!cart?.items?.length) {
+      setToast({ type: "error", message: "Your cart is empty!" });
+      return;
+    }
 
     const restaurantId =
       cart.restaurantId ||
@@ -59,10 +67,14 @@ export default function CustomerCheckout() {
           addressId: selectedAddress,
           paymentMethod: "COD",
         });
-        alert("Order placed successfully!");
-        navigate("/customer/orders");
+
+        setToast({ type: "success", message: "Order placed successfully!" });
+        setTimeout(() => {
+          setToast(null);
+          navigate("/customer/orders");
+        }, 3000);
       } catch (error) {
-        alert("Failed to place order.");
+        setToast({ type: "error", message: "Failed to place order." });
       }
       return;
     }
@@ -70,7 +82,10 @@ export default function CustomerCheckout() {
     // --- CASE 2: ONLINE PAYMENT ---
     if (paymentMethod === "ONLINE") {
       const isLoaded = await loadRazorpayScript();
-      if (!isLoaded) return alert("Razorpay SDK failed to load.");
+      if (!isLoaded) {
+        setToast({ type: "error", message: "Razorpay SDK failed to load." });
+        return;
+      }
 
       try {
         // Step A: Create Razorpay Order on Backend
@@ -102,13 +117,20 @@ export default function CustomerCheckout() {
                 paymentId: response.razorpay_payment_id, // Store for reference
               });
 
-              alert("Payment successful & Order placed!");
-              navigate("/customer/orders");
+              setToast({
+                type: "success",
+                message: "Order placed successfully!",
+              });
+              setTimeout(() => {
+                setToast(null);
+                navigate("/customer/orders");
+              }, 3000);
             } catch (err) {
               console.error("Verification/Order Error:", err);
-              alert(
-                "Payment successful but order creation failed. Please contact support."
-              );
+              setToast({
+                type: "error",
+                message: "Payment verification failed.",
+              });
             }
           },
           theme: { color: "#22c55e" },
@@ -118,7 +140,6 @@ export default function CustomerCheckout() {
         rzp.open();
       } catch (error) {
         console.error("Payment initiation failed:", error);
-        alert("Could not initiate payment.");
       }
     }
   };
@@ -131,6 +152,14 @@ export default function CustomerCheckout() {
     <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white">
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* CONTENT */}
       <div className="relative z-10 max-w-3xl mx-auto p-6">

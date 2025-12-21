@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate, Link } from "react-router-dom";
 import { Upload } from "lucide-react";
-import  { Home } from "lucide-react";
+import { Home } from "lucide-react";
+import Toast from "../../../components/toast/toast";
 
 export default function CustomerEditProfile() {
   const [form, setForm] = useState({
@@ -12,6 +13,7 @@ export default function CustomerEditProfile() {
     password: "",
   });
 
+  const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -40,11 +42,20 @@ export default function CustomerEditProfile() {
 
     try {
       await api.put("/api/customers/profile/edit", form);
-      alert("Profile updated successfully!");
-      navigate("/customer/profile");
+
+      setToast({ type: "success", message: "Profile updated successfully 🎉" });
+
+      setTimeout(() => {
+        setToast(null);
+        navigate("/customer/profile");
+      }, 1200);
     } catch (error) {
-      console.error("Profile update failed:", error);
-      alert(error.response?.data?.message || "Update failed");
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Update failed",
+      });
+
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
@@ -73,6 +84,15 @@ export default function CustomerEditProfile() {
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
+      {/* TOAST */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* CONTENT */}
       <div className="relative z-10">
         <div className="absolute inset-0 bg-black/10"></div>
@@ -84,14 +104,11 @@ export default function CustomerEditProfile() {
 
           <div className=" bg-black/90 rounded-xl p-6 border border-white border-2 max-w-md mx-auto ">
             <div className="flex justify-end  mb-4 gap-2">
-
               <Link to="/customer/dashboard">
-              <button
-                className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"
-              >
-                <Home />
-              </button>
-            </Link>
+                <button className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle">
+                  <Home />
+                </button>
+              </Link>
               <button
                 onClick={() => navigate(-1)}
                 className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"

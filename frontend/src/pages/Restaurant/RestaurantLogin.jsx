@@ -5,8 +5,10 @@ import AuthInput from "../../components/AuthInput";
 import api from "../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import Toast from "../../components/toast/toast";
 
 export default function RestaurantLogin() {
+  const [toast, setToast] = useState(null);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -19,20 +21,32 @@ export default function RestaurantLogin() {
     e.preventDefault();
 
     try {
-
-      
       await Login("restaurant", form);
-      navigate("/restaurant/dashboard");
-
+      setToast({ type: "success", message: "Login Successful 🎉" });
+      setTimeout(() => {
+        setToast(null);
+        navigate("/restaurant/dashboard");
+      }, 1200);
     } catch (error) {
       console.error("Login Failed:", error);
-      alert(error.response?.data?.message || "Login Failed");
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Login Failed",
+      });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
-
   return (
     <AuthLayout title="Restaurant Login">
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <form onSubmit={submit}>
         <AuthInput
           label="Email"

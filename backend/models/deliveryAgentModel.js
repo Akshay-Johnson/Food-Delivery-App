@@ -61,6 +61,7 @@ const deliveryAgentschema = new mongoose.Schema(
     },
     fcmToken: {
       type: String,
+      default: "null",
     },
   },
   { timestamps: true }

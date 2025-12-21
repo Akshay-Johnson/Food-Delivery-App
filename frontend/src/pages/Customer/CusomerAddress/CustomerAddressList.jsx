@@ -95,29 +95,59 @@ export default function CustomerAddressList() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() =>
-                      navigate(`/customer/address/edit/${address._id}`)
-                    }
-                    className="bg-blue-500 px-3 py-1 rounded flex items-center gap-1"
-                  >
-                    <Edit size={16} /> Edit
-                  </button>
+                  <div className="relative group">
+                    <button
+                      onClick={() =>
+                        navigate(`/customer/address/edit/${address._id}`)
+                      }
+                      className="bg-blue-500 px-3 py-1 rounded flex items-center gap-1"
+                    >
+                      <Edit size={16} />
+                    </button>
 
-                  <button
-                    onClick={() => deleteAddress(address._id)}
-                    className="bg-red-600 px-3 py-1 rounded flex items-center gap-1"
-                  >
-                    <Trash size={16} /> Delete
-                  </button>
+                    <span
+                      className="absolute left-full ml-2 top-1/2 -translate-y-1/2
+      bg-black text-white text-xs px-2 py-1 rounded
+      opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                    >
+                      Edit
+                    </span>
+                  </div>
+
+                  <div className="relative group">
+                    <button
+                      onClick={() => deleteAddress(address._id)}
+                      className="bg-red-600 px-3 py-1 rounded flex items-center gap-1"
+                    >
+                      <Trash size={16} />
+                    </button>
+
+                    <span
+                      className="absolute left-full ml-2 top-1/2 -translate-y-1/2
+                                bg-black text-white text-xs px-2 py-1 rounded
+                                opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                    >
+                      Delete
+                    </span>
+                  </div>
 
                   {!address.isDefault && (
-                    <button
-                      onClick={() => setDefault(address._id)}
-                      className="bg-yellow-500 px-3 py-1 rounded flex items-center gap-1"
-                    >
-                      <Star size={16} /> Set Default
-                    </button>
+                    <div className="relative group">
+                      <button
+                        onClick={() => setDefault(address._id)}
+                        className="bg-yellow-500 px-3 py-1 rounded flex items-center gap-1"
+                      >
+                        <Star size={16} />
+                      </button>
+
+                      <span
+                        className="absolute left-full ml-2 top-1/2 -translate-y-1/2
+                                  bg-black text-white text-xs px-2 py-1 rounded
+                                  opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                      >
+                        Set Default
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>

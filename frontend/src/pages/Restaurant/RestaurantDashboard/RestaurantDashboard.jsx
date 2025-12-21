@@ -20,7 +20,7 @@ import {
   Line,
   XAxis,
   YAxis,
-  Tooltip,
+  Tooltip as ChartTooltip,
   ResponsiveContainer,
 } from "recharts";
 
@@ -60,7 +60,9 @@ export default function RestaurantDashboard() {
       });
 
       if (token) {
-        await api.post("/api/restaurants/save-fcm-token", { fcmToken: token });
+        await api.post("/api/restaurants/save-fcm-token", {
+          fcmToken: token,
+        });
       }
     } catch (err) {
       console.error("FCM token error:", err);
@@ -80,7 +82,10 @@ export default function RestaurantDashboard() {
       const orders = ordersRes.data.orders || [];
       const menuItems = menuRes.data || [];
 
-      const revenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+      const revenue = orders.reduce(
+        (sum, o) => sum + (o.totalPrice || 0),
+        0
+      );
 
       setStats({
         orders: orders.length,
@@ -88,7 +93,6 @@ export default function RestaurantDashboard() {
         menuItems: menuItems.length,
       });
 
-      // Weekly chart (grouped roughly by day)
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const grouped = {};
 
@@ -120,13 +124,6 @@ export default function RestaurantDashboard() {
     localStorage.clear();
     navigate("/restaurant/login");
   };
-  const navItem = ({ isActive }) =>
-    `relative group flex items-center gap-3 px-4 py-2 rounded-lg transition
-   ${
-     isActive
-       ? "bg-blue-600/20 text-blue-400 font-semibold"
-       : "hover:bg-white/10 text-gray-300"
-   }`;
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-IN", {
@@ -138,25 +135,52 @@ export default function RestaurantDashboard() {
   /* =======================
      UI
   ======================= */
-   return (
+  return (
     <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
 
-      {/* CONTENT */}
       <div className="relative z-10 flex min-h-screen">
         {/* SIDEBAR */}
         <aside className="w-24 bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center">
           <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
 
           <nav className="space-y-3">
-            <SidebarLink to="/restaurant/dashboard" icon={LayoutDashboard} label="Dashboard" />
-            <SidebarLink to="/restaurant/dashboard/menu" icon={UtensilsCrossed} label="Menu" />
-            <SidebarLink to="/restaurant/dashboard/menu/add" icon={PlusCircle} label="Add Item" />
-            <SidebarLink to="/restaurant/dashboard/orders" icon={ClipboardList} label="Orders" />
-            <SidebarLink to="/restaurant/dashboard/agents" icon={Bike} label="Agents" />
-            <SidebarLink to="/restaurant/dashboard/profile" icon={User} label="Profile" />
-            <SidebarLink to="/restaurant/dashboard/reviews" icon={MessageSquare} label="Reviews" />
+            <SidebarLink
+              to="/restaurant/dashboard"
+              icon={LayoutDashboard}
+              label="Dashboard"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/menu"
+              icon={UtensilsCrossed}
+              label="Menu"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/menu/add"
+              icon={PlusCircle}
+              label="Add Item"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/orders"
+              icon={ClipboardList}
+              label="Orders"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/agents"
+              icon={Bike}
+              label="Agents"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/profile"
+              icon={User}
+              label="Profile"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/reviews"
+              icon={MessageSquare}
+              label="Reviews"
+            />
           </nav>
 
           <button
@@ -170,24 +194,34 @@ export default function RestaurantDashboard() {
 
         {/* MAIN CONTENT */}
         <main className="flex-1 p-6 overflow-y-auto">
-          {isOverview && (
+          {isOverview ? (
             <>
               <h2 className="text-2xl font-bold mb-6">
                 Restaurant Dashboard
               </h2>
 
-              {/* KPI CARDS */}
               {loadingStats ? (
                 <p className="text-gray-400">Loading stats…</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <StatCard label="Total Orders" value={stats.orders} color="text-blue-400" />
-                  <StatCard label="Revenue" value={formatCurrency(stats.revenue)} color="text-green-400" />
-                  <StatCard label="Menu Items" value={stats.menuItems} color="text-yellow-400" />
+                  <StatCard
+                    label="Total Orders"
+                    value={stats.orders}
+                    color="text-blue-400"
+                  />
+                  <StatCard
+                    label="Revenue"
+                    value={formatCurrency(stats.revenue)}
+                    color="text-green-400"
+                  />
+                  <StatCard
+                    label="Menu Items"
+                    value={stats.menuItems}
+                    color="text-yellow-400"
+                  />
                 </div>
               )}
 
-              {/* CHART */}
               {!loadingStats && (
                 <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">
                   <h3 className="text-lg font-semibold mb-4">
@@ -199,7 +233,7 @@ export default function RestaurantDashboard() {
                       <LineChart data={chartData}>
                         <XAxis dataKey="day" stroke="#aaa" />
                         <YAxis stroke="#aaa" />
-                        <Tooltip />
+                        <ChartTooltip />
                         <Line
                           type="monotone"
                           dataKey="orders"
@@ -212,9 +246,9 @@ export default function RestaurantDashboard() {
                 </div>
               )}
             </>
+          ) : (
+            <Outlet />
           )}
-
-          {!isOverview && <Outlet />}
         </main>
       </div>
     </div>
@@ -227,17 +261,39 @@ export default function RestaurantDashboard() {
 
 function SidebarLink({ to, icon: Icon, label }) {
   return (
-    <NavLink to={to} end className={({ isActive }) =>
-      `relative group flex items-center justify-center p-3 rounded-lg transition
-       ${isActive ? "bg-blue-600/30 text-blue-400" : "hover:bg-white/10 text-gray-300"}`
-    }>
+    <NavLink
+      to={to}
+      end
+      className={({ isActive }) =>
+        `relative group flex items-center justify-center p-3 rounded-lg transition
+        ${
+          isActive
+            ? "bg-blue-600/30 text-blue-400"
+            : "hover:bg-white/10 text-gray-300"
+        }`
+      }
+    >
       <Icon size={18} />
       <Tooltip text={label} />
     </NavLink>
   );
 }
 
-
+function Tooltip({ text }) {
+  return (
+    <span
+      className="
+        absolute left-14 top-1/2 -translate-y-1/2
+        opacity-0 group-hover:opacity-100
+        transition-opacity duration-200
+        bg-black text-white text-xs px-3 py-1 rounded
+        whitespace-nowrap shadow-lg z-50
+      "
+    >
+      {text}
+    </span>
+  );
+}
 
 function StatCard({ label, value, color }) {
   return (

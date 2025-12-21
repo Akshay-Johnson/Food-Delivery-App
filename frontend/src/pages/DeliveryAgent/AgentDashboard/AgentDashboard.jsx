@@ -1,13 +1,9 @@
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
+import Toast from "../../../components/toast/toast";
 
-import {
-  LayoutDashboard,
-  ClipboardList,
-  User,
-  LogOut,
-} from "lucide-react";
+import { LayoutDashboard, ClipboardList, User, LogOut } from "lucide-react";
 
 import {
   LineChart,
@@ -21,6 +17,7 @@ import {
 export default function AgentDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [toast, setToast] = useState(null);
 
   const isOverview = location.pathname === "/agent/dashboard";
 
@@ -55,7 +52,10 @@ export default function AgentDashboard() {
       await loadDashboardStats();
     } catch (err) {
       console.error("Status update failed", err);
-      alert("Failed to update status");
+      setToast ({
+        type: "error",
+        message: "Failed to update status",
+      });
     } finally {
       setUpdatingStatus(false);
     }
@@ -76,17 +76,14 @@ export default function AgentDashboard() {
         status: dashboardRes.data.status,
       });
 
-const ordersRes = await api.get("/api/agents/orders");
+      const ordersRes = await api.get("/api/agents/orders");
 
-// Normalize response safely
-const orders = Array.isArray(ordersRes.data)
-  ? ordersRes.data
-  : ordersRes.data.orders || [];
+      // Normalize response safely
+      const orders = Array.isArray(ordersRes.data)
+        ? ordersRes.data
+        : ordersRes.data.orders || [];
 
-const completed = orders.filter(
-  (o) => o.status === "delivered"
-);
-
+      const completed = orders.filter((o) => o.status === "delivered");
 
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const grouped = {};
@@ -130,13 +127,25 @@ const completed = orders.filter(
 
       <div className="relative z-10 flex min-h-screen">
         {/* SIDEBAR */}
-        <aside className="w-24 bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center">
+        <aside className="w-24 bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center overflow-visible relative z-50">
           <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
 
           <nav className="space-y-3">
-            <SidebarLink to="/agent/dashboard" icon={LayoutDashboard} label="Dashboard" />
-            <SidebarLink to="/agent/dashboard/orders" icon={ClipboardList} label="Orders" />
-            <SidebarLink to="/agent/dashboard/profile" icon={User} label="Profile" />
+            <SidebarLink
+              to="/agent/dashboard"
+              icon={LayoutDashboard}
+              label="Dashboard"
+            />
+            <SidebarLink
+              to="/agent/dashboard/orders"
+              icon={ClipboardList}
+              label="Orders"
+            />
+            <SidebarLink
+              to="/agent/dashboard/profile"
+              icon={User}
+              label="Profile"
+            />
           </nav>
 
           <button
@@ -160,8 +169,16 @@ const completed = orders.filter(
                 <p className="text-gray-400">Loading stats…</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <StatCard label="Assigned Orders" value={stats.assignedOrders} color="text-blue-400" />
-                  <StatCard label="Completed Orders" value={stats.completedOrders} color="text-green-400" />
+                  <StatCard
+                    label="Assigned Orders"
+                    value={stats.assignedOrders}
+                    color="text-blue-400"
+                  />
+                  <StatCard
+                    label="Completed Orders"
+                    value={stats.completedOrders}
+                    color="text-green-400"
+                  />
 
                   <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">
                     <p className="text-gray-400 text-sm">Status</p>
@@ -238,7 +255,7 @@ function SidebarLink({ to, icon: Icon, label }) {
       className={({ isActive }) =>
         `relative group flex items-center justify-center p-3 rounded-lg transition ${
           isActive
-            ? "bg-blue-600/30 text-blue-400"
+            ? "bg-blue-600/30 "
             : "hover:bg-white/10 text-gray-300"
         }`
       }

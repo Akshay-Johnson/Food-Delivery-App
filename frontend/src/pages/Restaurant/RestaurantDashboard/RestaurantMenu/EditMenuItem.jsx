@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
 import { Upload, Save } from "lucide-react";
+import Toast from "../../../../components/toast/toast";
 
 export default function EditMenuItem() {
   const { id } = useParams();
@@ -16,6 +17,7 @@ export default function EditMenuItem() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     loadItem();
@@ -52,7 +54,7 @@ export default function EditMenuItem() {
       setForm({ ...form, image: res.data.imageUrl });
     } catch (error) {
       console.error("Upload failed:", error.response?.data || error.message);
-      alert("Image upload failed");
+      setToast({ type: "error", message: "Image upload failed" });
     }
   };
 
@@ -69,11 +71,15 @@ export default function EditMenuItem() {
         image: form.image,
       });
 
-      alert("Menu item updated!");
-      navigate("/restaurant/dashboard/menu");
+      setToast({ type: "success", message: "Menu item updated successfully!" });
+      setTimeout(() => {
+        navigate("/restaurant/dashboard/menu");
+        setToast(null);
+      }, 3000);
+      
     } catch (error) {
       console.error("Update failed:", error.response?.data || error.message);
-      alert("Update failed");
+      setToast({ type: "error", message: "Update failed" });
     }
   };
 

@@ -85,11 +85,28 @@ export const getMyOrders = async (req, res) => {
   try {
     const customerId = req.user.id;
 
+
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // total count
+    const totalOrders = await Order.countDocuments({ customerId });
+
+    // paginated data
     const orders = await Order.find({ customerId })
       .populate("restaurantId", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    res.status(200).json({ orders });
+    res.status(200).json({
+      orders,
+      currentPage: page,
+      totalPages: Math.ceil(totalOrders / limit),
+      totalOrders,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching orders", error });
   }
@@ -350,58 +367,58 @@ export const assignOrderToAgent = async (req, res) => {
     const { orderId } = req.params;
     const { agentId } = req.body;
 
-    console.log("ASSIGN AGENT HIT");
-    console.log("Order ID:", orderId);
-    console.log("Agent ID:", agentId);
+    const restaurantId = req.user._id || req.user.id;
+
+    console.log("ASSIGN AGENT");
+    console.log("Restaurant:", restaurantId);
+    console.log("Order:", orderId);
+    console.log("Agent:", agentId);
 
     if (!agentId) {
       return res.status(400).json({ message: "agentId is required" });
     }
 
-    const order = await Order.findById(orderId);
-
+    const order = await Order.findOne({ _id: orderId, restaurantId });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
     const agent = await DeliveryAgent.findById(agentId);
-
     if (!agent) {
-      return res.status(404).json({ message: "Delivery agent not found" });
+      return res.status(404).json({ message: "Agent not found" });
     }
 
     if (agent.status !== "available") {
-      return res
-        .status(400)
-        .json({ message: "Delivery agent is not available" });
+      return res.status(400).json({ message: "Agent not available" });
     }
 
-    if (order.deliveryAgentId) {
-      return res.status(400).json({
-        message: "Order already assigned to an agent",
-      });
-    }
-
-    // Assign agent
     order.deliveryAgentId = agentId;
-    order.status = "ready";
-
+    if (order.status !== "ready") order.status = "ready";
     await order.save();
 
-    await DeliveryAgent.findByIdAndUpdate(agentId, {
-      status: "on-delivery",
-    });
+    agent.status = "on-delivery";
+    await agent.save();
 
-    res.status(200).json({
-      message: "Agent assigned successfully",
-      order,
-    });
+    // 🔔 Push notification (SAFE)
+    if (agent.fcmToken && agent.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: agent.fcmToken,
+          title: "New Delivery Assigned 🚚",
+          body: `Order ${order._id} assigned to you`,
+          data: { orderId: order._id.toString() },
+        });
+      } catch (err) {
+        console.error("FCM failed:", err.message);
+      }
+    }
+
+    res.json({ message: "Agent assigned successfully", order });
   } catch (error) {
     console.error("ASSIGN AGENT ERROR:", error);
     res.status(500).json({
       message: "Failed to assign agent",
       error: error.message,
-      stack: error.stack,
     });
   }
 };

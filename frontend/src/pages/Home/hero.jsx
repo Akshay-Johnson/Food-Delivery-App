@@ -35,7 +35,7 @@ export default function Hero() {
         <div className="flex justify-center gap-6 mt-30">
           <Link 
             to="/customer/login" 
-            className="hero-btn bg-black/40 hover:bg-green-600"
+            className="hero-btn bg-black/40 hover:bg-green-600 border-white "
           >
             Order Now
           </Link>
