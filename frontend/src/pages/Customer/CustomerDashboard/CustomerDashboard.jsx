@@ -32,7 +32,7 @@ export default function CustomerDashboard() {
   const [sortBy, setSortBy] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 6;
 
   const [restaurantPage, setRestaurantPage] = useState(1);
   const restaurantsPerPage = 6;

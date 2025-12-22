@@ -9,6 +9,7 @@ export default function AuthLayout({ title, children }) {
                     bg-[url('/assets/loginimage.jpg')]
                     blur-md
                     scale-105
+
                 "
             ></div>
 

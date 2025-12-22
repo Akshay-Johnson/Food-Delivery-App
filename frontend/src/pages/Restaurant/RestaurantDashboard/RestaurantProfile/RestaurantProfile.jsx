@@ -4,23 +4,24 @@ import { Upload, Save } from "lucide-react";
 import Toast from "../../../../components/toast/toast";
 
 export default function RestaurantProfile() {
-  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
+
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    email: "",
-    password: "",
     description: "",
     address: "",
     cuisineType: "",
     openingTime: "",
     closingTime: "",
     image: "",
+    password: "",
   });
 
-  const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState(null);
-
+  /* ==========================
+     LOAD PROFILE
+  ========================== */
   useEffect(() => {
     loadProfile();
   }, []);
@@ -28,14 +29,29 @@ export default function RestaurantProfile() {
   const loadProfile = async () => {
     try {
       const res = await api.get("/api/restaurants/profile");
-      setRestaurant(res.data);
-      setForm(res.data);
+
+      setForm({
+        name: res.data.name || "",
+        phone: res.data.phone || "",
+        description: res.data.description || "",
+        address: res.data.address || "",
+        cuisineType: res.data.cuisineType || "",
+        openingTime: res.data.openingTime || "",
+        closingTime: res.data.closingTime || "",
+        image: res.data.image || "",
+        password: "",
+      });
+
       setLoading(false);
     } catch (error) {
-      console.error("Error loading profile:", error);
+      console.error("Error loading profile:", error.response?.data || error.message);
+      setLoading(false);
     }
   };
 
+  /* ==========================
+     IMAGE UPLOAD
+  ========================== */
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -48,13 +64,17 @@ export default function RestaurantProfile() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setForm({ ...form, image: res.data.imageUrl });
-      console.log("UPLOAD RESPONSE:", res.data);
+      setForm((prev) => ({ ...prev, image: res.data.imageUrl }));
+      setToast({ type: "success", message: "Image uploaded successfully!" });
     } catch (error) {
-      console.error("Image upload failed:", error);
+      console.error("Image upload error:", error.response?.data || error.message);
+      setToast({ type: "error", message: "Image upload failed" });
     }
   };
 
+  /* ==========================
+     SUBMIT PROFILE
+  ========================== */
   const submit = async (e) => {
     e.preventDefault();
 
@@ -63,105 +83,95 @@ export default function RestaurantProfile() {
       setToast({ type: "success", message: "Profile updated successfully!" });
       loadProfile();
     } catch (error) {
-      setToast({ type: "error", message: "Update failed" });
-      console.error(error);
+      console.error("Update error:", error.response?.data || error.message);
+      setToast({ type: "error", message: "Profile update failed" });
     }
   };
 
   if (loading) return <p className="text-white p-6">Loading...</p>;
 
   return (
-    <div className="p-6 text-white flex flex-col items-center m-auto">
+    <div className="p-6 text-white flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-6">Restaurant Profile</h1>
+
       {toast && <Toast type={toast.type} message={toast.message} />}
-      <div className="bg-black/70 p-6 rounded-xl border border-white/20 max-w-2xl">
+
+      <div className="bg-black/70 p-6 rounded-xl border border-white/20 w-full max-w-2xl">
         <form onSubmit={submit} className="space-y-4">
-          {/* Image */}
+
+          {/* IMAGE */}
           <div className="flex flex-col items-center">
             <img
-              src={
-                (form.image || "/assets/restaurantimage.jpeg") +
-                "?t=" +
-                new Date().getTime()
-              }
+              src={(form.image || "/assets/restaurant.png") + "?t=" + Date.now()}
               className="w-80 h-40 rounded-lg object-cover border border-white/30"
+              alt="Restaurant"
             />
 
             <label className="mt-3 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
               <Upload size={16} />
-
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
+              Upload Image
+              <input type="file" className="hidden" onChange={handleImageUpload} />
             </label>
           </div>
 
-          {/* Name */}
-          <div className="flex row gap-2 ">
+          {/* NAME & PHONE */}
+          <div className="flex gap-2">
             <input
-              type="text"
-              className="w-100 mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.name}
+              className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
               placeholder="Restaurant Name"
+              value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
-
             <input
-              type="text"
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
+              className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
+              placeholder="Phone"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
           </div>
 
-          {/* Description */}
-          <div className="flex row gap-2">
+          {/* DESCRIPTION & ADDRESS */}
+          <div className="flex gap-2">
             <textarea
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               rows="3"
-              value={form.description}
+              className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
               placeholder="Description"
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
             <input
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.address}
+              className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
               placeholder="Address"
+              value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
           </div>
 
-          {/* Address */}
-          <div className="flex row gap-2">
-            <input
-              type="text"
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.password}
-              placeholder="Password"
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
+          {/* CUISINE */}
+          <input
+            className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
+            placeholder="Cuisine Type"
+            value={form.cuisineType}
+            onChange={(e) => setForm({ ...form, cuisineType: e.target.value })}
+          />
 
-            <input
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.cuisineType}
-              placeholder="Cusine"
-              onChange={(e) =>
-                setForm({ ...form, cuisineType: e.target.value })
-              }
-            />
-          </div>
+                  <input
+            className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
+            placeholder="New Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
 
-          {/* Opening / Closing Time */}
-          <div className="grid grid-cols-2 gap-4 text-white">
+
+
+
+          {/* TIME */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm">Opening Time</label>
               <input
                 type="time"
-                className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded "
+                className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
                 value={form.openingTime}
                 onChange={(e) =>
                   setForm({ ...form, openingTime: e.target.value })
@@ -173,7 +183,7 @@ export default function RestaurantProfile() {
               <label className="text-sm">Closing Time</label>
               <input
                 type="time"
-                className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
+                className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
                 value={form.closingTime}
                 onChange={(e) =>
                   setForm({ ...form, closingTime: e.target.value })
@@ -182,8 +192,11 @@ export default function RestaurantProfile() {
             </div>
           </div>
 
-          {/* Submit */}
-          <button className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex justify-end gap-2 mx-auto items-center">
+          {/* SAVE */}
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex gap-2 items-center mx-auto"
+          >
             <Save size={18} />
             Save Changes
           </button>

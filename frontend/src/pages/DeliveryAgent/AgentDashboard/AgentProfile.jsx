@@ -35,7 +35,7 @@ export default function AgentProfile() {
         password: "",
         vehicleType: res.data.agent.vehicleType || "",
         vehicleNumber: res.data.agent.vehicleNumber || "",
-        image: res.data.agent.image ?? prev.image, // 🔥 KEY LINE
+        image: res.data.agent.image ?? prev.image, 
         status: res.data.agent.status || "",
       }));
     } catch (error) {
@@ -45,7 +45,7 @@ export default function AgentProfile() {
     }
   };
 
-  // ✅ IMAGE UPLOAD WORKING
+  //image upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -64,7 +64,7 @@ export default function AgentProfile() {
     }
   };
 
-  // ✅ FIXED UPDATE API ROUTE
+
   const submit = async (e) => {
     e.preventDefault();
 
@@ -112,7 +112,7 @@ export default function AgentProfile() {
               src={
                 form.image && form.image.trim() !== ""
                   ? form.image
-                  : "/assets/agent-avatar.png"
+                  : "/assets/agent.png"
               }
               alt="Agent Avatar"
               className="w-40 h-40 object-cover border border-white/30"

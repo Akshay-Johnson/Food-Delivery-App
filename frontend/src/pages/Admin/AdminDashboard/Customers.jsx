@@ -59,14 +59,14 @@ export default function Customers() {
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-2xl">
             {paginatedCustomers.map((c) => (
               <div
                 key={c._id}
                 className="bg-black/60 backdrop-blur-lg border border-white/20 rounded-xl p-5"
               >
                 <img
-                  src={c.profileImage || "/assets/default-avatar.png"}
+                  src={c.profileImage || "/assets/customer.png"}
                   alt={c.name}
                   className="w-full h-40 object-cover rounded-md mb-3"
                 />

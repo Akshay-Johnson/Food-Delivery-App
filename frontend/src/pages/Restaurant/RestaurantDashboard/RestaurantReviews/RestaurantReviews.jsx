@@ -58,15 +58,15 @@ export default function RestaurantReviews() {
             {paginatedReviews.map((r) => (
               <div
                 key={r._id}
-                className="bg-black/70 border border-white/20 rounded-lg p-4 max-w-2xl"
+                className="bg-black/70 border border-white/20 rounded-lg p-4 w-sm max-w-2xl"
               >
                 <div className="flex items-center mb-2 ">
                   <img
-                    className="w-12 h-12 object-cover rounded-full border border-white/30 mr-4"
+                    className="w-22 h-22 object-cover  border border-white/30 mr-4"
                     src={
                       r.customerId?.profileImage?.trim()
                         ? r.customerId.profileImage
-                        : "/assets/default-avatar.png"
+                        : "/assets/customer.png"
                     }
                     alt="Customer"
                   />

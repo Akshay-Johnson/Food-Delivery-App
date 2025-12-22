@@ -100,7 +100,7 @@ export default function AdminOrders() {
         </p>
       ) : (
         <>
-          <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+          <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] w-sm">
             {paginatedOrders.map((o) => (
               <div
                 key={o._id}

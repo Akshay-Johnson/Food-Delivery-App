@@ -78,7 +78,7 @@ export const restaurantUpdateSchema = Joi.object({
   openingTime: Joi.string().optional(),
   closingTime: Joi.string().optional(),
 
-  password: Joi.string().min(6).optional().messages({
+  password: Joi.string().min(6).optional().allow("").messages({
     "string.min": "Password must be at least 6 characters",
   }),
 });

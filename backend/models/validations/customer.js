@@ -62,7 +62,7 @@ export const customerUpdateSchema = Joi.object({
       "string.pattern.base": "Phone number must be 10 digits",
     }),
 
-  password: Joi.string().min(6).optional().messages({
+  password: Joi.string().min(6).optional().allow("").messages({
     "string.min": "Password must be at least 6 characters",
   }),
 

@@ -162,7 +162,7 @@ export default function AdminReviews() {
           </div>
 
           {/* REVIEW GRID – AUTO FILL, 2 ROWS */}
-          <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
+          <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))] w-sm">
             {reviews.map((r) => (
               <div
                 key={r._id}

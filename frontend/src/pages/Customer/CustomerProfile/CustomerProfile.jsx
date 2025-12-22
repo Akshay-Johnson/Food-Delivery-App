@@ -78,7 +78,7 @@ export default function CustomerProfile() {
             <div className="flex flex-col items-center mb-8">
               <div className="relative">
                 <img
-                  src={user.profileImage || "/assets/default-avatar.png"}
+                  src={user.profileImage || "/assets/customer.png"}
                   alt="avatar"
                   className="w-32 h-32 rounded-full object-cover border-4 border-white/40 shadow-xl transition-transform hover:scale-105"
                 />
