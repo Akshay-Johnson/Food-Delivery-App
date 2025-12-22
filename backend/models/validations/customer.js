@@ -1,8 +1,6 @@
 import Joi from "joi";
 
-/* =========================
-   REGISTER
-========================= */
+//register customer
 export const customerRegisterSchema = Joi.object({
   name: Joi.string().min(2).max(50).required().messages({
     "string.empty": "Name is required",
@@ -35,9 +33,7 @@ export const customerRegisterSchema = Joi.object({
   fcmToken: Joi.string().allow(null).optional(),
 }).with("password", "confirmPassword");
 
-/* =========================
-   LOGIN
-========================= */
+//login customer
 export const customerLoginSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Invalid email",
@@ -49,9 +45,7 @@ export const customerLoginSchema = Joi.object({
   }),
 });
 
-/* =========================
-   UPDATE PROFILE
-========================= */
+//update customer profile
 export const customerUpdateSchema = Joi.object({
   name: Joi.string().min(2).max(50).optional(),
 

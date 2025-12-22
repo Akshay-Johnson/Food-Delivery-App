@@ -12,16 +12,15 @@ export default function About() {
         <h2 className="text-6xl font-bold mb-10">About DineX</h2>
 
         <p className="text-gray-300 text-2xl font-bold leading-relaxed drop-shadow-lg text-justify">
-          "FoodExpress is a modern food delivery platform that connects hungry customers
-          with their favorite restaurants. With fast delivery, real-time tracking, and
-          a seamless ordering experience, we ensure your meals arrive hot and fresh..."
-
+          "FoodExpress is a modern food delivery platform that connects hungry
+          customers with their favorite restaurants. With fast delivery,
+          real-time tracking, and a seamless ordering experience, we ensure your
+          meals arrive hot and fresh..."
         </p>
-       
       </div>
       <div className="w-full mt-10">
-         <HowItWorks />
-        </div>
+        <HowItWorks />
+      </div>
     </section>
   );
 }

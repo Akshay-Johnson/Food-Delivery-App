@@ -6,10 +6,10 @@ export default function RestaurantAgents() {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔍 Search
+  //  Search
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  // Pagination
   const [page, setPage] = useState(1);
   const agentsPerPage = 6;
 
@@ -24,14 +24,12 @@ export default function RestaurantAgents() {
     }
   };
 
-  /* ================= LOAD + AUTO REFRESH ================= */
   useEffect(() => {
     loadAgents();
     const interval = setInterval(loadAgents, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  /* ================= SEARCH FILTER ================= */
   const filteredAgents = agents.filter((agent) => {
     const q = search.toLowerCase();
 
@@ -44,7 +42,6 @@ export default function RestaurantAgents() {
     );
   });
 
-  /* ================= PAGINATION LOGIC ================= */
   const totalPages = Math.ceil(filteredAgents.length / agentsPerPage);
   const startIndex = (page - 1) * agentsPerPage;
   const paginatedAgents = filteredAgents.slice(
@@ -63,7 +60,7 @@ export default function RestaurantAgents() {
     <div className="text-white">
       <h1 className="text-3xl font-bold mb-4">Delivery Agents</h1>
 
-      {/* 🔍 SEARCH INPUT */}
+      {/*  SEARCH INPUT */}
       <input
         type="text"
         placeholder="Search by name, phone, vehicle, status..."

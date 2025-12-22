@@ -22,7 +22,6 @@ export default function AgentProfile() {
     loadProfile();
   }, []);
 
-  // ✅ FIXED PROFILE LOAD
   const loadProfile = async () => {
     try {
       const res = await api.get("/api/agents/profile");
@@ -35,7 +34,7 @@ export default function AgentProfile() {
         password: "",
         vehicleType: res.data.agent.vehicleType || "",
         vehicleNumber: res.data.agent.vehicleNumber || "",
-        image: res.data.agent.image ?? prev.image, 
+        image: res.data.agent.image ?? prev.image,
         status: res.data.agent.status || "",
       }));
     } catch (error) {
@@ -63,7 +62,6 @@ export default function AgentProfile() {
       console.error("Image upload failed:", error);
     }
   };
-
 
   const submit = async (e) => {
     e.preventDefault();

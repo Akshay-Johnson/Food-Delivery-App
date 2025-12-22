@@ -52,7 +52,7 @@ export default function AgentDashboard() {
       await loadDashboardStats();
     } catch (err) {
       console.error("Status update failed", err);
-      setToast ({
+      setToast({
         type: "error",
         message: "Failed to update status",
       });
@@ -61,9 +61,6 @@ export default function AgentDashboard() {
     }
   };
 
-  /* =======================
-     LOAD DASHBOARD DATA
-  ======================= */
   const loadDashboardStats = async () => {
     try {
       setLoadingStats(true);
@@ -78,7 +75,6 @@ export default function AgentDashboard() {
 
       const ordersRes = await api.get("/api/agents/orders");
 
-      // Normalize response safely
       const orders = Array.isArray(ordersRes.data)
         ? ordersRes.data
         : ordersRes.data.orders || [];
@@ -110,17 +106,11 @@ export default function AgentDashboard() {
     if (isOverview) loadDashboardStats();
   }, [isOverview]);
 
-  /* =======================
-     LOGOUT
-  ======================= */
   const logout = () => {
     localStorage.clear();
     navigate("/agent/login");
   };
 
-  /* =======================
-     UI
-  ======================= */
   return (
     <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
@@ -243,10 +233,6 @@ export default function AgentDashboard() {
   );
 }
 
-/* =======================
-   REUSABLE COMPONENTS
-======================= */
-
 function SidebarLink({ to, icon: Icon, label }) {
   return (
     <NavLink
@@ -254,9 +240,7 @@ function SidebarLink({ to, icon: Icon, label }) {
       end
       className={({ isActive }) =>
         `relative group flex items-center justify-center p-3 rounded-lg transition ${
-          isActive
-            ? "bg-blue-600/30 "
-            : "hover:bg-white/10 text-gray-300"
+          isActive ? "bg-blue-600/30 " : "hover:bg-white/10 text-gray-300"
         }`
       }
     >

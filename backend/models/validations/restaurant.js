@@ -1,8 +1,6 @@
 import Joi from "joi";
 
-/* =========================
-   REGISTER RESTAURANT
-========================= */
+//register restaurant
 export const restaurantRegisterSchema = Joi.object({
   name: Joi.string().min(2).max(100).required().messages({
     "string.empty": "Restaurant name is required",
@@ -21,9 +19,12 @@ export const restaurantRegisterSchema = Joi.object({
     "string.empty": "Confirm password is required",
   }),
 
-  phone: Joi.string().pattern(/^\d{10}$/).required().messages({
-    "string.pattern.base": "Phone number must be 10 digits",
-  }),
+  phone: Joi.string()
+    .pattern(/^\d{10}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Phone number must be 10 digits",
+    }),
 
   address: Joi.string().min(5).required().messages({
     "string.empty": "Address is required",
@@ -37,13 +38,11 @@ export const restaurantRegisterSchema = Joi.object({
 
   categories: Joi.array().items(Joi.string()).optional(),
 
-  openingTime: Joi.string().optional(),   // "09:00"
-  closingTime: Joi.string().optional(),   // "23:00"
+  openingTime: Joi.string().optional(),
+  closingTime: Joi.string().optional(),
 }).with("password", "confirmPassword");
 
-/* =========================
-   LOGIN RESTAURANT
-========================= */
+//login restaurant
 export const restaurantLoginSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Invalid email",
@@ -55,15 +54,16 @@ export const restaurantLoginSchema = Joi.object({
   }),
 });
 
-/* =========================
-   UPDATE RESTAURANT PROFILE
-========================= */
+//update restaurant profile
 export const restaurantUpdateSchema = Joi.object({
   name: Joi.string().min(2).max(100).optional(),
 
-  phone: Joi.string().pattern(/^\d{10}$/).optional().messages({
-    "string.pattern.base": "Phone number must be 10 digits",
-  }),
+  phone: Joi.string()
+    .pattern(/^\d{10}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Phone number must be 10 digits",
+    }),
 
   address: Joi.string().min(5).optional(),
 

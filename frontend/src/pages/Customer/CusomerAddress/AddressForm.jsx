@@ -45,19 +45,20 @@ export default function AddressForm({
   };
 
   return (
-    <div className="min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center
-                    text-white flex items-center justify-center p-6 ">
-
+    <div
+      className="min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center
+                    text-white flex items-center justify-center p-6 "
+    >
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       {/* CONTENT */}
       <div className="relative z-10"></div>
 
-
-      <div className="w-full max-w-lg bg-white/5 backdrop-blur-xl
-                      border border-white rounded-2xl shadow-2xl p-8">
-
+      <div
+        className="w-full max-w-lg bg-white/5 backdrop-blur-xl
+                      border border-white rounded-2xl shadow-2xl p-8"
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">{title}</h1>
@@ -73,7 +74,6 @@ export default function AddressForm({
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">
-
           {/* Row 1 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {renderInput("fullName", {
@@ -86,7 +86,6 @@ export default function AddressForm({
             })}
           </div>
 
-          {/* Row 2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {renderInput("addressLine1", {
               label: "Address Line 1",
@@ -98,14 +97,12 @@ export default function AddressForm({
             })}
           </div>
 
-          {/* Row 3 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {renderInput("city", { label: "City" })}
             {renderInput("state", { label: "State" })}
             {renderInput("pincode", { label: "Pincode" })}
           </div>
 
-          {/* Row 4 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {renderInput("landmark", {
               label: "Landmark",

@@ -114,7 +114,7 @@ export default function CustomerCheckout() {
                 restaurantId,
                 addressId: selectedAddress,
                 paymentMethod: "ONLINE",
-                paymentId: response.razorpay_payment_id, // Store for reference
+                paymentId: response.razorpay_payment_id,
               });
 
               setToast({

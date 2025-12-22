@@ -3,9 +3,6 @@ import { db } from "../../src/firebase";
 
 let watchId = null;
 
-/**
- * 🚴 Start sending live location
- */
 export const startLocationTracking = (agentId, orderId) => {
   if (!navigator.geolocation) {
     alert("Geolocation not supported");

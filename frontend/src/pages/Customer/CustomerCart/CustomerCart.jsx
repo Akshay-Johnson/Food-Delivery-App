@@ -58,7 +58,7 @@ export default function CustomerCart() {
 
             <button
               onClick={() => navigate(-1)}
-              className="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition" 
+              className="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition"
             >
               ← Back
             </button>
@@ -130,9 +130,7 @@ export default function CustomerCart() {
             <div className="mt-18 bg-black/50 rounded-xl p-6 border border-white/20">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-medium">Total</span>
-                <span className="text-2xl font-bold">
-                  ₹{cart.totalPrice}
-                </span>
+                <span className="text-2xl font-bold">₹{cart.totalPrice}</span>
               </div>
 
               <button

@@ -11,15 +11,11 @@ const storage = multer.diskStorage({
   },
 
   filename(req, file, cb) {
-    cb(
-      null,
-      `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`
-    );
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`);
   },
 });
 
 const upload = multer({ storage });
-
 
 // POST /api/upload/profile
 router.post("/profile", upload.single("profileImage"), (req, res) => {
@@ -31,7 +27,7 @@ router.post("/profile", upload.single("profileImage"), (req, res) => {
 
   res.json({
     message: "Uploaded successfully",
-    imageUrl: fullUrl,   // ✔ frontend friendly key
+    imageUrl: fullUrl,
   });
 });
 

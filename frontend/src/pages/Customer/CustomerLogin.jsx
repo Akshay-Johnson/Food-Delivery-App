@@ -30,7 +30,7 @@ export default function CustomerLogin() {
         await registerFCMToken();
       }
       setTimeout(() => {
-        setToast(null);  
+        setToast(null);
         navigate("/customer/dashboard");
       }, 1200);
     } catch (error) {
@@ -40,7 +40,6 @@ export default function CustomerLogin() {
       });
 
       setTimeout(() => setToast(null), 3000);
-
     }
   };
 

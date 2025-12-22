@@ -8,16 +8,16 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // 🔍 Search
+  //  Search
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const ordersPerPage = 6;
 
   const navigate = useNavigate();
 
-  /* ================= LOAD ORDERS ================= */
+
   useEffect(() => {
     loadOrders();
   }, []);
@@ -36,7 +36,7 @@ export default function Orders() {
     }
   };
 
-  /* ================= UPDATE STATUS ================= */
+
   const updateStatus = async (orderId, status) => {
     try {
       await api.put(`/api/restaurants/orders/${orderId}/${status}`);
@@ -81,7 +81,7 @@ export default function Orders() {
       <h2 className="text-2xl font-bold mb-4">Restaurant Orders</h2>
       {toast && <Toast type={toast.type} message={toast.message} />}
 
-      {/* 🔍 SEARCH INPUT */}
+      {/* SEARCH INPUT */}
       <input
         type="text"
         placeholder="Search by order ID, customer, phone or status"

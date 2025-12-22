@@ -22,92 +22,40 @@ import {
 
 const router = express.Router();
 
-/* =========================
-   AUTH
-========================= */
-router.post(
-  "/register",
-  validate(adminRegisterSchema),
-  registerAdmin
-);
+//admin registration and login
+router.post("/register", validate(adminRegisterSchema), registerAdmin);
 
-router.post(
-  "/login",
-  validate(adminLoginSchema),
-  loginAdmin
-);
+router.post("/login", validate(adminLoginSchema), loginAdmin);
 
-/* =========================
-   RESTAURANT CONTROLS
-========================= */
-router.get(
-  "/restaurants",
-  protectAdmin,
-  getAllRestaurants
-);
+//restaurant controls
+router.get("/restaurants", protectAdmin, getAllRestaurants);
 
-router.put(
-  "/restaurant/status/:id",
-  protectAdmin,
-  updateRestaurantStatus
-);
+router.put("/restaurant/status/:id", protectAdmin, updateRestaurantStatus);
 
-/* =========================
-   CUSTOMER CONTROLS
-========================= */
-router.get(
-  "/customers",
-  protectAdmin,
-  getAllCustomers
-);
+//customer controls
+router.get("/customers", protectAdmin, getAllCustomers);
 
-/* =========================
-   AGENT CONTROLS
-========================= */
-router.get(
-  "/agents",
-  protectAdmin,
-  getAllAgents
-);
+//agent controls
+router.get("/agents", protectAdmin, getAllAgents);
 
-router.put(
-  "/agent/status/:id",
-  protectAdmin,
-  updateAgentStatus
-);
+router.put("/agent/status/:id", protectAdmin, updateAgentStatus);
 
-/* =========================
-   ORDER CONTROLS
-========================= */
-router.get(
-  "/orders",
-  protectAdmin,
-  getAllOrders
-);
+//order controls
+router.get("/orders", protectAdmin, getAllOrders);
 
-/* =========================
-   REVIEW CONTROLS
-========================= */
-router.get(
-  "/reviews",
-  protectAdmin,
-  async (req, res) => {
-    const reviews = await Review.find()
-      .populate("customerId", "name email")
-      .populate("restaurantId", "name")
-      .sort({ createdAt: -1 });
+//review controls
+router.get("/reviews", protectAdmin, async (req, res) => {
+  const reviews = await Review.find()
+    .populate("customerId", "name email")
+    .populate("restaurantId", "name")
+    .sort({ createdAt: -1 });
 
-    res.json(reviews);
-  }
-);
+  res.json(reviews);
+});
 
-router.delete(
-  "/reviews/:id",
-  protectAdmin,
-  async (req, res) => {
-    await Review.findByIdAndDelete(req.params.id);
-    res.json({ message: "Review deleted successfully" });
-  }
-);
+router.delete("/reviews/:id", protectAdmin, async (req, res) => {
+  await Review.findByIdAndDelete(req.params.id);
+  res.json({ message: "Review deleted successfully" });
+});
 
 export default router;

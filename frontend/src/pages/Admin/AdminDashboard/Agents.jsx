@@ -7,7 +7,7 @@ export default function AdminAgents() {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const agentsPerPage = 6;
 
@@ -21,7 +21,7 @@ export default function AdminAgents() {
       const nextStatus = approvalStatus === "approved" ? "blocked" : "approved";
 
       await api.put(`/api/admins/agent/status/${id}`, {
-        approvalStatus: nextStatus, // backend expects this key
+        approvalStatus: nextStatus,
       });
 
       load();
@@ -39,7 +39,7 @@ export default function AdminAgents() {
     load();
   }, []);
 
-  /* 🔍 SEARCH FILTER */
+  /*  SEARCH FILTER */
   const filteredAgents = list.filter((a) => {
     const q = search.toLowerCase();
     return (
@@ -49,7 +49,7 @@ export default function AdminAgents() {
     );
   });
 
-  /* 📄 PAGINATION LOGIC */
+  /*  PAGINATION LOGIC */
   const totalPages = Math.ceil(filteredAgents.length / agentsPerPage);
   const startIndex = (page - 1) * agentsPerPage;
   const paginatedAgents = filteredAgents.slice(
@@ -74,7 +74,7 @@ export default function AdminAgents() {
         />
       )}
 
-      {/* 🔍 SEARCH */}
+      {/* SEARCH */}
       <input
         type="text"
         placeholder="Search by name, email, or status..."
@@ -83,7 +83,7 @@ export default function AdminAgents() {
         className="w-xl mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white placeholder-gray-400"
       />
 
-      {/* 🧾 CARDS */}
+      {/* CARDS */}
       {paginatedAgents.length === 0 ? (
         <p className="text-center text-gray-400 py-8">
           No matching agents found.
@@ -135,7 +135,7 @@ export default function AdminAgents() {
             ))}
           </div>
 
-          {/* 📄 PAGINATION */}
+          {/* PAGINATION */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-10">
               <button

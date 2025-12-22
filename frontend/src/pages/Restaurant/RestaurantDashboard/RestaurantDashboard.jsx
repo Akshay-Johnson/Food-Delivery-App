@@ -30,9 +30,6 @@ export default function RestaurantDashboard() {
 
   const isOverview = location.pathname === "/restaurant/dashboard";
 
-  /* =======================
-     DASHBOARD STATS STATE
-  ======================= */
   const [stats, setStats] = useState({
     orders: 0,
     revenue: 0,
@@ -42,17 +39,11 @@ export default function RestaurantDashboard() {
   const [chartData, setChartData] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
 
-  /* =======================
-     INITIAL EFFECTS
-  ======================= */
   useEffect(() => {
     saveFCMToken();
     if (isOverview) loadDashboardStats();
   }, [isOverview]);
 
-  /* =======================
-     FCM TOKEN
-  ======================= */
   const saveFCMToken = async () => {
     try {
       const token = await getToken(messaging, {
@@ -69,9 +60,6 @@ export default function RestaurantDashboard() {
     }
   };
 
-  /* =======================
-     LOAD DASHBOARD DATA
-  ======================= */
   const loadDashboardStats = async () => {
     try {
       const [ordersRes, menuRes] = await Promise.all([
@@ -82,10 +70,7 @@ export default function RestaurantDashboard() {
       const orders = ordersRes.data.orders || [];
       const menuItems = menuRes.data || [];
 
-      const revenue = orders.reduce(
-        (sum, o) => sum + (o.totalPrice || 0),
-        0
-      );
+      const revenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
 
       setStats({
         orders: orders.length,
@@ -117,9 +102,6 @@ export default function RestaurantDashboard() {
     }
   };
 
-  /* =======================
-     LOGOUT
-  ======================= */
   const logout = () => {
     localStorage.clear();
     navigate("/restaurant/login");
@@ -132,9 +114,6 @@ export default function RestaurantDashboard() {
       maximumFractionDigits: 0,
     }).format(value);
 
-  /* =======================
-     UI
-  ======================= */
   return (
     <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
       {/* BLUR OVERLAY */}
@@ -196,9 +175,7 @@ export default function RestaurantDashboard() {
         <main className="flex-1 p-6 overflow-y-auto">
           {isOverview ? (
             <>
-              <h2 className="text-2xl font-bold mb-6">
-                Restaurant Dashboard
-              </h2>
+              <h2 className="text-2xl font-bold mb-6">Restaurant Dashboard</h2>
 
               {loadingStats ? (
                 <p className="text-gray-400">Loading stats…</p>
@@ -224,9 +201,7 @@ export default function RestaurantDashboard() {
 
               {!loadingStats && (
                 <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Weekly Orders
-                  </h3>
+                  <h3 className="text-lg font-semibold mb-4">Weekly Orders</h3>
 
                   <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
@@ -254,10 +229,6 @@ export default function RestaurantDashboard() {
     </div>
   );
 }
-
-/* =======================
-   REUSABLE COMPONENTS
-======================= */
 
 function SidebarLink({ to, icon: Icon, label }) {
   return (

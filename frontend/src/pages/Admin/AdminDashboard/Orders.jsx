@@ -5,29 +5,22 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const [ordersPerPage, setOrdersPerPage] = useState(6);
 
-  /* ======================
-     GRID CALCULATION
-  ====================== */
-  const CARD_WIDTH = 260; // must match minmax()
+  const CARD_WIDTH = 260;
   const ROWS = 2;
 
   const calculateOrdersPerPage = () => {
-    const sidebarWidth = 100; // DX sidebar
-    const padding = 48; // page padding
-    const availableWidth =
-      window.innerWidth - sidebarWidth - padding;
+    const sidebarWidth = 100;
+    const padding = 48;
+    const availableWidth = window.innerWidth - sidebarWidth - padding;
 
     const columns = Math.floor(availableWidth / CARD_WIDTH);
     return Math.max(columns, 1) * ROWS;
   };
 
-  /* ======================
-     LOAD ORDERS
-  ====================== */
   useEffect(() => {
     api.get("/api/admins/orders").then((res) => {
       setOrders(res.data || []);
@@ -35,9 +28,6 @@ export default function AdminOrders() {
     });
   }, []);
 
-  /* ======================
-     HANDLE RESIZE
-  ====================== */
   useEffect(() => {
     const update = () => {
       setOrdersPerPage(calculateOrdersPerPage());
@@ -50,9 +40,7 @@ export default function AdminOrders() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  /* ======================
-     SEARCH FILTER
-  ====================== */
+  //search filter
   const filteredOrders = orders.filter((o) => {
     const q = search.toLowerCase();
     return (
@@ -68,12 +56,7 @@ export default function AdminOrders() {
     setPage(1);
   }, [search]);
 
-  /* ======================
-     PAGINATION LOGIC
-  ====================== */
-  const totalPages = Math.ceil(
-    filteredOrders.length / ordersPerPage
-  );
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   const paginatedOrders = filteredOrders.slice(
     (page - 1) * ordersPerPage,
@@ -84,7 +67,7 @@ export default function AdminOrders() {
     <div>
       <h2 className="text-2xl font-bold mb-6">All Orders</h2>
 
-      {/* 🔍 SEARCH */}
+      {/*  SEARCH */}
       <input
         type="text"
         placeholder="Search by order ID, customer, restaurant, status, or amount..."
@@ -93,7 +76,7 @@ export default function AdminOrders() {
         className="w-full max-w-xl mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white placeholder-gray-400"
       />
 
-      {/* 🧾 CARDS */}
+      {/*  CARDS */}
       {paginatedOrders.length === 0 ? (
         <p className="text-center text-gray-400 py-12">
           No matching orders found.
@@ -109,9 +92,7 @@ export default function AdminOrders() {
                 {/* HEADER */}
                 <div className="mb-3">
                   <p className="text-xs text-gray-400 mb-1">Order ID</p>
-                  <p className="text-blue-400 text-sm break-all">
-                    {o._id}
-                  </p>
+                  <p className="text-blue-400 text-sm break-all">{o._id}</p>
                 </div>
 
                 {/* DETAILS */}
@@ -152,14 +133,12 @@ export default function AdminOrders() {
             ))}
           </div>
 
-          {/* 📄 PAGINATION */}
+          {/*  PAGINATION */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-12">
               <button
                 disabled={page === 1}
-                onClick={() =>
-                  setPage((p) => Math.max(1, p - 1))
-                }
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
               >
                 Prev
@@ -181,11 +160,7 @@ export default function AdminOrders() {
 
               <button
                 disabled={page === totalPages}
-                onClick={() =>
-                  setPage((p) =>
-                    Math.min(totalPages, p + 1)
-                  )
-                }
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
               >
                 Next

@@ -1,33 +1,36 @@
 import mongoose from "mongoose";
 
-const menuSchema = new mongoose.Schema({
+const menuSchema = new mongoose.Schema(
+  {
     restaurantId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Restaurant',
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Restaurant",
+      required: true,
     },
 
     name: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     description: {
-        type: String,
+      type: String,
     },
     price: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     category: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     image: {
-        type: String,
-        default: null,
+      type: String,
+      default: null,
     },
-}, {
+  },
+  {
     timestamps: true,
-});
+  }
+);
 
-export default mongoose.model('Menu', menuSchema);
+export default mongoose.model("Menu", menuSchema);

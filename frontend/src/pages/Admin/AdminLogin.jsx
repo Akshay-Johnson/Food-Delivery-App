@@ -16,26 +16,25 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { Login } = useAuth();
 
-const submit = async (e) => {
-  e.preventDefault();
+  const submit = async (e) => {
+    e.preventDefault();
 
-  try {
-    await Login("admin", form); // AuthContext handles storage
-    setToast({ type: "success", message: "Login Successful 🎉" });
-    setTimeout(() => {
-      setToast(null);
-      navigate("/admin/dashboard");
-    }, 1200);
-  } catch (error) {
-    console.error("Login Failed:", error);
-    setToast({
-      type: "error",
-      message: error.response?.data?.message || "Login Failed",
-    });
-    setTimeout(() => setToast(null), 3000);
-  }
-};
-
+    try {
+      await Login("admin", form);
+      setToast({ type: "success", message: "Login Successful 🎉" });
+      setTimeout(() => {
+        setToast(null);
+        navigate("/admin/dashboard");
+      }, 1200);
+    } catch (error) {
+      console.error("Login Failed:", error);
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Login Failed",
+      });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
 
   return (
     <AuthLayout title="Admin Login">

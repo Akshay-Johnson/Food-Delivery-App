@@ -8,9 +8,8 @@ export default function Navbar() {
 
   return (
     <div className="fixed top-6 right-6 flex items-center gap-3 z-30">
-
       {/* Home Button */}
-      <button 
+      <button
         onClick={() => scrollTo("home")}
         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
@@ -18,7 +17,7 @@ export default function Navbar() {
       </button>
 
       {/* About Button */}
-      <button 
+      <button
         onClick={() => scrollTo("about")}
         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
@@ -26,21 +25,20 @@ export default function Navbar() {
       </button>
 
       {/* Testimonials Button */}
-      <button 
+      <button
         onClick={() => scrollTo("review")}
-         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Testimonials
       </button>
 
       {/* Contact Us Button */}
-      <button 
+      <button
         onClick={() => scrollTo("contact")}
-         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Contact Us
       </button>
-
 
       {/* Login */}
       <Link

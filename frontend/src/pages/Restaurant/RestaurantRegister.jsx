@@ -55,54 +55,49 @@ export default function RestaurantRegister() {
         />
       )}
       <form onSubmit={submit}>
-          <div className="mb-4 flex flex-row gap-4">
+        <div className="mb-4 flex flex-row gap-4">
           <AuthInput
             label="Restaurant Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
 
-           <AuthInput
+          <AuthInput
             label="Phone"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
           />
-          </div>
-            <AuthInput
-            label="Address"
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-          />
+        </div>
+        <AuthInput
+          label="Address"
+          value={form.address}
+          onChange={(e) => setForm({ ...form, address: e.target.value })}
+        />
 
-
-          <AuthInput
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-
+        <AuthInput
+          label="Email"
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
 
         <div className="mb-4 flex flex-row gap-4">
-        <AuthInput
-          label="Password"
-          type="password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+          <AuthInput
+            label="Password"
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
 
-        <AuthInput
-          label="Confirm Password"
-          type="password"
-          value={form.confirmPassword}
-          onChange={(e) =>
-            setForm({ ...form, confirmPassword: e.target.value })
-          }
-        />
+          <AuthInput
+            label="Confirm Password"
+            type="password"
+            value={form.confirmPassword}
+            onChange={(e) =>
+              setForm({ ...form, confirmPassword: e.target.value })
+            }
+          />
         </div>
-
-
-        
 
         <div className="flex gap-3 mt-4">
           <button className="w-1/2 bg-blue-600 text-white py-2 rounded-md">

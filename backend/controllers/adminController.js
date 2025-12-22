@@ -46,7 +46,6 @@ export const registerAdmin = async (req, res) => {
   }
 };
 
-
 //admin login
 export const loginAdmin = async (req, res) => {
   try {
@@ -82,7 +81,6 @@ export const loginAdmin = async (req, res) => {
   }
 };
 
-
 //get all restaurants
 export const getAllRestaurants = async (req, res) => {
   try {
@@ -109,12 +107,10 @@ export const updateRestaurantStatus = async (req, res) => {
 
     res.json({ message: `Restaurant updated to ${status}`, restaurant });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error updating restaurant status",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error updating restaurant status",
+      error: error.message,
+    });
   }
 };
 
@@ -141,7 +137,6 @@ export const getAllAgents = async (req, res) => {
 };
 
 //approve or block delivery agent
-
 export const updateAgentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -151,14 +146,12 @@ export const updateAgentStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid approval status" });
     }
 
-    // 🔴 IMPORTANT: find ONLY by ID
     const agent = await DeliveryAgent.findById(id);
 
     if (!agent) {
       return res.status(404).json({ message: "Delivery Agent not found" });
     }
 
-    // ✅ correct updates
     agent.approvalStatus = approvalStatus;
     agent.isActive = approvalStatus === "approved";
 
@@ -173,7 +166,6 @@ export const updateAgentStatus = async (req, res) => {
     res.status(500).json({ message: "Error updating delivery agent status" });
   }
 };
-
 
 //get all orders
 export const getAllOrders = async (req, res) => {

@@ -29,7 +29,10 @@ export default function AdminRegister() {
 
     try {
       await api.post("/api/admins/register", form);
-      setToast({ type: "success", message: "Admin Registered Successfully 🎉" });
+      setToast({
+        type: "success",
+        message: "Admin Registered Successfully 🎉",
+      });
       setTimeout(() => {
         setToast(null);
         navigate("/admin/login");
@@ -62,23 +65,23 @@ export default function AdminRegister() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <div className="mb-4 flex flex-row gap-4">
-        <AuthInput
-          label="Password"
-          type="password"
-          placeholder="Enter your "
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+          <AuthInput
+            label="Password"
+            type="password"
+            placeholder="Enter your "
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
 
-        <AuthInput
-          label="Confirm Password"
-          type="password"
-          placeholder="Confirm your password"
-          value={form.confirmPassword}
-          onChange={(e) =>
-            setForm({ ...form, confirmPassword: e.target.value })
-          }
-        />
+          <AuthInput
+            label="Confirm Password"
+            type="password"
+            placeholder="Confirm your password"
+            value={form.confirmPassword}
+            onChange={(e) =>
+              setForm({ ...form, confirmPassword: e.target.value })
+            }
+          />
         </div>
 
         <div className="flex gap-3 mt-4">

@@ -10,7 +10,7 @@ const generateToken = (id) => {
   });
 };
 
-// ✅ REGISTER DELIVERY AGENT
+// register delivery agent
 export const registerAgent = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -24,7 +24,6 @@ export const registerAgent = async (req, res) => {
       return res.status(400).json({ message: "Delivery agent already exists" });
     }
 
-    // ✅ HASH AND USE IT
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const agent = await DeliveryAgent.create({
@@ -55,7 +54,7 @@ export const registerAgent = async (req, res) => {
   }
 };
 
-// ✅ LOGIN DELIVERY AGENT
+// login delivery agent
 export const loginAgent = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -173,7 +172,7 @@ export const updateAgentProfile = async (req, res) => {
   }
 };
 
-// ✅ UPDATE AGENT LOCATION
+// update agent location
 export const updateAgentLocation = async (req, res) => {
   try {
     const agent = await DeliveryAgent.findById(req.user.id);
@@ -220,13 +219,11 @@ export const getAgentDashboardStats = async (req, res) => {
   try {
     const agentId = req.user.id;
 
-    // Active (assigned / picked) orders
     const assignedOrders = await Order.countDocuments({
       deliveryAgentId: agentId,
       status: { $in: ["assigned", "picked"] },
     });
 
-    // Completed (delivered) orders
     const completedOrders = await Order.countDocuments({
       deliveryAgentId: agentId,
       status: "delivered",
@@ -246,7 +243,7 @@ export const getAgentDashboardStats = async (req, res) => {
   }
 };
 
-// ✅ SAVE FCM TOKEN
+// save FCM token for delivery agent
 export const saveAgentFcmToken = async (req, res) => {
   try {
     const agentId = req.user.id;

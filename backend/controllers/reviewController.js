@@ -2,7 +2,7 @@ import { sendPushNotification } from "../utils/sendpush.js";
 import Review from "../models/reviewModel.js";
 import Restaurant from "../models/restaurantModel.js";
 
-//auto udate restaurant rating when a new review is added
+//auto udate restaurant rating
 const updateRestaurantRating = async (restaurantId) => {
   const reviews = await Review.find({ restaurantId });
 
@@ -56,7 +56,7 @@ export const postReview = async (req, res) => {
           title: "New Review Received",
           body: `Your restaurant has received a new review with a rating of ${rating} stars.`,
           data: {
-            restaurantName: restaurant.name ,
+            restaurantName: restaurant.name,
             rating: rating.toString(),
           },
         });
@@ -175,7 +175,7 @@ export const getRestaurantReview = async (req, res) => {
     const reviews = await Review.find({ restaurantId })
       .populate("customerId", "name profileImage")
       .sort({ createdAt: -1 });
-      isHidden: false
+    isHidden: false;
 
     res.status(200).json(reviews);
   } catch (error) {
@@ -186,10 +186,7 @@ export const getRestaurantReview = async (req, res) => {
   }
 };
 
-
-/* ======================================================
-   ADMIN: GET ALL REVIEWS (WITH CUSTOMER & RESTAURANT)
-====================================================== */
+//admin: get all reviews
 export const getAllReviewsAdmin = async (req, res) => {
   try {
     const reviews = await Review.find()
@@ -204,9 +201,7 @@ export const getAllReviewsAdmin = async (req, res) => {
   }
 };
 
-/* ======================================================
-   ADMIN: HIDE / UNHIDE REVIEW
-====================================================== */
+//admin: hide or unhide review
 export const toggleHideReview = async (req, res) => {
   try {
     const { id } = req.params;
@@ -234,9 +229,7 @@ export const toggleHideReview = async (req, res) => {
   }
 };
 
-/* ======================================================
-   ADMIN: FLAG REVIEW AS ABUSIVE
-====================================================== */
+//admin: flag review
 export const flagReview = async (req, res) => {
   try {
     const { id } = req.params;
@@ -259,9 +252,7 @@ export const flagReview = async (req, res) => {
   }
 };
 
-/* ======================================================
-   RESTAURANT: REPORT REVIEW (REQUEST MODERATION)
-====================================================== */
+//restaurant: report review to admin
 export const reportReviewByRestaurant = async (req, res) => {
   try {
     const { id } = req.params;

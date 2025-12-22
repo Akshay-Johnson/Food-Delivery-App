@@ -117,7 +117,7 @@ export default function CustomerProfile() {
                         `, ${defaultAddress.addressLine2}`}
                       , {defaultAddress.city}, {defaultAddress.state} -{" "}
                       {defaultAddress.pincode}
-                      {defaultAddress.type && ` (${defaultAddress.type})` }
+                      {defaultAddress.type && ` (${defaultAddress.type})`}
                     </>
                   ) : (
                     "No default address added"

@@ -52,7 +52,10 @@ export default function AssignAgent() {
       }, 3000);
     } catch (error) {
       console.error("Assignment failed:", error);
-      setToast({ type: "error", message: error.response?.data?.message || "Failed to assign agent" });
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Failed to assign agent",
+      });
       setTimeout(() => {
         setToast(null);
       }, 3000);
@@ -75,9 +78,7 @@ export default function AssignAgent() {
 
   return (
     <div className="text-white">
-      <h1 className="text-3xl font-bold mb-6">
-        Assign Agent to Order
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Assign Agent to Order</h1>
 
       {toast && <Toast type={toast.type} message={toast.message} />}
 
@@ -85,7 +86,7 @@ export default function AssignAgent() {
         <p className="text-gray-400">No available agents</p>
       )}
 
-      <div className="grid grid-cols-3 gap-6 w-2xl"> 
+      <div className="grid grid-cols-3 gap-6 w-2xl">
         {agents.map((agent) => {
           const isAssigned = assignedAgentId === agent._id;
           const isDisabled = assignedAgentId && !isAssigned;

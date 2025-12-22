@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 
-/* ⭐ STAR RENDER */
+/* STAR RENDER */
 function Stars({ rating }) {
   return (
     <div className="flex gap-1">
@@ -17,7 +17,7 @@ function Stars({ rating }) {
   );
 }
 
-/* ⭐ AVG RATING */
+/* AVG RATING */
 function averageRating(reviews) {
   if (!reviews.length) return 0;
   const total = reviews.reduce((sum, r) => sum + r.rating, 0);
@@ -32,25 +32,18 @@ export default function AdminReviews() {
   const [page, setPage] = useState(1);
   const [restaurantsPerPage, setRestaurantsPerPage] = useState(2);
 
-  /* ======================
-     GRID CALCULATION
-  ====================== */
-  const CARD_WIDTH = 300; // review card width
+  const CARD_WIDTH = 300;
   const ROWS = 2;
 
   const calculateRestaurantsPerPage = () => {
     const sidebarWidth = 100;
     const padding = 48;
-    const availableWidth =
-      window.innerWidth - sidebarWidth - padding;
+    const availableWidth = window.innerWidth - sidebarWidth - padding;
 
     const columns = Math.floor(availableWidth / CARD_WIDTH);
     return Math.max(columns, 1) * ROWS;
   };
 
-  /* ======================
-     LOAD REVIEWS
-  ====================== */
   const load = async () => {
     const res = await api.get("/api/reviews/admin/all");
     setReviews(res.data || []);
@@ -61,9 +54,6 @@ export default function AdminReviews() {
     load();
   }, []);
 
-  /* ======================
-     HANDLE RESIZE
-  ====================== */
   useEffect(() => {
     const update = () => {
       setRestaurantsPerPage(calculateRestaurantsPerPage());
@@ -104,7 +94,7 @@ export default function AdminReviews() {
     );
   });
 
-  /* 🧠 GROUP BY RESTAURANT */
+  /*  GROUP BY RESTAURANT */
   const grouped = filtered.reduce((acc, r) => {
     const id = r.restaurantId._id;
     if (!acc[id]) {
@@ -121,11 +111,9 @@ export default function AdminReviews() {
     g.reviews.sort((a, b) => a.rating - b.rating)
   );
 
-  /* 📄 PAGINATION */
+  /* PAGINATION */
   const restaurantsArray = Object.values(grouped);
-  const totalPages = Math.ceil(
-    restaurantsArray.length / restaurantsPerPage
-  );
+  const totalPages = Math.ceil(restaurantsArray.length / restaurantsPerPage);
 
   const paginatedRestaurants = restaurantsArray.slice(
     (page - 1) * restaurantsPerPage,
@@ -155,13 +143,11 @@ export default function AdminReviews() {
 
             <div className="flex items-center gap-1 text-sm">
               <Stars rating={Math.round(averageRating(reviews))} />
-              <span className="text-gray-300">
-                ({averageRating(reviews)})
-              </span>
+              <span className="text-gray-300">({averageRating(reviews)})</span>
             </div>
           </div>
 
-          {/* REVIEW GRID – AUTO FILL, 2 ROWS */}
+          {/* REVIEW CARDS */}
           <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))] w-sm">
             {reviews.map((r) => (
               <div
@@ -207,7 +193,7 @@ export default function AdminReviews() {
         </div>
       ))}
 
-      {/* 📄 PAGINATION */}
+      {/*  PAGINATION */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mt-12">
           <button

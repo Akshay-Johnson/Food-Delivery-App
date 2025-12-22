@@ -82,26 +82,25 @@ export default function CustomerRegister() {
         />
 
         <div className="mb-4 flex flex-row gap-4">
-        <AuthInput
-          label="Password"
-          type="password"
-          placeholder="Enter your password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+          <AuthInput
+            label="Password"
+            type="password"
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
 
-        <AuthInput
-          label="Confirm Password"
-          type="password"
-          placeholder="Confirm your password"
-          value={form.confirmPassword}
-          onChange={(e) =>
-            setForm({ ...form, confirmPassword: e.target.value })
-          }
-        />
+          <AuthInput
+            label="Confirm Password"
+            type="password"
+            placeholder="Confirm your password"
+            value={form.confirmPassword}
+            onChange={(e) =>
+              setForm({ ...form, confirmPassword: e.target.value })
+            }
+          />
         </div>
 
-        {/* Same row buttons like login */}
         <div className="flex gap-3 mt-4">
           <button className="w-1/2 bg-blue-600 text-white py-2 rounded-md">
             Register

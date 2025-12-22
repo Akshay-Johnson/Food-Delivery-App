@@ -37,20 +37,18 @@ export default function EditMenuItem() {
     }
   };
 
-  // ✅ CORRECT IMAGE UPLOAD (MATCHES YOUR BACKEND)
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const fd = new FormData();
-    fd.append("profileImage", file); // ✅ must match backend
+    fd.append("profileImage", file);
 
     try {
       const res = await api.post("/api/upload/profile", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // ✅ backend returns: { imageUrl }
       setForm({ ...form, image: res.data.imageUrl });
     } catch (error) {
       console.error("Upload failed:", error.response?.data || error.message);
@@ -58,7 +56,6 @@ export default function EditMenuItem() {
     }
   };
 
-  // ✅ CORRECT UPDATE API
   const submit = async (e) => {
     e.preventDefault();
 
@@ -76,7 +73,6 @@ export default function EditMenuItem() {
         navigate("/restaurant/dashboard/menu");
         setToast(null);
       }, 3000);
-      
     } catch (error) {
       console.error("Update failed:", error.response?.data || error.message);
       setToast({ type: "error", message: "Update failed" });

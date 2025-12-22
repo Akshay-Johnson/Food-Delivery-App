@@ -29,9 +29,6 @@ export default function AdminDashboard() {
 
   const isOverview = location.pathname === "/admin/dashboard";
 
-  /* =======================
-     STATE
-  ======================= */
   const [stats, setStats] = useState({
     restaurants: 0,
     customers: 0,
@@ -42,9 +39,6 @@ export default function AdminDashboard() {
   const [chartData, setChartData] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
 
-  /* =======================
-     LOAD DASHBOARD DATA
-  ======================= */
   const loadDashboardStats = async () => {
     try {
       const [r, c, a, o] = await Promise.all([
@@ -92,9 +86,6 @@ export default function AdminDashboard() {
     }
   };
 
-  /* =======================
-     EFFECT (AUTH SAFE)
-  ======================= */
   useEffect(() => {
     if (!loading && role === "admin" && isOverview) {
       loadDashboardStats();
@@ -109,9 +100,6 @@ export default function AdminDashboard() {
     navigate("/admin/login", { replace: true });
   };
 
-  /* =======================
-     SIDEBAR LINK STYLE
-  ======================= */
   const navItem = ({ isActive }) =>
     `group relative flex items-center justify-center rounded-lg transition px-4 py-2
      ${
@@ -120,19 +108,14 @@ export default function AdminDashboard() {
          : "hover:bg-white/10 text-white flex items-center justify-center"
      }`;
 
-  /* =======================
-     UI
-  ======================= */
   return (
-   <div className="relative flex min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
-
-        {/* BLUR OVERLAY */}
-     <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-0"></div>
-
+    <div className="relative flex min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
+      {/* BLUR OVERLAY */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-0"></div>
 
       {/* SIDEBAR */}
       <aside className="relative z-20 w-24 overflow-visible bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
+        <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
 
         <nav className="space-y-3">
           <NavLink to="/admin/dashboard" end className={navItem}>
@@ -176,7 +159,6 @@ export default function AdminDashboard() {
         </button>
       </aside>
 
-    
       {/* MAIN */}
       <main className="relative z-10 flex-1 p-6 overflow-y-auto">
         {isOverview ? (
@@ -233,8 +215,6 @@ export default function AdminDashboard() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-                
-                
               </>
             )}
           </>
@@ -246,9 +226,6 @@ export default function AdminDashboard() {
   );
 }
 
-/* =======================
-   TOOLTIP
-======================= */
 function SidebarTooltip({ text }) {
   return (
     <span
@@ -262,9 +239,6 @@ function SidebarTooltip({ text }) {
   );
 }
 
-/* =======================
-   STAT CARD
-======================= */
 function StatCard({ label, value, color }) {
   return (
     <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">

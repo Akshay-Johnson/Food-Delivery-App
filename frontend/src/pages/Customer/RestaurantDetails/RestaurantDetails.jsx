@@ -28,10 +28,7 @@ export default function RestaurantDetails() {
   const [page, setPage] = useState(1);
 
   const startIndex = (page - 1) * ITEMS_PER_PAGE;
-  const visibleDishes = dishes.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
+  const visibleDishes = dishes.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   const totalPages = Math.ceil(dishes.length / ITEMS_PER_PAGE);
 
   useEffect(() => {

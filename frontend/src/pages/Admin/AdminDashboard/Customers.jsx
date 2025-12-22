@@ -5,7 +5,7 @@ export default function Customers() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const customersPerPage = 6;
 
@@ -13,7 +13,7 @@ export default function Customers() {
     api.get("/api/admins/customers").then((res) => setList(res.data || []));
   }, []);
 
-  /* 🔍 FILTER LOGIC */
+  /*  FILTER LOGIC */
   const filteredCustomers = list.filter((c) => {
     const q = search.toLowerCase();
 
@@ -24,10 +24,8 @@ export default function Customers() {
     );
   });
 
-  /* 📄 PAGINATION LOGIC */
-  const totalPages = Math.ceil(
-    filteredCustomers.length / customersPerPage
-  );
+  /*  PAGINATION LOGIC */
+  const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
   const startIndex = (page - 1) * customersPerPage;
   const paginatedCustomers = filteredCustomers.slice(
     startIndex,
@@ -43,7 +41,7 @@ export default function Customers() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Customers</h2>
 
-      {/* 🔍 SEARCH */}
+      {/*  SEARCH */}
       <input
         type="text"
         placeholder="Search by name, email, or phone..."
@@ -52,7 +50,7 @@ export default function Customers() {
         className="w-full mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white placeholder-gray-400"
       />
 
-      {/* 🧾 CARDS */}
+      {/*  CARDS */}
       {paginatedCustomers.length === 0 ? (
         <p className="text-gray-400 text-center py-8">
           No matching customers found.
@@ -82,7 +80,7 @@ export default function Customers() {
             ))}
           </div>
 
-          {/* 📄 PAGINATION */}
+          {/*  PAGINATION */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-10">
               <button

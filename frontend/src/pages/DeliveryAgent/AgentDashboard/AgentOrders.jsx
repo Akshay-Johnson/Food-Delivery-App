@@ -11,10 +11,10 @@ export default function AgentOrders() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // 🔍 Search
+  // Search
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  // Pagination
   const [page, setPage] = useState(1);
   const ordersPerPage = 6;
 
@@ -112,9 +112,7 @@ export default function AgentOrders() {
                 key={order._id}
                 className="bg-black/70 p-4 rounded-xl border border-white/20"
               >
-                <h3 className="font-semibold mb-1">
-                  Order ID: {order._id}
-                </h3>
+                <h3 className="font-semibold mb-1">Order ID: {order._id}</h3>
                 <p>Customer: {order.customerId?.name || "N/A"}</p>
                 <p>Phone: {order.customerId?.phone || "N/A"}</p>
                 <p>Address: {order.restaurantId?.address || "N/A"}</p>

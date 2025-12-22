@@ -9,16 +9,15 @@ export default function MenuManagement() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // 🔍 Search
+  //  Search
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const itemsPerPage = 6;
 
   const navigate = useNavigate();
 
-  /* ================= LOAD MENU ================= */
   useEffect(() => {
     loadMenu();
   }, []);
@@ -37,7 +36,6 @@ export default function MenuManagement() {
     }
   };
 
-  /* ================= DELETE ================= */
   const deleteItem = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
@@ -50,7 +48,6 @@ export default function MenuManagement() {
     }
   };
 
-  /* ================= SEARCH FILTER ================= */
   const filteredItems = items.filter((item) => {
     const q = search.toLowerCase();
 
@@ -117,18 +114,14 @@ export default function MenuManagement() {
               >
                 <img
                   src={
-                    (item.image || "/assets/dishimage.jpg") +
-                    "?t=" +
-                    Date.now()
+                    (item.image || "/assets/dishimage.jpg") + "?t=" + Date.now()
                   }
                   className="h-32 w-full object-cover rounded"
                 />
 
                 <h3 className="mt-2 font-semibold">{item.name}</h3>
 
-                <p className="text-gray-300 text-sm mt-1">
-                  {item.description}
-                </p>
+                <p className="text-gray-300 text-sm mt-1">{item.description}</p>
 
                 <p className="text-gray-300 text-sm mt-1">₹{item.price}</p>
 
@@ -141,9 +134,7 @@ export default function MenuManagement() {
                   {/* EDIT */}
                   <button
                     onClick={() =>
-                      navigate(
-                        `/restaurant/dashboard/menu/edit/${item._id}`
-                      )
+                      navigate(`/restaurant/dashboard/menu/edit/${item._id}`)
                     }
                     className="relative group bg-blue-600 px-3 py-1 rounded flex items-center"
                   >

@@ -4,7 +4,6 @@ import { Upload, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/toast/toast";
 
-
 export default function AddMenuItem() {
   const navigate = useNavigate();
 
@@ -19,20 +18,20 @@ export default function AddMenuItem() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // ✅ IMAGE UPLOAD (matches your backend)
+  // IMAGE UPLOAD (matches your backend)
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const fd = new FormData();
-    fd.append("profileImage", file); // ✅ must match backend
+    fd.append("profileImage", file);
 
     try {
       const res = await api.post("/api/upload/profile", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setForm({ ...form, image: res.data.imageUrl }); // ✅ backend returns imageUrl
+      setForm({ ...form, image: res.data.imageUrl });
     } catch (error) {
       console.error(
         "Image upload failed:",
@@ -42,7 +41,7 @@ export default function AddMenuItem() {
     }
   };
 
-  // ✅ ADD MENU ITEM
+  // ADD MENU ITEM
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -61,11 +60,12 @@ export default function AddMenuItem() {
         navigate("/restaurant/dashboard/menu");
         setToast(null);
       }, 3000);
-    
-     
     } catch (error) {
       console.error("Add menu failed:", error.response?.data || error.message);
-      setToast({ type: "error", message: error.response?.data?.message || "Add menu failed" });
+      setToast({
+        type: "error",
+        message: error.response?.data?.message || "Add menu failed",
+      });
     } finally {
       setLoading(false);
     }
@@ -124,10 +124,6 @@ export default function AddMenuItem() {
 
           {/* Price */}
           <div className="flex items-center justify-end gap-4">
-
- 
-
-           
             <input
               type="number"
               className="w-100 mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded "
@@ -137,9 +133,6 @@ export default function AddMenuItem() {
               required
             />
 
-
-
-           
             <input
               type="text"
               className="w-100 mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
@@ -148,10 +141,7 @@ export default function AddMenuItem() {
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               required
             />
-
           </div>
-
-        
 
           {/* Submit */}
           <button

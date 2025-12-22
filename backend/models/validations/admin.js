@@ -1,9 +1,6 @@
 import Joi from "joi";
 
-/* =========================
-   ADMIN REGISTER
-   (one-time / seed)
-========================= */
+//register admin
 export const adminRegisterSchema = Joi.object({
   name: Joi.string().min(2).max(50).required().messages({
     "string.empty": "Name is required",
@@ -21,12 +18,9 @@ export const adminRegisterSchema = Joi.object({
     "any.only": "Passwords do not match",
     "any.required": "Confirm Password is required",
   }),
-
 }).with("password", "confirmPassword");
 
-/* =========================
-   ADMIN LOGIN
-========================= */
+//login admin
 export const adminLoginSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Invalid email",

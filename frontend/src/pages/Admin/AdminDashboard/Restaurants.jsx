@@ -5,7 +5,7 @@ export default function Restaurants() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const restaurantsPerPage = 6;
 
@@ -33,10 +33,7 @@ export default function Restaurants() {
     );
   });
 
-  /* 📄 PAGINATION LOGIC */
-  const totalPages = Math.ceil(
-    filteredRestaurants.length / restaurantsPerPage
-  );
+  const totalPages = Math.ceil(filteredRestaurants.length / restaurantsPerPage);
   const startIndex = (page - 1) * restaurantsPerPage;
   const paginatedRestaurants = filteredRestaurants.slice(
     startIndex,
@@ -52,7 +49,7 @@ export default function Restaurants() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Restaurants</h2>
 
-      {/* 🔍 SEARCH */}
+      {/* SEARCH */}
       <input
         type="text"
         placeholder="Search by name, email, or status..."
@@ -61,7 +58,7 @@ export default function Restaurants() {
         className="w-xl  mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white placeholder-gray-400"
       />
 
-      {/* 🧾 CARDS */}
+      {/*  CARDS */}
       {paginatedRestaurants.length === 0 ? (
         <p className="text-gray-400 text-center py-8">
           No matching restaurants found.
@@ -121,7 +118,7 @@ export default function Restaurants() {
             ))}
           </div>
 
-          {/* 📄 PAGINATION */}
+          {/*  PAGINATION */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-10">
               <button

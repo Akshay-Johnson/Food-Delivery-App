@@ -3,12 +3,12 @@ import nodemailer from "nodemailer";
 export const sendContactEmail = async (req, res) => {
   const { name, email, message } = req.body;
 
-  // Create transporter using your .env variables
+  // Create email transporter
   const transporter = nodemailer.createTransport({
-    service: "gmail", 
+    service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER, // Your email from .env
-      pass: process.env.EMAIL_PASS, // Your App Password from .env
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 
@@ -29,7 +29,9 @@ export const sendContactEmail = async (req, res) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ success: true, message: "Email sent successfully!" });
+    res
+      .status(200)
+      .json({ success: true, message: "Email sent successfully!" });
   } catch (error) {
     console.error("Nodemailer Error:", error);
     res.status(500).json({ success: false, message: "Failed to send email" });

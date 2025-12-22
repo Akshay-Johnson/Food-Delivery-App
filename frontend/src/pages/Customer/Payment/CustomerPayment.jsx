@@ -8,7 +8,6 @@ export default function CustomerPayment() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
-  
 
   //load cart
   useEffect(() => {
@@ -71,35 +70,42 @@ export default function CustomerPayment() {
         name: "DineX",
         description: "Order Payment",
 
-handler: async (response) => {
-  try {
-    // 1. Verify Payment
-    await api.post("/api/payments/verify", {
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_signature: response.razorpay_signature,
-    });
+        handler: async (response) => {
+          try {
+            // 1. Verify Payment
+            await api.post("/api/payments/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
 
-    // 2. Create the actual order
-    // FIX: Get restaurantId from the cart object
-    // FIX: Ensure selectedAddress is actually passed (you might need a state for this)
-    await api.post("/api/orders/create", {
-      restaurantId: cart.restaurantId, // Using cart data
-      addressId: cart.addressId || "PASTE_A_VALID_ADDRESS_ID_HERE_FOR_TESTING", 
-      paymentMethod: "ONLINE",
-      paymentId: response.razorpay_payment_id,
-    });
+            // 2. Create the actual order
+            await api.post("/api/orders/create", {
+              restaurantId: cart.restaurantId, // Using cart data
+              addressId:
+                cart.addressId || "PASTE_A_VALID_ADDRESS_ID_HERE_FOR_TESTING",
+              paymentMethod: "ONLINE",
+              paymentId: response.razorpay_payment_id,
+            });
 
-    setToast({ type: "success", message: "Order placed successfully!" });
-    setTimeout(() => {
-      setToast(null);
-       navigate("/customer/orders");
-    }, 3000);
-  } catch (error) {
-    console.error("Final Order Error:", error.response?.data);
-    setToast({ type: "error", message: error.response?.data?.message || "Payment worked, but order failed to save." });
-  }
-},
+            setToast({
+              type: "success",
+              message: "Order placed successfully!",
+            });
+            setTimeout(() => {
+              setToast(null);
+              navigate("/customer/orders");
+            }, 3000);
+          } catch (error) {
+            console.error("Final Order Error:", error.response?.data);
+            setToast({
+              type: "error",
+              message:
+                error.response?.data?.message ||
+                "Payment worked, but order failed to save.",
+            });
+          }
+        },
 
         theme: { color: "#22c55e" },
       };

@@ -2,33 +2,40 @@ import { useState } from "react";
 import api from "../../api/axiosInstance";
 
 export default function ContactUs() {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [status, setStatus] = useState("");
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setStatus("Sending...");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus("Sending...");
 
-  try {
-    const res = await api.post("/api/contact/send", formData);
-    
-    if (res.data.success) {
-      setStatus("Message Sent Successfully!");
-      setFormData({ name: "", email: "", message: "" });
+    try {
+      const res = await api.post("/api/contact/send", formData);
+
+      if (res.data.success) {
+        setStatus("Message Sent Successfully!");
+        setFormData({ name: "", email: "", message: "" });
+        setTimeout(() => setStatus(""), 3000);
+      }
+    } catch (error) {
+      console.error("Contact Error:", error);
+      setStatus("Failed to send. Please try again.");
       setTimeout(() => setStatus(""), 3000);
     }
-  } catch (error) {
-    console.error("Contact Error:", error);
-    setStatus("Failed to send. Please try again.");
-    setTimeout(() => setStatus(""), 3000);
-  }
-};
+  };
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <section id="contact" className="relative py-24 px-10 bg-[url('/assets/loginimage.jpg')] bg-cover bg-center text-white">
+    <section
+      id="contact"
+      className="relative py-24 px-10 bg-[url('/assets/loginimage.jpg')] bg-cover bg-center text-white"
+    >
       {/* Dark Overlay with Blur to match Testimonials */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-md"></div>
 
@@ -45,7 +52,9 @@ export default function ContactUs() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name Input */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Your Name</label>
+                <label className="text-sm font-medium text-gray-300">
+                  Your Name
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -59,7 +68,9 @@ export default function ContactUs() {
 
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Email Address</label>
+                <label className="text-sm font-medium text-gray-300">
+                  Email Address
+                </label>
                 <input
                   type="email"
                   name="email"
@@ -74,7 +85,9 @@ export default function ContactUs() {
 
             {/* Message Input */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Message</label>
+              <label className="text-sm font-medium text-gray-300">
+                Message
+              </label>
               <textarea
                 name="message"
                 required

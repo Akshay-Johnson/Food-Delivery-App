@@ -55,11 +55,8 @@ export const addToCart = async (req, res) => {
       return res.status(400).json({ message: "Invalid quantity" });
     }
 
-    /* ================== CART LOGIC ================== */
-
     let cart = await Cart.findOne({ customerId });
 
-    // First item → create cart
     if (!cart) {
       cart = await Cart.create({
         customerId,
@@ -78,7 +75,6 @@ export const addToCart = async (req, res) => {
       return res.status(201).json(cart);
     }
 
-    // Enforce single-restaurant rule
     if (cart.restaurantId.toString() !== restaurantId) {
       return res.status(400).json({
         message: "You can only order items from one restaurant at a time",
@@ -87,10 +83,7 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // Update or insert item
-    const existingItem = cart.items.find(
-      (i) => i.itemId.toString() === itemId
-    );
+    const existingItem = cart.items.find((i) => i.itemId.toString() === itemId);
 
     if (existingItem) {
       existingItem.quantity += parsedQuantity;
@@ -107,7 +100,6 @@ export const addToCart = async (req, res) => {
     await cart.save();
 
     return res.status(200).json(cart);
-
   } catch (error) {
     console.error("🔥 ADD TO CART CRASH:", error);
 

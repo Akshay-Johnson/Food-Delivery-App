@@ -30,38 +30,16 @@ import {
 
 const router = express.Router();
 
-/* =========================
-   AUTH
-========================= */
-router.post(
-  "/register",
-  validate(agentRegisterSchema),
-  registerAgent
-);
+//agent registration and login
+router.post("/register", validate(agentRegisterSchema), registerAgent);
 
-router.post(
-  "/login",
-  validate(agentLoginSchema),
-  loginAgent
-);
+router.post("/login", validate(agentLoginSchema), loginAgent);
 
-/* =========================
-   DASHBOARD
-========================= */
-router.get(
-  "/dashboard",
-  protectAgent,
-  getAgentDashboardStats
-);
+//dashboard stats
+router.get("/dashboard", protectAgent, getAgentDashboardStats);
 
-/* =========================
-   PROFILE
-========================= */
-router.get(
-  "/profile",
-  protectAgent,
-  getAgentProfile
-);
+//profile routes
+router.get("/profile", protectAgent, getAgentProfile);
 
 router.put(
   "/profile",
@@ -70,49 +48,19 @@ router.put(
   updateAgentProfile
 );
 
-/* =========================
-   LOCATION
-========================= */
-router.put(
-  "/location",
-  protectAgent,
-  updateAgentLocation
-);
+//update location
+router.put("/location", protectAgent, updateAgentLocation);
 
-/* =========================
-   ORDERS
-========================= */
-router.get(
-  "/available",
-  restaurantAuth,
-  getAvailableAgents
-);
+//get available agents for restaurant to assign orders
+router.get("/available", restaurantAuth, getAvailableAgents);
 
-router.get(
-  "/orders",
-  protectAgent,
-  getAssignedOrders
-);
+router.get("/orders", protectAgent, getAssignedOrders);
 
-router.put(
-  "/orders/picked/:id",
-  protectAgent,
-  markOrderPickedUp
-);
+router.put("/orders/picked/:id", protectAgent, markOrderPickedUp);
 
-router.put(
-  "/orders/delivered/:id",
-  protectAgent,
-  markOrderDelivered
-);
+router.put("/orders/delivered/:id", protectAgent, markOrderDelivered);
 
-/* =========================
-   FCM
-========================= */
-router.post(
-  "/save-fcm-token",
-  protectAgent,
-  saveAgentFcmToken
-);
+//save fcm token
+router.post("/save-fcm-token", protectAgent, saveAgentFcmToken);
 
 export default router;

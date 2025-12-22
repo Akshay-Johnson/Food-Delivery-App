@@ -33,38 +33,20 @@ import {
 
 const router = express.Router();
 
-/* =========================
-   AUTH
-========================= */
+//restaurant registration and login
 router.post(
   "/register",
   validate(restaurantRegisterSchema),
   registerRestaurant
 );
 
-router.post(
-  "/login",
-  validate(restaurantLoginSchema),
-  loginRestaurant
-);
+router.post("/login", validate(restaurantLoginSchema), loginRestaurant);
 
-/* =========================
-   FCM TOKEN
-========================= */
-router.post(
-  "/save-fcm-token",
-  restaurantAuth,
-  saveFCMToken
-);
+//save fcm token
+router.post("/save-fcm-token", restaurantAuth, saveFCMToken);
 
-/* =========================
-   PRIVATE RESTAURANT ROUTES
-========================= */
-router.get(
-  "/profile",
-  restaurantAuth,
-  getRestaurantProfile
-);
+//profile routes
+router.get("/profile", restaurantAuth, getRestaurantProfile);
 
 router.put(
   "/profile",
@@ -73,33 +55,15 @@ router.put(
   updateRestaurantProfile
 );
 
-router.get(
-  "/orders",
-  restaurantAuth,
-  getRestaurantOrders
-);
+router.get("/orders", restaurantAuth, getRestaurantOrders);
 
-router.put(
-  "/assign/orders",
-  restaurantAuth,
-  getAssignedOrders
-);
+router.put("/assign/orders", restaurantAuth, getAssignedOrders);
 
-router.put(
-  "/orders/assign/:orderId",
-  restaurantAuth,
-  assignOrderToAgent
-);
+router.put("/orders/assign/:orderId", restaurantAuth, assignOrderToAgent);
 
-router.get(
-  "/reviews",
-  restaurantAuth,
-  getRestaurantReviewsForOwner
-);
+router.get("/reviews", restaurantAuth, getRestaurantReviewsForOwner);
 
-/* =========================
-   PUBLIC ROUTES
-========================= */
+//public routes
 router.get("/", getAllRestaurants);
 
 router.get("/search", searchRestaurants);
@@ -110,19 +74,9 @@ router.get("/:id/details", getRestaurantDetails);
 
 router.get("/:id", getRestaurantById);
 
-/* =========================
-   CATEGORY MANAGEMENT
-========================= */
-router.post(
-  "/categories",
-  restaurantAuth,
-  addCategory
-);
+//category management
+router.post("/categories", restaurantAuth, addCategory);
 
-router.delete(
-  "/categories",
-  restaurantAuth,
-  removeCategory
-);
+router.delete("/categories", restaurantAuth, removeCategory);
 
 export default router;

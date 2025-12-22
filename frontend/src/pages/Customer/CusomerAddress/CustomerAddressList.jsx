@@ -107,8 +107,8 @@ export default function CustomerAddressList() {
 
                     <span
                       className="absolute left-full ml-2 top-1/2 -translate-y-1/2
-      bg-black text-white text-xs px-2 py-1 rounded
-      opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
+                                bg-black text-white text-xs px-2 py-1 rounded
+                                opacity-0 group-hover:opacity-100 transition whitespace-nowrap"
                     >
                       Edit
                     </span>

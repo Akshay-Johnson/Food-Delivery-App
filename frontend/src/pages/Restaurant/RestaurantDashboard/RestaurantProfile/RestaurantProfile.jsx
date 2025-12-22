@@ -19,9 +19,6 @@ export default function RestaurantProfile() {
     password: "",
   });
 
-  /* ==========================
-     LOAD PROFILE
-  ========================== */
   useEffect(() => {
     loadProfile();
   }, []);
@@ -44,14 +41,14 @@ export default function RestaurantProfile() {
 
       setLoading(false);
     } catch (error) {
-      console.error("Error loading profile:", error.response?.data || error.message);
+      console.error(
+        "Error loading profile:",
+        error.response?.data || error.message
+      );
       setLoading(false);
     }
   };
 
-  /* ==========================
-     IMAGE UPLOAD
-  ========================== */
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -67,14 +64,14 @@ export default function RestaurantProfile() {
       setForm((prev) => ({ ...prev, image: res.data.imageUrl }));
       setToast({ type: "success", message: "Image uploaded successfully!" });
     } catch (error) {
-      console.error("Image upload error:", error.response?.data || error.message);
+      console.error(
+        "Image upload error:",
+        error.response?.data || error.message
+      );
       setToast({ type: "error", message: "Image upload failed" });
     }
   };
 
-  /* ==========================
-     SUBMIT PROFILE
-  ========================== */
   const submit = async (e) => {
     e.preventDefault();
 
@@ -98,11 +95,12 @@ export default function RestaurantProfile() {
 
       <div className="bg-black/70 p-6 rounded-xl border border-white/20 w-full max-w-2xl">
         <form onSubmit={submit} className="space-y-4">
-
           {/* IMAGE */}
           <div className="flex flex-col items-center">
             <img
-              src={(form.image || "/assets/restaurant.png") + "?t=" + Date.now()}
+              src={
+                (form.image || "/assets/restaurant.png") + "?t=" + Date.now()
+              }
               className="w-80 h-40 rounded-lg object-cover border border-white/30"
               alt="Restaurant"
             />
@@ -110,7 +108,11 @@ export default function RestaurantProfile() {
             <label className="mt-3 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
               <Upload size={16} />
               Upload Image
-              <input type="file" className="hidden" onChange={handleImageUpload} />
+              <input
+                type="file"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
             </label>
           </div>
 
@@ -137,7 +139,9 @@ export default function RestaurantProfile() {
               className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
               placeholder="Description"
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
             />
             <input
               className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
@@ -155,15 +159,12 @@ export default function RestaurantProfile() {
             onChange={(e) => setForm({ ...form, cuisineType: e.target.value })}
           />
 
-                  <input
+          <input
             className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded"
             placeholder="New Password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-
-
-
 
           {/* TIME */}
           <div className="grid grid-cols-2 gap-4">

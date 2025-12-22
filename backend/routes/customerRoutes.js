@@ -20,29 +20,13 @@ import {
 
 const router = express.Router();
 
-/* =========================
-   AUTH
-========================= */
-router.post(
-  "/register",
-  validate(customerRegisterSchema),
-  registerCustomer
-);
+//customer registration and login
+router.post("/register", validate(customerRegisterSchema), registerCustomer);
 
-router.post(
-  "/login",
-  validate(customerLoginSchema),
-  loginCustomer
-);
+router.post("/login", validate(customerLoginSchema), loginCustomer);
 
-/* =========================
-   PROFILE
-========================= */
-router.get(
-  "/profile",
-  protectCustomer,
-  getCustomerProfile
-);
+//profile routes
+router.get("/profile", protectCustomer, getCustomerProfile);
 
 router.put(
   "/profile/edit",
@@ -51,22 +35,7 @@ router.put(
   editProfile
 );
 
-/* =========================
-   FCM
-========================= */
-router.put(
-  "/fcm-token",
-  protectCustomer,
-  saveFCMToken
-);
-
-/* =========================
-   TEST PUSH
-========================= */
-router.post(
-  "/test-push",
-  protectCustomer,
-  testCustomerPush
-);
+//save fcm token
+router.put("/fcm-token", protectCustomer, saveFCMToken);
 
 export default router;

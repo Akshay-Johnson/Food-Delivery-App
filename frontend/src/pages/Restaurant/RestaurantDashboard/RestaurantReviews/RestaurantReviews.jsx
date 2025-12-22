@@ -8,7 +8,7 @@ export default function RestaurantReviews() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // 📄 Pagination
+  //  Pagination
   const [page, setPage] = useState(1);
   const reviewsPerPage = 5;
 

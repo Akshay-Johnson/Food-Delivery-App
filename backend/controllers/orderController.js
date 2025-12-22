@@ -85,8 +85,6 @@ export const getMyOrders = async (req, res) => {
   try {
     const customerId = req.user.id;
 
-
-
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -499,6 +497,7 @@ export const markOrderDelivered = async (req, res) => {
     });
 
     const customer = await Customer.findById(order.customerId);
+
     //push notification
     await sendPushNotification({
       token: customer.fcmToken,

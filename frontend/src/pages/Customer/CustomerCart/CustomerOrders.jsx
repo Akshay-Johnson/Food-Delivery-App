@@ -12,12 +12,10 @@ export default function CustomerOrders() {
 
   const navigate = useNavigate();
 
-  /* ================= FETCH ORDERS ================= */
   useEffect(() => {
     fetchOrders();
   }, [page]);
 
-  /* ================= SMOOTH SCROLL (ONLY PAGE CHANGE) ================= */
   useEffect(() => {
     if (page > 1) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -41,7 +39,6 @@ export default function CustomerOrders() {
     }
   };
 
-  /* ================= STATUS COLOR ================= */
   const statusColor = (status) => {
     switch (status) {
       case "pending":
@@ -65,7 +62,6 @@ export default function CustomerOrders() {
 
   return (
     <div className="relative min-h-screen text-white">
-      {/* FIXED BACKGROUND */}
       <div className="fixed inset-0 bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center -z-10"></div>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-md -z-10"></div>
 
@@ -134,7 +130,7 @@ export default function CustomerOrders() {
               ))}
             </div>
 
-            {/* PAGINATION (TRUE CENTER) */}
+            {/* PAGINATION */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 pb-12">
                 <button
