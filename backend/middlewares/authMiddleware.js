@@ -1,27 +1,36 @@
 import jwt from "jsonwebtoken";
+import Customer from "../models/customerModel.js";
 
-const protectCustomer = (req, res, next) => {
+const protectCustomer = async (req, res, next) => {
   try {
-    let token;
+    const authHeader = req.headers.authorization;
 
-    if (req.headers.authorization?.startsWith("Bearer")) {
-      token = req.headers.authorization.split(" ")[1];
-    } else if (req.headers["x-auth-token"]) {
-      token = req.headers["x-auth-token"];
-    }
-
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "No token provided" });
     }
 
+    const token = authHeader.split(" ")[1];
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = { id: decoded.id };
+    const customer = await Customer.findById(decoded.id);
+
+    if (!customer) {
+      return res.status(401).json({ message: "Customer not found" });
+    }
+
+    // 🔴 THIS CHECK CAUSED YOUR BUG
+    if (!customer.isActive) {
+      return res.status(403).json({
+        message: "Your account has been blocked. Contact support.",
+      });
+    }
+    req.user = customer;
 
     next();
   } catch (error) {
     console.error("AUTH ERROR:", error);
-    res.status(401).json({ message: "Invalid or expired token" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
 

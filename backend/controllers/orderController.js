@@ -10,11 +10,11 @@ import { sendPushNotification } from "../utils/sendpush.js";
 
 /////////////////////////////////////////// Customer Controllers ////////////////////////////
 
-//create new order
+// create new order
 export const createOrder = async (req, res) => {
   try {
     const customerId = req.user.id;
-    const { addressId } = req.body;
+    const { addressId, paymentMethod = "COD", paymentId } = req.body;
 
     const cart = await Cart.findOne({ customerId });
 
@@ -24,11 +24,12 @@ export const createOrder = async (req, res) => {
 
     const restaurantId = cart.restaurantId;
 
+    // Prevent duplicate order spam
     const existingPendingOrder = await Order.findOne({
       customerId,
       restaurantId,
       status: "pending",
-      createdAt: { $gt: new Date(Date.now() - 5000) }, // last 5 seconds
+      createdAt: { $gt: new Date(Date.now() - 5000) },
     });
 
     if (existingPendingOrder) {
@@ -38,35 +39,63 @@ export const createOrder = async (req, res) => {
       });
     }
 
+    /* =======================
+       🔢 PRICE CALCULATION
+    ======================= */
+    const DELIVERY_CHARGE = 40;
+
+    const itemsTotal = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const totalPayable = itemsTotal + DELIVERY_CHARGE;
+
+    /* =======================
+       📦 CREATE ORDER
+    ======================= */
     const order = await Order.create({
       customerId,
-      restaurantId: cart.restaurantId,
+      restaurantId,
       items: cart.items,
-      totalPrice: cart.totalPrice,
+
+      totalPrice: itemsTotal, // items total only
+      deliveryCharge: DELIVERY_CHARGE,
+      agentEarning: DELIVERY_CHARGE, // agent revenue
+
       address: addressId,
+
+      paymentMethod,
+      paymentId: paymentMethod === "ONLINE" ? paymentId : null,
+      paymentStatus: paymentMethod === "ONLINE" ? "paid" : "pending",
+
       status: "pending",
     });
 
-    //clear cart after order
+    /* =======================
+       🧹 CLEAR CART
+    ======================= */
     cart.items = [];
     cart.totalPrice = 0;
     await cart.save();
 
-    //send order placed email
+    /* =======================
+       📧 NOTIFICATIONS
+    ======================= */
     const customer = await Customer.findById(customerId);
 
     await sendOrderPlacedEmail({
       to: customer.email,
       customerName: customer.name,
       orderId: order._id,
-      totalAmount: order.totalPrice,
+      totalAmount: totalPayable,
     });
 
     if (customer.fcmToken) {
       await sendPushNotification({
         token: customer.fcmToken,
         title: "Order Placed",
-        body: `Your order ${order._id} has been placed successfully.`,
+        body: `Your order has been placed. Total ₹${totalPayable}`,
         data: {
           orderId: order._id.toString(),
           status: "pending",
@@ -74,9 +103,13 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    res.status(201).json({ message: "Order created successfully", order });
+    res.status(201).json({
+      message: "Order created successfully",
+      order,
+    });
   } catch (error) {
-    res.status(500).json({ message: "error creating order", error });
+    console.error("CREATE ORDER ERROR:", error);
+    res.status(500).json({ message: "Error creating order", error });
   }
 };
 

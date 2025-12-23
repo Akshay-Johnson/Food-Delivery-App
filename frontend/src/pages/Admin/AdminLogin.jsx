@@ -5,9 +5,12 @@ import AuthInput from "../../components/AuthInput";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../components/toast/toast";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLogin() {
   const [toast, setToast] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -27,7 +30,6 @@ export default function AdminLogin() {
         navigate("/admin/dashboard");
       }, 1200);
     } catch (error) {
-      console.error("Login Failed:", error);
       setToast({
         type: "error",
         message: error.response?.data?.message || "Login Failed",
@@ -45,6 +47,7 @@ export default function AdminLogin() {
           onClose={() => setToast(null)}
         />
       )}
+
       <form onSubmit={submit}>
         <AuthInput
           label="Email"
@@ -54,13 +57,26 @@ export default function AdminLogin() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
-        <AuthInput
-          label="Password"
-          type="password"
-          placeholder="Enter your password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+        {/* PASSWORD WITH TOGGLE */}
+        <div className="relative">
+          <AuthInput
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-200"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
 
         <div className="flex gap-3 mt-4 justify-center">
           <button

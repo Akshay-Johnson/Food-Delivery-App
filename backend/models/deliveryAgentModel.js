@@ -37,6 +37,23 @@ const deliveryAgentschema = new mongoose.Schema(
       enum: ["approved", "blocked"],
       default: "approved",
     },
+    
+    flaggedByRestaurants: [
+      {
+        restaurantId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Restaurant",
+        },
+        reason: {
+          type: String,
+          default: "",
+        },
+        flaggedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
 
     status: {
       type: String,

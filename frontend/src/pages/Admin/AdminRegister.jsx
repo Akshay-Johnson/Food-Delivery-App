@@ -1,10 +1,10 @@
 import { useState } from "react";
 import AuthLayout from "../../layouts/AuthLayout";
 import RoleSwitcher from "../../components/RoleSwitcher";
-import AuthInput from "../../components/AuthInput";
 import api from "../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import Toast from "../../components/toast/toast";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminRegister() {
   const [form, setForm] = useState({
@@ -14,8 +14,10 @@ export default function AdminRegister() {
     confirmPassword: "",
   });
 
-  const [toast, setToast] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
   const submit = async (e) => {
@@ -33,12 +35,12 @@ export default function AdminRegister() {
         type: "success",
         message: "Admin Registered Successfully 🎉",
       });
+
       setTimeout(() => {
         setToast(null);
         navigate("/admin/login");
       }, 1200);
     } catch (error) {
-      console.error("Registration Failed:", error);
       setToast({
         type: "error",
         message: error.response?.data?.message || "Registration Failed",
@@ -49,43 +51,100 @@ export default function AdminRegister() {
 
   return (
     <AuthLayout title="Admin Register">
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <form onSubmit={submit}>
-        <AuthInput
-          label="Name"
-          placeholder="Enter your name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-
-        <AuthInput
-          label="Email"
-          type="email"
-          placeholder="Enter your email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <div className="mb-4 flex flex-row gap-4">
-          <AuthInput
-            label="Password"
-            type="password"
-            placeholder="Enter your "
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-
-          <AuthInput
-            label="Confirm Password"
-            type="password"
-            placeholder="Confirm your password"
-            value={form.confirmPassword}
-            onChange={(e) =>
-              setForm({ ...form, confirmPassword: e.target.value })
-            }
+        {/* NAME */}
+        <div className="mb-4">
+          <label className="block text-sm text-gray-300 mb-1">Name</label>
+          <input
+            type="text"
+            placeholder="Enter your name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="w-full px-4 py-2 rounded-md bg-black/40 text-white border border-white/20"
           />
         </div>
 
+        {/* EMAIL */}
+        <div className="mb-4">
+          <label className="block text-sm text-gray-300 mb-1">Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full px-4 py-2 rounded-md bg-black/40 text-white border border-white/20"
+          />
+        </div>
+
+        {/* PASSWORDS */}
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* PASSWORD */}
+          <div className="relative">
+            <label className="block text-sm text-gray-300 mb-1">
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={form.password}
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value })
+              }
+              className="w-full px-4 py-2 pr-12 rounded-md bg-black/40 text-white border border-white/20"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[38px] text-gray-400 hover:text-white"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+
+          {/* CONFIRM PASSWORD */}
+          <div className="relative">
+            <label className="block text-sm text-gray-300 mb-1">
+              Confirm Password
+            </label>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={form.confirmPassword}
+              onChange={(e) =>
+                setForm({ ...form, confirmPassword: e.target.value })
+              }
+              className="w-full px-4 py-2 pr-12 rounded-md bg-black/40 text-white border border-white/20"
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+              className="absolute right-3 top-[38px] text-gray-400 hover:text-white"
+            >
+              {showConfirmPassword ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* BUTTONS */}
         <div className="flex gap-3 mt-4">
-          <button className="w-1/2 bg-blue-600 text-white py-2 rounded-md">
+          <button
+            type="submit"
+            className="w-1/2 bg-blue-600 text-white py-2 rounded-md"
+          >
             Register
           </button>
 
@@ -93,7 +152,7 @@ export default function AdminRegister() {
             to="/admin/login"
             className="w-1/2 text-center bg-blue-600 text-white py-2 rounded-md"
           >
-            Back to Login ?
+            Back to Login
           </Link>
         </div>
       </form>

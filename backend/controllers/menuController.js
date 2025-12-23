@@ -93,7 +93,10 @@ export const getMyMenu = async (req, res) => {
 export const getMenuByRestaurant = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const menu = await Menu.find({ restaurantId });
+    const menu = await Menu.find({
+      restaurantId,
+      isAvailable: true,
+    });
 
     res.json(menu);
   } catch (error) {
@@ -127,11 +130,36 @@ export const getRecommendedDishes = async (req, res) => {
     const dishes = await Menu.find().limit(10);
     res.json(dishes);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error fetching recommended dishes",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching recommended dishes",
+      error: error.message,
+    });
+  }
+};
+
+//update availability
+export const updateAvailability = async (req, res) => {
+  try {
+    const restaurantId = req.user.id;
+    const { isAvailable } = req.body;
+
+    const item = await Menu.findOne({
+      _id: req.params.id,
+      restaurantId, 
+    });
+
+    if (!item) {
+      return res.status(404).json({ message: "Menu item not found" });
+    }
+
+    item.isAvailable = isAvailable;
+    await item.save();
+
+    res.json({
+      message: "Availability updated",
+      isAvailable: item.isAvailable,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };

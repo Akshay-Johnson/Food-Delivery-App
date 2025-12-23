@@ -19,6 +19,7 @@ import {
 } from "../models/validations/customer.js";
 
 const router = express.Router();
+console.log("✅ customerRoutes.js LOADED");
 
 //customer registration and login
 router.post("/register", validate(customerRegisterSchema), registerCustomer);
@@ -34,6 +35,8 @@ router.put(
   validate(customerUpdateSchema),
   editProfile
 );
+
+console.log("✅ REGISTERING PUT /fcm-token");
 
 //save fcm token
 router.put("/fcm-token", protectCustomer, saveFCMToken);

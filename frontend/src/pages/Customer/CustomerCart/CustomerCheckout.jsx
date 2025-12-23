@@ -206,6 +206,7 @@ export default function CustomerCheckout() {
         <h2 className="text-xl font-bold mt-8 mb-3">Order Summary</h2>
 
         <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+          {/* ITEMS */}
           {cart.items.map((item) => (
             <div key={item._id} className="flex justify-between mb-2">
               <p>
@@ -217,9 +218,24 @@ export default function CustomerCheckout() {
 
           <hr className="border-white/30 my-3" />
 
-          <div className="flex justify-between text-lg font-semibold">
-            <p>Total</p>
+          {/* ITEMS TOTAL */}
+          <div className="flex justify-between text-sm">
+            <p>Items Total</p>
             <p>₹{cart.totalPrice}</p>
+          </div>
+
+          {/* DELIVERY CHARGE */}
+          <div className="flex justify-between text-sm">
+            <p>Delivery Charge</p>
+            <p>₹40</p>
+          </div>
+
+          <hr className="border-white/30 my-2" />
+
+          {/* FINAL TOTAL */}
+          <div className="flex justify-between text-lg font-bold">
+            <p>Total Payable</p>
+            <p>₹{cart.totalPrice + 40}</p>
           </div>
         </div>
 

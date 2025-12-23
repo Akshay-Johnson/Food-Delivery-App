@@ -2,6 +2,7 @@ import Customer from "../models/customerModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendPushNotification } from "../utils/sendpush.js";
+import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
 
 // Register Customer
 export const registerCustomer = async (req, res) => {
@@ -11,6 +12,12 @@ export const registerCustomer = async (req, res) => {
     const existingUser = await Customer.findOne({ email });
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -34,6 +41,12 @@ export const loginCustomer = async (req, res) => {
 
     const user = await Customer.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        message: "Your account has been blocked. Contact support.",
+      });
+    }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ message: "Invalid credentials" });
@@ -145,5 +158,31 @@ export const testCustomerPush = async (req, res) => {
   } catch (error) {
     console.error("TEST PUSH ERROR:", error);
     res.status(500).json({ message: "Failed to send test push" });
+  }
+};
+
+// ADMIN: block / unblock customer
+export const updateCustomerStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const customer = await Customer.findById(id);
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    customer.isActive = isActive;
+    await customer.save();
+
+    res.json({
+      message: isActive
+        ? "Customer unblocked successfully"
+        : "Customer blocked successfully",
+    });
+  } catch (error) {
+    console.error("UPDATE CUSTOMER STATUS ERROR:", error);
+    res.status(500).json({ message: "Failed to update customer status" });
   }
 };

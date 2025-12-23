@@ -15,7 +15,10 @@ export default function RestaurantReviews() {
   const loadReviews = async () => {
     try {
       const res = await api.get("/api/reviews/restaurant/my-reviews");
-      setReviews(res.data || []);
+
+      console.log("Restaurant Reviews API:", res.data);
+
+      setReviews(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error("Failed to load reviews", error);
     } finally {

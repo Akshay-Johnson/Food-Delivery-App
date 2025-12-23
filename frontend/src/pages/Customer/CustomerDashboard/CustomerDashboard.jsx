@@ -31,6 +31,8 @@ export default function CustomerDashboard() {
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("");
 
+  const availableDishes = dishes.filter((dish) => dish.isAvailable === true);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -82,10 +84,9 @@ export default function CustomerDashboard() {
     try {
       const response = await api.get(`/api/search?query=${text}`);
 
-      // merge backend results + local matches
       const mergedDishResults = [
-        ...response.data.dishes,
-        ...dishes.filter(
+        ...response.data.dishes.filter(d => d.isAvailable === true),
+        ...availableDishes.filter(
           (d) =>
             d.name.toLowerCase().includes(text.toLowerCase()) ||
             d.category?.toLowerCase().includes(text.toLowerCase())
@@ -131,15 +132,15 @@ export default function CustomerDashboard() {
     setRestaurantPage(1);
   }, [searchQuery, restaurants]);
 
-  const filteredDishes = dishes.filter((d) =>
+  const filteredDishes = availableDishes.filter((d) =>
     d.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   let categoryDishes = selectedCategory
-    ? dishes.filter(
+    ? availableDishes.filter(
         (d) => d.category?.toLowerCase() === selectedCategory.toLowerCase()
       )
-    : [...dishes];
+    : [...availableDishes];
 
   /* ===== PRICE FILTER ===== */
   if (priceRange !== "all") {
@@ -547,7 +548,7 @@ export default function CustomerDashboard() {
 
         {/* POPULAR RESTAURANTS */}
         <section className="px-6 mt-10 mb-10">
-          <h3 className="text-xl font-bold mb-4">Popular Restaurants</h3>
+          <h3 className="text-xl font-bold mb-4"> Restaurants</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedRestaurants.map((r) => (
@@ -557,7 +558,7 @@ export default function CustomerDashboard() {
                 className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
               >
                 <img
-                  src={r.image || `/assets/restaurantimage.jpeg`}
+                  src={r.image || `/assets/restaurant.png`}
                   className="h-40 w-full object-cover"
                   alt={r.name}
                 />

@@ -9,6 +9,9 @@ import {
   getAvailableAgents,
   getAgentDashboardStats,
   saveAgentFcmToken,
+  flagAgent,
+  unflagAgent,
+  getFlaggedAgentsByRestaurant,
 } from "../controllers/deliveryAgentController.js";
 
 import { protectAgent } from "../middlewares/agentAuth.js";
@@ -62,5 +65,10 @@ router.put("/orders/delivered/:id", protectAgent, markOrderDelivered);
 
 //save fcm token
 router.post("/save-fcm-token", protectAgent, saveAgentFcmToken);
+
+// flag / unflag delivery agent (restaurant only)
+router.put("/:agentId/flag", restaurantAuth, flagAgent);
+router.put("/:agentId/unflag", restaurantAuth, unflagAgent);
+router.get("/flagged", restaurantAuth, getFlaggedAgentsByRestaurant);
 
 export default router;

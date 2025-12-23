@@ -2,6 +2,7 @@ import DeliveryAgent from "../models/deliveryAgentModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Order from "../models/orderModel.js";
+import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
 
 // Generate Token
 const generateToken = (id) => {
@@ -14,6 +15,14 @@ const generateToken = (id) => {
 export const registerAgent = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
+
+    const emailLower = email.toLowerCase();
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
 
     if (!name || !email || !phone || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -28,9 +37,9 @@ export const registerAgent = async (req, res) => {
 
     const agent = await DeliveryAgent.create({
       name,
-      email,
+      email: emailLower,
       phone,
-      password: hashedPassword, // ✅ FIX
+      password: hashedPassword,
       approvalStatus: "approved",
       isActive: true,
     });
@@ -200,10 +209,13 @@ export const updateAgentLocation = async (req, res) => {
 // get all agents for restaurant view
 export const getAvailableAgents = async (req, res) => {
   try {
+    const restaurantId = req.user.id;
+
     const agents = await DeliveryAgent.find({
       approvalStatus: "approved",
       status: "available",
       isActive: true,
+      "flaggedByRestaurants.restaurantId": { $ne: restaurantId },
     });
 
     res.json(agents);
@@ -254,5 +266,101 @@ export const saveAgentFcmToken = async (req, res) => {
     res.json({ message: "FCM token saved successfully" });
   } catch (error) {
     res.status(500).json({ message: "Failed to save FCM token", error });
+  }
+};
+
+//flag delivery agent
+export const flagAgent = async (req, res) => {
+  try {
+    const restaurantId = req.user.id;
+    const { agentId } = req.params;
+    const { reason } = req.body;
+
+    const agent = await DeliveryAgent.findById(agentId);
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    if (
+      (agent.flaggedByRestaurants || []).some(
+        (f) => f.restaurantId.toString() === restaurantId
+      )
+    ) {
+      return res.status(400).json({ message: "Agent already flagged" });
+    }
+
+    agent.flaggedByRestaurants.push({
+      restaurantId,
+      reason,
+    });
+
+    await agent.save();
+
+    res.json({ message: "Agent flagged successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to flag agent" });
+  }
+};
+
+//unflag delivery agent
+export const unflagAgent = async (req, res) => {
+  try {
+    const restaurantId = req.user.id;
+    const { agentId } = req.params;
+
+    await DeliveryAgent.updateOne(
+      { _id: agentId },
+      {
+        $pull: {
+          flaggedByRestaurants: { restaurantId },
+        },
+      }
+    );
+
+    res.json({ message: "Agent unflagged successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to unflag agent" });
+  }
+};
+
+// agents flagged by THIS restaurant
+export const getFlaggedAgentsByRestaurant = async (req, res) => {
+  try {
+    const restaurantId = req.user.id;
+
+    const agents = await DeliveryAgent.find({
+      "flaggedByRestaurants.restaurantId": restaurantId,
+    });
+
+    res.json(agents);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load flagged agents" });
+  }
+};
+
+// ADMIN: remove a specific restaurant flag from agent
+export const adminRemoveFlag = async (req, res) => {
+  try {
+    const { agentId, restaurantId } = req.params;
+
+    const result = await DeliveryAgent.updateOne(
+      { _id: agentId },
+      {
+        $pull: {
+          flaggedByRestaurants: { restaurantId },
+        },
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res
+        .status(404)
+        .json({ message: "Flag not found or already removed" });
+    }
+
+    res.json({ message: "Flag removed successfully" });
+  } catch (error) {
+    console.error("ADMIN REMOVE FLAG ERROR:", error);
+    res.status(500).json({ message: "Failed to remove flag" });
   }
 };

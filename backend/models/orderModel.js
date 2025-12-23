@@ -7,11 +7,13 @@ const orderSchema = new mongoose.Schema(
       ref: "Customer",
       required: true,
     },
+
     restaurantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant",
       required: true,
     },
+
     items: [
       {
         itemId: { type: mongoose.Schema.Types.ObjectId, ref: "Menu" },
@@ -20,13 +22,41 @@ const orderSchema = new mongoose.Schema(
         quantity: Number,
       },
     ],
+
     totalPrice: {
-      type: Number,
+      type: Number, // items total
       required: true,
     },
+
+    deliveryCharge: {
+      type: Number,
+      default: 0,
+    },
+
+    agentEarning: {
+      type: Number,
+      default: 0,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["COD", "ONLINE"],
+      default: "COD",
+    },
+
+    paymentId: {
+      type: String,
+      default: null,
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid"],
+      default: "pending",
+    },
+
     status: {
       type: String,
-      default: "pending",
       enum: [
         "pending",
         "accepted",
@@ -36,6 +66,7 @@ const orderSchema = new mongoose.Schema(
         "picked",
         "delivered",
       ],
+      default: "pending",
     },
 
     deliveryAgentId: {
@@ -43,14 +74,10 @@ const orderSchema = new mongoose.Schema(
       ref: "DeliveryAgent",
       default: null,
     },
+
     address: {
       type: String,
       required: true,
-    },
-
-    paymentStatus: {
-      type: String,
-      default: "pending",
     },
   },
   { timestamps: true }

@@ -3,6 +3,7 @@ import Customer from "../models/customerModel.js";
 import Restaurant from "../models/restaurantModel.js";
 import Order from "../models/orderModel.js";
 import DeliveryAgent from "../models/deliveryAgentModel.js";
+import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -15,6 +16,12 @@ const generateToken = (id) => {
 export const registerAdmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
 
     const exists = await Admin.findOne({ email: email.toLowerCase() });
     if (exists) {

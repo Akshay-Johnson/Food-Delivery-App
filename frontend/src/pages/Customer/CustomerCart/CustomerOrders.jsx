@@ -7,7 +7,7 @@ export default function CustomerOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [limit] = useState(6);
+  const limit = 6;
   const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ export default function CustomerOrders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-
       const res = await api.get("/api/orders/my-orders", {
         params: { page, limit },
       });
@@ -62,11 +61,11 @@ export default function CustomerOrders() {
 
   return (
     <div className="relative min-h-screen text-white">
+      {/* BACKGROUND */}
       <div className="fixed inset-0 bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center -z-10"></div>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-md -z-10"></div>
 
-      {/* CONTENT */}
-      <div className="relative z-10 max-w-3xl mx-auto px-2">
+      <div className="relative z-10 max-w-4xl mx-auto px-4">
         {/* TOP BAR */}
         <div className="mb-6 flex justify-end gap-2 pt-10">
           <Link to="/customer/dashboard">
@@ -92,42 +91,67 @@ export default function CustomerOrders() {
         ) : (
           <>
             {/* ORDERS GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6 pb-6 ">
-              {orders.map((order) => (
-                <div
-                  key={order._id}
-                  className="bg-black/70 border border-white rounded-xl p-5 shadow-lg flex flex-col h-full"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-lg font-semibold">
-                      {order.items.map((item) => item.name).join(", ")}
-                    </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
+              {orders.map((order) => {
+                // ✅ SAFE NUMBER HANDLING (THIS FIXES NaN)
+                const itemsTotal = Number(order.totalPrice) || 0;
+                const deliveryCharge = Number(order.deliveryCharge) || 0;
+                const totalPayable = itemsTotal + deliveryCharge;
 
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full ${statusColor(
-                        order.status
-                      )}`}
-                    >
-                      {order.status.toUpperCase()}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-300 mb-2">
-                    Ordered on {new Date(order.createdAt).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-300">
-                    From: {order.restaurantId?.name}
-                  </p>
-                  <p className="font-bold mt-3">Total: ₹{order.totalPrice}</p>
-
-                  <button
-                    onClick={() => navigate(`/customer/orders/${order._id}`)}
-                    className="mt-auto bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+                return (
+                  <div
+                    key={order._id}
+                    className="bg-black/70 border border-white/30 rounded-xl p-5 shadow-lg flex flex-col"
                   >
-                    View Details
-                  </button>
-                </div>
-              ))}
+                    {/* HEADER */}
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-lg font-semibold line-clamp-1">
+                        {order.items.map((i) => i.name).join(", ")}
+                      </h3>
+
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full ${statusColor(
+                          order.status
+                        )}`}
+                      >
+                        {order.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* DETAILS */}
+                    <p className="text-sm text-gray-300 mb-1">
+                      Ordered on{" "}
+                      {new Date(order.createdAt).toLocaleString()}
+                    </p>
+
+                    <p className="text-sm text-gray-300 mb-2">
+                      From: {order.restaurantId?.name || "Restaurant"}
+                    </p>
+
+                    <p className="text-sm text-gray-300">
+                      Items: ₹{itemsTotal}
+                    </p>
+
+                    <p className="text-sm text-gray-300">
+                      Delivery: ₹{deliveryCharge}
+                    </p>
+
+                    <p className="font-bold mt-1 text-lg">
+                      Total Paid: ₹{totalPayable}
+                    </p>
+
+                    {/* ACTION */}
+                    <button
+                      onClick={() =>
+                        navigate(`/customer/orders/${order._id}`)
+                      }
+                      className="mt-auto bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                );
+              })}
             </div>
 
             {/* PAGINATION */}

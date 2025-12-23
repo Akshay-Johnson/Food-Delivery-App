@@ -1,5 +1,6 @@
 import Restaurant from "../models/restaurantModel.js";
 import Menu from "../models/menuModel.js";
+import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -15,6 +16,13 @@ export const registerRestaurant = async (req, res) => {
   const { name, email, password, phone, address } = req.body;
   try {
     const exists = await Restaurant.findOne({ email });
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
+
     if (exists) {
       return res.status(400).json({ message: "Restaurant already exists" });
     }

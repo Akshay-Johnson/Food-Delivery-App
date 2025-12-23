@@ -163,7 +163,7 @@ export default function RestaurantDetails() {
 
         {/* Banner */}
         <img
-          src={restaurant.image || "/assets/restaurantprofile.png"}
+          src={restaurant.image || "/assets/restaurant.png"}
           className="w-full h-64 object-cover"
           alt="Restaurant"
         />

@@ -59,6 +59,26 @@ export default function MenuManagement() {
     );
   });
 
+  const toggleAvailability = async (id, currentStatus) => {
+    try {
+      await api.put(`/api/menu/${id}/availability`, {
+        isAvailable: !currentStatus,
+      });
+
+      setToast({
+        type: "success",
+        message: `Item marked as ${
+          currentStatus ? "Not Available" : "Available"
+        }`,
+      });
+
+      loadMenu(); // refresh list
+    } catch (error) {
+      console.error("Availability update failed:", error);
+      setToast({ type: "error", message: "Update failed" });
+    }
+  };
+
   /* ================= PAGINATION LOGIC ================= */
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
@@ -155,6 +175,19 @@ export default function MenuManagement() {
                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
                       Delete
                     </span>
+                  </button>
+                  {/* AVAILABILITY TOGGLE */}
+                  <button
+                    onClick={() =>
+                      toggleAvailability(item._id, item.isAvailable)
+                    }
+                    className={`mt-3 w-full py-1 rounded text-sm font-semibold transition ${
+                      item.isAvailable
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-600 hover:bg-gray-700"
+                    }`}
+                  >
+                    {item.isAvailable ? "Available" : "Not Available"}
                   </button>
                 </div>
               </div>

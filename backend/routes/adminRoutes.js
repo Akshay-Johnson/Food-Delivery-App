@@ -11,6 +11,10 @@ import {
   getAllOrders,
 } from "../controllers/adminController.js";
 
+import { updateCustomerStatus } from "../controllers/customerController.js";
+
+import { adminRemoveFlag } from "../controllers/deliveryAgentController.js";
+
 import Review from "../models/reviewModel.js";
 import { protectAdmin } from "../middlewares/adminAuth.js";
 import { validate } from "../middlewares/validate.js";
@@ -35,10 +39,20 @@ router.put("/restaurant/status/:id", protectAdmin, updateRestaurantStatus);
 //customer controls
 router.get("/customers", protectAdmin, getAllCustomers);
 
+// ADMIN: block / unblock customer
+router.put("/customer/status/:id", protectAdmin, updateCustomerStatus);
+
 //agent controls
 router.get("/agents", protectAdmin, getAllAgents);
 
 router.put("/agent/status/:id", protectAdmin, updateAgentStatus);
+
+// ADMIN: remove restaurant flag from agent
+router.put(
+  "/agents/:agentId/unflag/:restaurantId",
+  protectAdmin,
+  adminRemoveFlag
+);
 
 //order controls
 router.get("/orders", protectAdmin, getAllOrders);

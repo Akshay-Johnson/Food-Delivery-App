@@ -7,21 +7,26 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const role = localStorage.getItem("role");
 
-  let tokenKey = null;
-  if (role === "customer") tokenKey = "customerToken";
-  if (role === "restaurant") tokenKey = "restaurantToken";
-  if (role === "agent") tokenKey = "agentToken";
-  if (role === "admin") tokenKey = "adminToken";
+  let token =
+    (role === "restaurant" && localStorage.getItem("restaurantToken")) ||
+    (role === "agent" && localStorage.getItem("agentToken")) ||
+    (role === "admin" && localStorage.getItem("adminToken")) ||
+    (role === "customer" && localStorage.getItem("customerToken"));
 
-  const token = tokenKey ? localStorage.getItem(tokenKey) : null;
+  // 🔐 fallback (VERY IMPORTANT)
+  if (!token) {
+    token =
+      localStorage.getItem("restaurantToken") ||
+      localStorage.getItem("agentToken") ||
+      localStorage.getItem("adminToken") ||
+      localStorage.getItem("customerToken");
+  }
 
   const isAuthRoute =
     config.url.includes("/login") || config.url.includes("/register");
 
   if (token && !isAuthRoute) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    delete config.headers.Authorization;
   }
 
   return config;
