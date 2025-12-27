@@ -11,6 +11,11 @@ export const agentRegisterSchema = Joi.object({
     "string.empty": "Email is required",
   }),
 
+  otp: Joi.string().length(6).required().messages({
+    "string.length": "OTP must be 6 digits",
+    "string.empty": "OTP is required",
+  }),
+
   phone: Joi.string()
     .pattern(/^\d{10}$/)
     .required()

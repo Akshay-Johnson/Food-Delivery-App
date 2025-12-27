@@ -15,10 +15,10 @@ const router = express.Router();
 // list orders
 router.get("/orders", restaurantAuth, getRestaurantOrders);
 
-// ✅ get single order (FIXES 404)
+// get single order
 router.get("/orders/:orderId", restaurantAuth, getRestaurantOrderById);
 
-// assign agent (KEEP ONE)
+// assign agent 
 router.post(
   "/orders/assign-agent/:orderId",
   restaurantAuth,

@@ -10,6 +10,11 @@ export const adminRegisterSchema = Joi.object({
     "string.email": "Invalid email address",
   }),
 
+  otp: Joi.string().length(6).required().messages({
+    "string.length": "OTP must be 6 digits",
+    "string.empty": "OTP is required",
+  }),
+
   password: Joi.string().min(6).required().messages({
     "string.min": "Password must be at least 6 characters",
   }),

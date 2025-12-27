@@ -6,7 +6,8 @@ export default function RoleSwitcher() {
     <div className="flex justify-center mt-6">
       <div className="text-sm text-gray-300">
         <div className="flex gap-4 flex-wrap justify-center">
-          {/* Customer */}
+
+          {/* Customer 
           <Link to="/customer/login" className="relative group">
             <div
               className="
@@ -30,8 +31,9 @@ export default function RoleSwitcher() {
               Customer
             </span>
           </Link>
+          */}
 
-          {/* Restaurant */}
+          {/* Restaurant 
           <Link to="/restaurant/login" className="relative group">
             <div
               className="
@@ -56,7 +58,7 @@ export default function RoleSwitcher() {
             </span>
           </Link>
 
-          {/* Agent */}
+          {/* Agent 
           <Link to="/agent/login" className="relative group">
             <div
               className="
@@ -81,7 +83,9 @@ export default function RoleSwitcher() {
             </span>
           </Link>
 
-          {/* Admin */}
+          */}
+
+          {/* Admin 
           <Link to="/admin/login" className="relative group">
             <div
               className="
@@ -105,6 +109,7 @@ export default function RoleSwitcher() {
               Admin
             </span>
           </Link>
+          */}
 
           {/* Home */}
           <Link to="/" className="relative group">

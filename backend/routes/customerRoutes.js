@@ -6,7 +6,7 @@ import {
   getCustomerProfile,
   editProfile,
   saveFCMToken,
-  testCustomerPush,
+  sendCustomerEmailOtp,
 } from "../controllers/customerController.js";
 
 import protectCustomer from "../middlewares/authMiddleware.js";
@@ -19,11 +19,10 @@ import {
 } from "../models/validations/customer.js";
 
 const router = express.Router();
-console.log("✅ customerRoutes.js LOADED");
 
 //customer registration and login
+router.post("/send-otp", sendCustomerEmailOtp);
 router.post("/register", validate(customerRegisterSchema), registerCustomer);
-
 router.post("/login", validate(customerLoginSchema), loginCustomer);
 
 //profile routes

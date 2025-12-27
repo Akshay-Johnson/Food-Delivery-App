@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Order from "../models/orderModel.js";
 import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
+import EmailOtp from "../models/EmailOtp.js";
+import { generateOtp, sendEmailOtp } from "../utils/emailOtp.js";
 
 // Generate Token
 const generateToken = (id) => {
@@ -11,10 +13,49 @@ const generateToken = (id) => {
   });
 };
 
+// send email otp
+export const sendAgentEmailOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
+
+    const otp = generateOtp();
+
+    await EmailOtp.deleteMany({ email });
+
+    await EmailOtp.create({
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    await sendEmailOtp(email, otp);
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
+
 // register delivery agent
 export const registerAgent = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, email, phone, password, otp } = req.body;
+
+    const otpRecord = await EmailOtp.findOne({ email, otp });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
 
     const emailLower = email.toLowerCase();
 
@@ -42,6 +83,7 @@ export const registerAgent = async (req, res) => {
       password: hashedPassword,
       approvalStatus: "approved",
       isActive: true,
+      isEmailVerified: true,
     });
 
     const token = generateToken(agent._id);
@@ -362,5 +404,29 @@ export const adminRemoveFlag = async (req, res) => {
   } catch (error) {
     console.error("ADMIN REMOVE FLAG ERROR:", error);
     res.status(500).json({ message: "Failed to remove flag" });
+  }
+};
+
+export const toggleAgentStatus = async (req, res) => {
+  try {
+    const agent = await DeliveryAgent.findById(req.user.id);
+
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    // toggle status
+    agent.status =
+      agent.status === "available" ? "offline" : "available";
+
+    await agent.save();
+
+    res.json({
+      message: "Status updated successfully",
+      status: agent.status,
+    });
+  } catch (error) {
+    console.error("TOGGLE AGENT STATUS ERROR:", error);
+    res.status(500).json({ message: "Failed to update status" });
   }
 };

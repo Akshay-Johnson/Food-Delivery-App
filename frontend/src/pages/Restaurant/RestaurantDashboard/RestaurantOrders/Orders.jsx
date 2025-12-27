@@ -8,15 +8,14 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  //  Search
+  // Search
   const [search, setSearch] = useState("");
 
-  //  Pagination
+  // Pagination
   const [page, setPage] = useState(1);
   const ordersPerPage = 6;
 
   const navigate = useNavigate();
-
 
   useEffect(() => {
     loadOrders();
@@ -35,7 +34,6 @@ export default function Orders() {
       setLoading(false);
     }
   };
-
 
   const updateStatus = async (orderId, status) => {
     try {
@@ -59,7 +57,7 @@ export default function Orders() {
     );
   });
 
-  /* ================= PAGINATION LOGIC ================= */
+  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
   const startIndex = (page - 1) * ordersPerPage;
   const paginatedOrders = filteredOrders.slice(
@@ -67,7 +65,6 @@ export default function Orders() {
     startIndex + ordersPerPage
   );
 
-  // Reset page when search changes
   useEffect(() => {
     setPage(1);
   }, [search]);
@@ -79,9 +76,10 @@ export default function Orders() {
   return (
     <div className="p-6 text-white">
       <h2 className="text-2xl font-bold mb-4">Restaurant Orders</h2>
+
       {toast && <Toast type={toast.type} message={toast.message} />}
 
-      {/* SEARCH INPUT */}
+      {/* SEARCH */}
       <input
         type="text"
         placeholder="Search by order ID, customer, phone or status"
@@ -101,6 +99,7 @@ export default function Orders() {
                 key={order._id}
                 className="bg-black/70 p-5 rounded-xl border border-white/20"
               >
+                {/* HEADER */}
                 <div className="flex justify-between mb-2">
                   <p className="font-semibold">
                     Order ID:{" "}
@@ -111,6 +110,7 @@ export default function Orders() {
                   </span>
                 </div>
 
+                {/* CUSTOMER */}
                 <p className="text-sm mb-2">
                   Customer:{" "}
                   <span className="font-semibold">
@@ -130,6 +130,7 @@ export default function Orders() {
                   )}
                 </p>
 
+                {/* ITEMS */}
                 <ul className="text-sm text-gray-300 mb-3 list-disc list-inside">
                   {order.items.map((item, idx) => (
                     <li key={idx}>
@@ -138,25 +139,29 @@ export default function Orders() {
                   ))}
                 </ul>
 
+                {/* FOOTER */}
                 <div className="flex justify-between items-center">
                   <p className="font-bold text-green-400">
                     ₹{order.totalPrice}
                   </p>
 
                   <div className="flex items-center gap-3">
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        updateStatus(order._id, e.target.value)
-                      }
-                      className="bg-black border border-white px-3 py-1 rounded"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="preparing">Preparing</option>
-                      <option value="ready">Ready</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
+                    {/* ✅ STATUS DROPDOWN — ONLY BEFORE AGENT ASSIGN */}
+                    {!order.deliveryAgentId && (
+                      <select
+                        value={order.status}
+                        onChange={(e) =>
+                          updateStatus(order._id, e.target.value)
+                        }
+                        className="bg-black border border-white px-3 py-1 rounded"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="ready">Ready</option>
+                      </select>
+                    )}
 
+                    {/* ASSIGN AGENT */}
                     {order.status === "ready" && !order.deliveryAgentId && (
                       <button
                         onClick={() =>

@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-//register customer
+/* ================= REGISTER CUSTOMER ================= */
 export const customerRegisterSchema = Joi.object({
   name: Joi.string().min(2).max(50).required().messages({
     "string.empty": "Name is required",
@@ -16,10 +16,13 @@ export const customerRegisterSchema = Joi.object({
     "string.empty": "Password is required",
   }),
 
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
-    "string.empty": "Confirm password is required",
-  }),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match",
+      "string.empty": "Confirm password is required",
+    }),
 
   phone: Joi.string()
     .pattern(/^\d{10}$/)
@@ -29,11 +32,19 @@ export const customerRegisterSchema = Joi.object({
       "string.empty": "Phone number is required",
     }),
 
+  otp: Joi.string()
+    .length(6)
+    .required()
+    .messages({
+      "string.length": "OTP must be 6 digits",
+      "string.empty": "OTP is required",
+    }),
+
   profileImage: Joi.string().uri().optional(),
   fcmToken: Joi.string().allow(null).optional(),
 }).with("password", "confirmPassword");
 
-//login customer
+/* ================= LOGIN CUSTOMER ================= */
 export const customerLoginSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Invalid email",
@@ -45,7 +56,7 @@ export const customerLoginSchema = Joi.object({
   }),
 });
 
-//update customer profile
+/* ================= UPDATE CUSTOMER PROFILE ================= */
 export const customerUpdateSchema = Joi.object({
   name: Joi.string().min(2).max(50).optional(),
 

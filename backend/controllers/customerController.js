@@ -3,11 +3,52 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendPushNotification } from "../utils/sendpush.js";
 import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
+import EmailOtp from "../models/EmailOtp.js";
+import { generateOtp, sendEmailOtp } from "../utils/emailOtp.js";
+
+// send email otp
+export const sendCustomerEmailOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
+
+    const otp = generateOtp();
+
+    await EmailOtp.deleteMany({ email });
+
+    await EmailOtp.create({
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    await sendEmailOtp(email, otp);
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
 
 // Register Customer
 export const registerCustomer = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, otp } = req.body;
+
+    const otpRecord = await EmailOtp.findOne({ email, otp });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
 
     const existingUser = await Customer.findOne({ email });
     if (existingUser)
@@ -26,6 +67,7 @@ export const registerCustomer = async (req, res) => {
       email,
       password: hashedPassword,
       phone,
+      isEmailVerified: true,
     });
 
     res.status(201).json({ message: "User registered successfully", user });
@@ -69,6 +111,12 @@ export const getCustomerProfile = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: "Customer not found" });
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+      });
     }
 
     res.json(user);

@@ -14,6 +14,7 @@ import {
   getRestaurantDetails,
   saveFCMToken,
   getRestaurantReviewsForOwner,
+  sendRestaurantEmailOtp,
 } from "../controllers/restaurantController.js";
 
 import {
@@ -34,6 +35,7 @@ import {
 const router = express.Router();
 
 //restaurant registration and login
+router.post("/send-otp", sendRestaurantEmailOtp);
 router.post(
   "/register",
   validate(restaurantRegisterSchema),

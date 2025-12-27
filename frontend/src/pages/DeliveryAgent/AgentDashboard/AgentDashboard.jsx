@@ -28,7 +28,7 @@ export default function AgentDashboard() {
     assignedOrders: 0,
     completedOrders: 0,
     revenue: 0,
-    status: "available",
+    status: "offline",
   });
 
   const [chartData, setChartData] = useState([]);
@@ -44,12 +44,17 @@ export default function AgentDashboard() {
     try {
       setUpdatingStatus(true);
 
-      const nextStatus = isOnline ? "on-delivery" : "available";
+      const res = await api.put("/api/agents/status");
 
-      await api.put("/api/agents/profile", { status: nextStatus });
-      await loadDashboardStats();
+      setStats((prev) => ({
+        ...prev,
+        status: res.data.status,
+      }));
     } catch (err) {
-      setToast({ type: "error", message: "Failed to update status" });
+      setToast({
+        type: "error",
+        message: "Failed to update status",
+      });
     } finally {
       setUpdatingStatus(false);
     }
@@ -62,19 +67,13 @@ export default function AgentDashboard() {
     try {
       setLoadingStats(true);
 
-      // Agent profile/dashboard
       const dashboardRes = await api.get("/api/agents/dashboard");
-
-      // Orders
       const ordersRes = await api.get("/api/agents/orders");
 
       const orders = Array.isArray(ordersRes.data)
         ? ordersRes.data
         : ordersRes.data.orders || [];
 
-      /* =======================
-         DERIVED METRICS
-      ======================= */
       const assignedOrders = orders.filter((o) =>
         ["ready", "picked"].includes(o.status)
       );
@@ -88,9 +87,6 @@ export default function AgentDashboard() {
         0
       );
 
-      /* =======================
-         WEEKLY CHART DATA
-      ======================= */
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const grouped = {};
 
@@ -134,7 +130,7 @@ export default function AgentDashboard() {
 
       <div className="relative z-10 flex min-h-screen">
         {/* SIDEBAR */}
-        <aside className="w-24 bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center">
+        <aside className="w-24 bg-black/70 border-r border-white/10 p-4 flex flex-col items-center">
           <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
 
           <nav className="space-y-3">
@@ -158,7 +154,9 @@ export default function AgentDashboard() {
 
           {isOverview ? (
             <>
-              <h2 className="text-2xl font-bold mb-6">Delivery Agent Dashboard</h2>
+              <h2 className="text-2xl font-bold mb-6">
+                Delivery Agent Dashboard
+              </h2>
 
               {loadingStats ? (
                 <p className="text-gray-400">Loading stats…</p>
@@ -180,24 +178,25 @@ export default function AgentDashboard() {
                     color="text-yellow-400"
                   />
 
-                  <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">
+                  {/* STATUS CARD */}
+                  <div className="bg-black/70 border border-white/20 rounded-xl p-6">
                     <p className="text-gray-400 text-sm">Status</p>
-                    <p
-                      className={`text-3xl font-bold mt-2 ${
-                        isOnline ? "text-green-400" : "text-yellow-400"
-                      }`}
-                    >
-                      {isOnline ? "Online" : "Busy"}
+                    <p className="text-3xl font-bold mt-2">
+                      {stats.status === "available"
+                        ? "Online"
+                        : stats.status === "offline"
+                        ? "Offline"
+                        : "On Delivery"}
                     </p>
 
                     <button
                       onClick={toggleOnlineStatus}
-                      disabled={updatingStatus}
+                      disabled={updatingStatus || stats.status === "on-delivery"}
                       className={`mt-4 w-full py-2 rounded-lg text-sm font-medium ${
                         isOnline
                           ? "bg-red-600 hover:bg-red-700"
                           : "bg-green-600 hover:bg-green-700"
-                      }`}
+                      } disabled:opacity-50`}
                     >
                       {updatingStatus
                         ? "Updating..."
@@ -210,7 +209,7 @@ export default function AgentDashboard() {
               )}
 
               {!loadingStats && (
-                <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">
+                <div className="bg-black/70 border border-white/20 rounded-xl p-6">
                   <h3 className="text-lg font-semibold mb-4">
                     Weekly Deliveries
                   </h3>
@@ -265,7 +264,7 @@ function SidebarLink({ to, icon: Icon, label }) {
 
 function StatCard({ label, value, color }) {
   return (
-    <div className="bg-black/70 backdrop-blur-lg border border-white/20 rounded-xl p-6">
+    <div className="bg-black/70 border border-white/20 rounded-xl p-6">
       <p className="text-gray-400 text-sm">{label}</p>
       <p className={`text-3xl font-bold mt-2 ${color}`}>{value}</p>
     </div>

@@ -40,7 +40,7 @@ export default function Navbar() {
         Contact Us
       </button>
 
-      {/* Login */}
+      {/* Login 
       <Link
         to="/customer/login"
         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
@@ -48,6 +48,8 @@ export default function Navbar() {
         <User size={16} />
         Login
       </Link>
+      */}
+      
     </div>
   );
 }

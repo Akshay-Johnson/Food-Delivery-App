@@ -14,6 +14,10 @@ const adminSchema = new mongoose.Schema(
       lowercase: true,
       index: true,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: true,

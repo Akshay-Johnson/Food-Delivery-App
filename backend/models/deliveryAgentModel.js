@@ -11,6 +11,10 @@ const deliveryAgentschema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     phone: {
       type: String,
       required: true,
@@ -57,7 +61,7 @@ const deliveryAgentschema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["available", "on-delivery"],
+      enum: ["available", "offline", "on-delivery"],
       default: "available",
     },
 

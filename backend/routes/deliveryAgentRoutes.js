@@ -12,6 +12,8 @@ import {
   flagAgent,
   unflagAgent,
   getFlaggedAgentsByRestaurant,
+  toggleAgentStatus,
+  sendAgentEmailOtp,
 } from "../controllers/deliveryAgentController.js";
 
 import { protectAgent } from "../middlewares/agentAuth.js";
@@ -34,6 +36,7 @@ import {
 const router = express.Router();
 
 //agent registration and login
+router.post("/send-otp", sendAgentEmailOtp);
 router.post("/register", validate(agentRegisterSchema), registerAgent);
 
 router.post("/login", validate(agentLoginSchema), loginAgent);
@@ -56,6 +59,8 @@ router.put("/location", protectAgent, updateAgentLocation);
 
 //get available agents for restaurant to assign orders
 router.get("/available", restaurantAuth, getAvailableAgents);
+
+router.put("/status", protectAgent, toggleAgentStatus);
 
 router.get("/orders", protectAgent, getAssignedOrders);
 

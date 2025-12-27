@@ -47,7 +47,7 @@ export default function Testimonials() {
             >
               <img
                 src={r.img}
-                className="w-20 h-20 mx-auto rounded-full mb-4 border-2 border-white/30"
+                className="w-20 h-20 object-cover mx-auto rounded-full mb-4 border-2 border-white/30"
               />
               <h3 className="text-xl font-semibold mb-2">{r.name}</h3>
               <p className="text-gray-300 italic">{r.text}</p>

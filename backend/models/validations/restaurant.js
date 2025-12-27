@@ -30,6 +30,11 @@ export const restaurantRegisterSchema = Joi.object({
     "string.empty": "Address is required",
   }),
 
+  otp: Joi.string().length(6).required().messages({
+    "string.length": "OTP must be 6 digits",
+    "string.empty": "OTP is required",
+  }),
+
   image: Joi.string().uri().optional(),
 
   description: Joi.string().max(500).optional(),

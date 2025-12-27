@@ -9,6 +9,7 @@ import {
   getAllAgents,
   updateAgentStatus,
   getAllOrders,
+  sendAdminEmailOtp,
 } from "../controllers/adminController.js";
 
 import { updateCustomerStatus } from "../controllers/customerController.js";
@@ -27,6 +28,7 @@ import {
 const router = express.Router();
 
 //admin registration and login
+router.post("/send-otp", sendAdminEmailOtp);
 router.post("/register", validate(adminRegisterSchema), registerAdmin);
 
 router.post("/login", validate(adminLoginSchema), loginAdmin);

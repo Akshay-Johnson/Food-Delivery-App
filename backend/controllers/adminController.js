@@ -4,7 +4,8 @@ import Restaurant from "../models/restaurantModel.js";
 import Order from "../models/orderModel.js";
 import DeliveryAgent from "../models/deliveryAgentModel.js";
 import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
-
+import EmailOtp from "../models/EmailOtp.js";
+import { generateOtp, sendEmailOtp } from "../utils/emailOtp.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -12,10 +13,49 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
+// send email otp
+export const sendAdminEmailOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (await emailExistsAnywhere(email)) {
+      return res.status(400).json({
+        message: "Email already registered with another role",
+      });
+    }
+
+    const otp = generateOtp();
+
+    await EmailOtp.deleteMany({ email });
+
+    await EmailOtp.create({
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    await sendEmailOtp(email, otp);
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
+
 //admin registration
 export const registerAdmin = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, otp } = req.body;
+
+    const otpRecord = await EmailOtp.findOne({ email, otp });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
 
     if (await emailExistsAnywhere(email)) {
       return res.status(400).json({
@@ -34,6 +74,7 @@ export const registerAdmin = async (req, res) => {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
+      isEmailVerified: true,
     });
 
     const token = generateToken(admin);
