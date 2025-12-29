@@ -464,6 +464,7 @@ export const getAssignedOrders = async (req, res) => {
     const orders = await Order.find({ deliveryAgentId: agentId })
       .populate("customerId", "name phone")
       .populate("restaurantId", "name address")
+      .populate("address")
       .sort({
         createdAt: -1,
       });

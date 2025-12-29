@@ -9,7 +9,7 @@ export default function Customers() {
 
   // Pagination
   const [page, setPage] = useState(1);
-  const customersPerPage = 6;
+  const customersPerPage = 10;
 
   const load = async () => {
     const res = await api.get("/api/admins/customers");
@@ -20,7 +20,7 @@ export default function Customers() {
     load();
   }, []);
 
-  // 🔒 BLOCK / UNBLOCK CUSTOMER
+  // BLOCK / UNBLOCK CUSTOMER
   const toggleStatus = async (id, isActive) => {
     try {
       await api.put(`/api/admins/customer/status/${id}`, {
@@ -44,17 +44,20 @@ export default function Customers() {
     }
   };
 
-  /* FILTER */
+  /* 🔍 FILTER */
   const filteredCustomers = list.filter((c) => {
     const q = search.toLowerCase();
+    const statusText = c.isActive ? "active" : "blocked";
+    
     return (
       c.name?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q) ||
-      c.phone?.toLowerCase().includes(q)
+      c.phone?.toLowerCase().includes(q) ||
+      statusText.includes(q) 
     );
   });
 
-  /* PAGINATION */
+  /* 📄 PAGINATION */
   const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
   const paginatedCustomers = filteredCustomers.slice(
     (page - 1) * customersPerPage,
@@ -66,8 +69,19 @@ export default function Customers() {
   }, [search]);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Customers</h2>
+    <div className="text-white">
+      {/* HEADER */}
+      <div className="flex items-center gap-6 mb-6">
+        <h2 className="text-2xl font-bold">Customers</h2>
+
+        <input
+          type="text"
+          placeholder="Search by name, email, or phone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+        />
+      </div>
 
       {toast && (
         <Toast
@@ -77,44 +91,35 @@ export default function Customers() {
         />
       )}
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Search by name, email, or phone..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
-      />
-
-      {/* CARDS */}
       {paginatedCustomers.length === 0 ? (
         <p className="text-gray-400 text-center py-8">
           No matching customers found.
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* GRID — SAME AS RESTAURANTS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {paginatedCustomers.map((c) => (
               <div
                 key={c._id}
-                className="bg-black/60 backdrop-blur-lg border border-white/20 rounded-xl p-5 flex flex-col justify-between"
+                className="bg-black/70 backdrop-blur-lg border border-white/20
+                           rounded-xl p-4 flex flex-col h-70"
               >
-                <div>
-                  <img
-                    src={c.profileImage || "/assets/customer.png"}
-                    alt={c.name}
-                    className="w-full h-40 object-cover rounded-md mb-3"
-                  />
+                {/* IMAGE */}
+                <img
+                  src={c.profileImage || "/assets/customer.png"}
+                  alt={c.name}
+                  className="w-full h-25 object-cover rounded-md"
+                />
 
-                  <h3 className="text-lg font-semibold mb-1">{c.name}</h3>
-                  <p className="text-sm text-gray-400 mb-2">{c.email}</p>
-                  <p className="text-sm text-gray-300 mb-3">
-                    <span className="text-gray-400">Phone:</span> {c.phone}
-                  </p>
+                {/* NAME + STATUS */}
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <h3 className="text-lg font-semibold line-clamp-1">
+                    {c.name}
+                  </h3>
 
-                  {/* STATUS */}
                   <span
-                    className={`inline-block px-3 py-1 text-xs rounded-full ${
+                    className={`px-3 py-1 text-xs rounded-full whitespace-nowrap ${
                       c.isActive
                         ? "bg-green-600/20 text-green-400"
                         : "bg-red-600/20 text-red-400"
@@ -124,10 +129,18 @@ export default function Customers() {
                   </span>
                 </div>
 
-                {/* ACTION */}
+                {/* EMAIL */}
+                <p className="text-sm text-gray-400 line-clamp-1 mt-1">
+                  {c.email}
+                </p>
+
+                {/* PHONE */}
+                <p className="text-sm text-gray-300 mt-1">{c.phone}</p>
+
+                {/* ACTION BUTTON — FIXED BOTTOM */}
                 <button
                   onClick={() => toggleStatus(c._id, c.isActive)}
-                  className={`mt-5 py-2 rounded-lg font-medium transition ${
+                  className={`mt-auto w-full py-2 rounded-lg font-medium transition ${
                     c.isActive
                       ? "bg-red-600 hover:bg-red-700"
                       : "bg-green-600 hover:bg-green-700"

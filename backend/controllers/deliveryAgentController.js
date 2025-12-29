@@ -255,7 +255,6 @@ export const getAvailableAgents = async (req, res) => {
 
     const agents = await DeliveryAgent.find({
       approvalStatus: "approved",
-      status: "available",
       isActive: true,
       "flaggedByRestaurants.restaurantId": { $ne: restaurantId },
     });
@@ -430,3 +429,4 @@ export const toggleAgentStatus = async (req, res) => {
     res.status(500).json({ message: "Failed to update status" });
   }
 };
+

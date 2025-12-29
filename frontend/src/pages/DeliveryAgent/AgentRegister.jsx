@@ -216,7 +216,7 @@ export default function AgentRegister() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 text-white py-2 rounded-md"
+              className="w-30 bg-green-600 text-white py-2 rounded-md"
             >
               {loading ? "Registering..." : "Verify & Register"}
             </button>

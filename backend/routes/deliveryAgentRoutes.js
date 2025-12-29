@@ -76,4 +76,13 @@ router.put("/:agentId/flag", restaurantAuth, flagAgent);
 router.put("/:agentId/unflag", restaurantAuth, unflagAgent);
 router.get("/flagged", restaurantAuth, getFlaggedAgentsByRestaurant);
 
+router.get("/all", restaurantAuth, async (req, res) => {
+  try {
+    const agents = await getAllAgentsForRestaurant(req.restaurant._id); // implement this in your controller
+    res.status(200).json(agents);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch agents" });
+  }
+});
+
 export default router;

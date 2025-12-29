@@ -9,12 +9,12 @@ export default function MenuManagement() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  //  Search
+  // Search
   const [search, setSearch] = useState("");
 
-  //  Pagination
+  // Pagination
   const [page, setPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 8;
 
   const navigate = useNavigate();
 
@@ -48,17 +48,6 @@ export default function MenuManagement() {
     }
   };
 
-  const filteredItems = items.filter((item) => {
-    const q = search.toLowerCase();
-
-    return (
-      item.name?.toLowerCase().includes(q) ||
-      item.category?.toLowerCase().includes(q) ||
-      item.description?.toLowerCase().includes(q) ||
-      String(item.price).includes(q)
-    );
-  });
-
   const toggleAvailability = async (id, currentStatus) => {
     try {
       await api.put(`/api/menu/${id}/availability`, {
@@ -72,14 +61,25 @@ export default function MenuManagement() {
         }`,
       });
 
-      loadMenu(); // refresh list
+      loadMenu();
     } catch (error) {
       console.error("Availability update failed:", error);
       setToast({ type: "error", message: "Update failed" });
     }
   };
 
-  /* ================= PAGINATION LOGIC ================= */
+  /* ================= SEARCH ================= */
+  const filteredItems = items.filter((item) => {
+    const q = search.toLowerCase();
+    return (
+      item.name?.toLowerCase().includes(q) ||
+      item.category?.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      String(item.price).includes(q)
+    );
+  });
+
+  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedItems = filteredItems.slice(
@@ -87,7 +87,6 @@ export default function MenuManagement() {
     startIndex + itemsPerPage
   );
 
-  // Reset page when search changes
   useEffect(() => {
     setPage(1);
   }, [search]);
@@ -104,6 +103,15 @@ export default function MenuManagement() {
 
         {toast && <Toast type={toast.type} message={toast.message} />}
 
+        {/* SEARCH */}
+        <input
+          type="text"
+          placeholder="Search menu items..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-sm mb-4 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white "
+        />
+
         <button
           onClick={() => navigate("/restaurant/dashboard/menu/add")}
           className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
@@ -112,83 +120,80 @@ export default function MenuManagement() {
         </button>
       </div>
 
-      {/* 🔍 SEARCH */}
-      <input
-        type="text"
-        placeholder="Search menu items..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full mb-4 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
-      />
-
       {paginatedItems.length === 0 ? (
         <p className="text-gray-400">No matching menu items found.</p>
       ) : (
         <>
           {/* MENU GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {paginatedItems.map((item) => (
               <div
                 key={item._id}
-                className="bg-black/70 p-4 rounded-xl border border-white/20"
+                className="bg-black/70 p-4 rounded-xl border border-white/20
+                           flex flex-col h-70"
               >
+                {/* IMAGE */}
                 <img
                   src={
                     (item.image || "/assets/dishimage.jpg") + "?t=" + Date.now()
                   }
-                  className="h-32 w-full object-cover rounded"
+                  className="h-15 w-full object-cover rounded"
+                  alt={item.name}
                 />
 
+                {/* CONTENT */}
                 <h3 className="mt-2 font-semibold">{item.name}</h3>
 
-                <p className="text-gray-300 text-sm mt-1">{item.description}</p>
+                <p className="text-gray-300 text-sm mt-1 line-clamp-2">
+                  {item.description}
+                </p>
 
-                <p className="text-gray-300 text-sm mt-1">₹{item.price}</p>
+                <p className="text-green-400 text-sm mt-1">₹{item.price}</p>
 
                 <p className="text-xs text-gray-400 mt-1">
                   Category: {item.category}
                 </p>
 
-                {/* ACTIONS */}
-                <div className="flex gap-3 mt-4">
-                  {/* EDIT */}
-                  <button
-                    onClick={() =>
-                      navigate(`/restaurant/dashboard/menu/edit/${item._id}`)
-                    }
-                    className="relative group bg-blue-600 px-3 py-1 rounded flex items-center"
-                  >
-                    <Pencil size={16} />
+                {/* ACTIONS (STICK TO BOTTOM) */}
+                <div className="mt-auto">
+                  <div className="flex gap-3 mt-4">
+                    {/* EDIT */}
+                    <button
+                      onClick={() =>
+                        navigate(`/restaurant/dashboard/menu/edit/${item._id}`)
+                      }
+                      className="relative group bg-blue-600 px-3 py-1 rounded flex items-center"
+                    >
+                      <Pencil size={16} />
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        Edit
+                      </span>
+                    </button>
 
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                      Edit
-                    </span>
-                  </button>
-
-                  {/* DELETE */}
-                  <button
-                    onClick={() => deleteItem(item._id)}
-                    className="relative group bg-red-600 px-3 py-1 rounded flex items-center"
-                  >
-                    <Trash size={16} />
-
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                      Delete
-                    </span>
-                  </button>
-                  {/* AVAILABILITY TOGGLE */}
-                  <button
-                    onClick={() =>
-                      toggleAvailability(item._id, item.isAvailable)
-                    }
-                    className={`mt-3 w-full py-1 rounded text-sm font-semibold transition ${
-                      item.isAvailable
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-gray-600 hover:bg-gray-700"
-                    }`}
-                  >
-                    {item.isAvailable ? "Available" : "Not Available"}
-                  </button>
+                    {/* DELETE */}
+                    <button
+                      onClick={() => deleteItem(item._id)}
+                      className="relative group bg-red-600 px-3 py-1 rounded flex items-center"
+                    >
+                      <Trash size={16} />
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        Delete
+                      </span>
+                    </button>
+                    {/* AVAILABILITY */}
+                    <button
+                      onClick={() =>
+                        toggleAvailability(item._id, item.isAvailable)
+                      }
+                      className={`mt-3 w-full py-1 rounded text-sm font-semibold transition ${
+                        item.isAvailable
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-gray-600 hover:bg-gray-700"
+                      }`}
+                    >
+                      {item.isAvailable ? "Available" : "Not Available"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

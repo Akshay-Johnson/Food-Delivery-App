@@ -87,7 +87,6 @@ export default function AddMenuItem() {
 
             <label className="mt-6 mb-2 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
               <Upload size={16} />
-              Upload Image
               <input
                 type="file"
                 className="hidden"
@@ -146,7 +145,7 @@ export default function AddMenuItem() {
           {/* Submit */}
           <button
             disabled={loading}
-            className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2 disabled:opacity-60"
+            className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2 disabled:opacity-60 m-auto"
           >
             <Save size={18} />
             {loading ? "Saving..." : "Add Menu Item"}

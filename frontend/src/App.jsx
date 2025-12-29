@@ -104,7 +104,7 @@ export default function App() {
           <Route path="customers" element={<Customers />} />
           <Route path="agents" element={<AdminAgents />} />
           <Route path="orders" element={<AdminOrders />} />
-          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="reviews/:restaurantId" element={<AdminReviews />} />
         </Route>
 
         {/* Restaurant Routes */}

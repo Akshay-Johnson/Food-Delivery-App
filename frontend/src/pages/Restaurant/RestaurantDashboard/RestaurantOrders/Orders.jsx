@@ -8,12 +8,10 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // Search
   const [search, setSearch] = useState("");
 
-  // Pagination
   const [page, setPage] = useState(1);
-  const ordersPerPage = 6;
+  const ordersPerPage = 12;
 
   const navigate = useNavigate();
 
@@ -26,10 +24,7 @@ export default function Orders() {
       const res = await api.get("/api/restaurants/orders");
       setOrders(res.data.orders || []);
     } catch (error) {
-      console.error(
-        "Failed to load orders:",
-        error.response?.data || error.message
-      );
+      console.error("Failed to load orders:", error);
     } finally {
       setLoading(false);
     }
@@ -39,16 +34,13 @@ export default function Orders() {
     try {
       await api.put(`/api/restaurants/orders/${orderId}/${status}`);
       loadOrders();
-    } catch (error) {
-      console.error(error.response?.data || error.message);
+    } catch {
       setToast({ type: "error", message: "Failed to update order status" });
     }
   };
 
-  /* ================= SEARCH FILTER ================= */
   const filteredOrders = orders.filter((order) => {
     const q = search.toLowerCase();
-
     return (
       order._id.toLowerCase().includes(q) ||
       order.status.toLowerCase().includes(q) ||
@@ -57,185 +49,153 @@ export default function Orders() {
     );
   });
 
-  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-  const startIndex = (page - 1) * ordersPerPage;
   const paginatedOrders = filteredOrders.slice(
-    startIndex,
-    startIndex + ordersPerPage
+    (page - 1) * ordersPerPage,
+    page * ordersPerPage
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
+  useEffect(() => setPage(1), [search]);
 
-  if (loading) {
-    return <p className="text-white p-6">Loading orders...</p>;
-  }
+  if (loading) return <p className="text-white p-6">Loading orders...</p>;
 
   return (
     <div className="p-6 text-white">
-      <h2 className="text-2xl font-bold mb-4">Restaurant Orders</h2>
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
-      {toast && <Toast type={toast.type} message={toast.message} />}
+      <div className="flex gap-4 mb-4">
+        <h2 className="text-2xl font-bold">Restaurant Orders</h2>
+        <input
+          type="text"
+          placeholder="Search order, customer, phone or status"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20"
+        />
+      </div>
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Search by order ID, customer, phone or status"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white placeholder-gray-400"
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {paginatedOrders.map((order) => {
+          const hasAgent = Boolean(order.deliveryAgentId);
 
-      {paginatedOrders.length === 0 ? (
-        <p className="text-gray-400">No matching orders found.</p>
-      ) : (
-        <>
-          {/* ORDERS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedOrders.map((order) => (
-              <div
-                key={order._id}
-                className="bg-black/70 p-5 rounded-xl border border-white/20"
-              >
-                {/* HEADER */}
-                <div className="flex justify-between mb-2">
-                  <p className="font-semibold">
-                    Order ID:{" "}
-                    <span className="text-blue-400">{order._id}</span>
-                  </p>
-                  <span className="text-sm text-gray-300">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </span>
-                </div>
+          return (
+            <div
+              key={order._id}
+              className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col"
+            >
+              {/* HEADER */}
+              <p className="text-xs text-gray-400">Order ID</p>
+              <p className="text-blue-400 text-sm break-all">{order._id}</p>
 
-                {/* CUSTOMER */}
-                <p className="text-sm mb-2">
-                  Customer:{" "}
-                  <span className="font-semibold">
-                    {order.customerId?.name || "N/A"}
-                  </span>
-                  {order.customerId?.phone && (
-                    <span className="text-gray-400">
-                      {" "}
-                      ({order.customerId.phone})
-                    </span>
-                  )}
-                  {order.customerId?.email && (
-                    <span className="text-gray-400">
-                      {" "}
-                      – {order.customerId.email}
-                    </span>
-                  )}
+              {/* CUSTOMER */}
+              <p className="text-sm mt-2">
+                <span className="text-gray-400">Customer:</span>{" "}
+                {order.customerId?.name || "N/A"}
+              </p>
+
+              {/* ITEMS */}
+              <ul className="text-sm list-disc list-inside mt-2 line-clamp-3">
+                {order.items.map((i, idx) => (
+                  <li key={idx}>
+                    {i.name} × {i.quantity}
+                  </li>
+                ))}
+              </ul>
+
+              {/* FOOTER */}
+              <div className="mt-auto flex justify-between items-center pt-3">
+                <p className="font-bold text-green-400">
+                  ₹{order.totalPrice}
                 </p>
 
-                {/* ITEMS */}
-                <ul className="text-sm text-gray-300 mb-3 list-disc list-inside">
-                  {order.items.map((item, idx) => (
-                    <li key={idx}>
-                      {item.name} × {item.qty}
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex gap-2 items-center">
+                  {/* STATUS DROPDOWN (before agent assignment) */}
+                  {!hasAgent && (
+                    <select
+                      value={order.status}
+                      onChange={(e) =>
+                        updateStatus(order._id, e.target.value)
+                      }
+                      className="bg-black border border-white px-2 py-1 rounded text-sm"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="preparing">Preparing</option>
+                      <option value="ready">Ready</option>
+                    </select>
+                  )}
 
-                {/* FOOTER */}
-                <div className="flex justify-between items-center">
-                  <p className="font-bold text-green-400">
-                    ₹{order.totalPrice}
-                  </p>
+                  {/* ASSIGN BUTTON */}
+                  {order.status === "ready" && !hasAgent && (
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/restaurant/dashboard/assign-agent/${order._id}`
+                        )
+                      }
+                      className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                    >
+                      Assign
+                    </button>
+                  )}
 
-                  <div className="flex items-center gap-3">
-                    {/* ✅ STATUS DROPDOWN — ONLY BEFORE AGENT ASSIGN */}
-                    {!order.deliveryAgentId && (
-                      <select
-                        value={order.status}
-                        onChange={(e) =>
-                          updateStatus(order._id, e.target.value)
-                        }
-                        className="bg-black border border-white px-3 py-1 rounded"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="preparing">Preparing</option>
-                        <option value="ready">Ready</option>
-                      </select>
-                    )}
+                  {/* STATUS BADGES */}
+                  {hasAgent && order.status === "ready" && (
+                    <span className="px-2 py-1 text-xs bg-blue-600/20 text-blue-400 rounded">
+                      Waiting for Pickup
+                    </span>
+                  )}
 
-                    {/* ASSIGN AGENT */}
-                    {order.status === "ready" && !order.deliveryAgentId && (
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/restaurant/dashboard/assign-agent/${order._id}`
-                          )
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm"
-                      >
-                        Assign Agent
-                      </button>
-                    )}
+                  {hasAgent && order.status === "picked" && (
+                    <span className="px-2 py-1 text-xs bg-yellow-600/20 text-yellow-400 rounded">
+                      On Delivery
+                    </span>
+                  )}
 
-                    {/* STATUS BADGES */}
-                    {order.deliveryAgentId && (
-                      <>
-                        {order.status === "ready" && (
-                          <span className="px-3 py-1 text-sm bg-blue-700/30 text-blue-400 rounded">
-                            Assigned
-                          </span>
-                        )}
-                        {order.status === "picked" && (
-                          <span className="px-3 py-1 text-sm bg-yellow-700/30 text-yellow-400 rounded">
-                            Picked Up
-                          </span>
-                        )}
-                        {order.status === "delivered" && (
-                          <span className="px-4 py-1 text-sm font-semibold bg-emerald-700/30 text-emerald-400 rounded">
-                            Delivered
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </div>
+                  {hasAgent && order.status === "delivered" && (
+                    <span className="px-2 py-1 text-xs bg-green-600/20 text-green-400 rounded">
+                      Delivered
+                    </span>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* PAGINATION */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
-              >
-                Prev
-              </button>
-
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  className={`px-3 py-1 rounded ${
-                    page === i + 1
-                      ? "bg-green-600"
-                      : "bg-white/20 hover:bg-white/30"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
-              >
-                Next
-              </button>
             </div>
-          )}
-        </>
+          );
+        })}
+      </div>
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1 bg-blue-600 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded ${
+                page === i + 1
+                  ? "bg-green-600"
+                  : "bg-white/20 hover:bg-white/30"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1 bg-blue-600 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       )}
     </div>
   );

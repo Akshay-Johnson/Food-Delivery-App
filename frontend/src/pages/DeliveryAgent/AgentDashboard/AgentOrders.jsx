@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
-import {
-  startLocationTracking,
-  stopLocationTracking,
-} from "../../../services/locationService";
 import Toast from "../../../components/toast/toast";
 
 export default function AgentOrders() {
@@ -11,12 +7,12 @@ export default function AgentOrders() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // Search
+  // 🔍 Search
   const [search, setSearch] = useState("");
 
-  // Pagination
+  // 📄 Pagination
   const [page, setPage] = useState(1);
-  const ordersPerPage = 6;
+  const ordersPerPage = 8;
 
   useEffect(() => {
     loadOrders();
@@ -38,8 +34,7 @@ export default function AgentOrders() {
     try {
       await api.put(`/api/agents/orders/${action}/${id}`);
       loadOrders();
-    } catch (error) {
-      console.error(error.response?.data || error.message);
+    } catch {
       setToast({
         type: "error",
         message: "Failed to update order status",
@@ -47,22 +42,9 @@ export default function AgentOrders() {
     }
   };
 
-  const pickupOrder = async (order) => {
-    await api.put(`/api/agents/orders/picked/${order._id}`);
-    startLocationTracking(order.deliveryAgentId, order._id);
-    loadOrders();
-  };
-
-  const deliverOrder = async (order) => {
-    await api.put(`/api/agents/orders/delivered/${order._id}`);
-    await stopLocationTracking(order.deliveryAgentId);
-    loadOrders();
-  };
-
-  /* ================= SEARCH FILTER ================= */
+  /* 🔍 SEARCH */
   const filteredOrders = orders.filter((order) => {
     const q = search.toLowerCase();
-
     return (
       order._id.toLowerCase().includes(q) ||
       order.status?.toLowerCase().includes(q) ||
@@ -71,80 +53,139 @@ export default function AgentOrders() {
     );
   });
 
-  /* ================= PAGINATION ================= */
+  /* 📄 PAGINATION */
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-  const startIndex = (page - 1) * ordersPerPage;
   const paginatedOrders = filteredOrders.slice(
-    startIndex,
-    startIndex + ordersPerPage
+    (page - 1) * ordersPerPage,
+    page * ordersPerPage
   );
 
-  // reset page on search
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
+  useEffect(() => setPage(1), [search]);
 
-  if (loading) return <p className="text-white">Loading assigned orders...</p>;
+  if (loading) {
+    return <p className="text-white">Loading assigned orders...</p>;
+  }
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-6">Assigned Orders</h2>
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
-      {toast && <Toast type={toast.type} message={toast.message} />}
+      {/* HEADER */}
+      <div className="flex items-center gap-6 mb-6">
+        <h2 className="text-2xl font-bold">Assigned Orders</h2>
 
-      {/* 🔍 SEARCH BAR */}
-      <input
-        type="text"
-        placeholder="Search by order ID, customer, phone or status..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white placeholder-gray-400"
-      />
+        <input
+          type="text"
+          placeholder="Search by order ID, customer, phone or status..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+        />
+      </div>
 
       {paginatedOrders.length === 0 ? (
         <p className="text-gray-400">No matching orders found</p>
       ) : (
         <>
-          {/* ORDERS GRID */}
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
-            {paginatedOrders.map((order) => (
-              <div
-                key={order._id}
-                className="bg-black/70 p-4 rounded-xl border border-white/20"
-              >
-                <h3 className="font-semibold mb-1">Order ID: {order._id}</h3>
-                <p>Customer: {order.customerId?.name || "N/A"}</p>
-                <p>Phone: {order.customerId?.phone || "N/A"}</p>
-                <p>Address: {order.restaurantId?.address || "N/A"}</p>
-                <p>Total: ₹{order.totalPrice}</p>
-                <p>Status: {order.status}</p>
+          {/* GRID */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {paginatedOrders.map((order) => {
+              const earning =
+                order.agentEarning ?? order.deliveryCharge ?? 0;
 
-                <div className="flex gap-3 mt-3">
-                  {order.status === "ready" && (
-                    <button
-                      onClick={() => updateStatus(order._id, "picked")}
-                      className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded"
-                    >
-                      Pick Up
-                    </button>
-                  )}
+              const customerAddress =
+                typeof order.address === "object"
+                  ? `${order.address.addressLine1}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}`
+                  : "Address not available";
 
-                  {order.status === "picked" && (
-                    <button
-                      onClick={() => updateStatus(order._id, "delivered")}
-                      className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded"
-                    >
-                      Delivered
-                    </button>
-                  )}
+              return (
+                <div
+                  key={order._id}
+                  className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col h-70"
+                >
+                  {/* ORDER ID */}
+                  <p className="text-xs text-gray-400">Order ID</p>
+                  <p className="text-blue-400 text-sm break-all mb-2">
+                    {order._id}
+                  </p>
+
+                  {/* CUSTOMER */}
+                  <p className="text-sm text-gray-300">
+                    <span className="text-gray-400">Customer:</span>{" "}
+                    {order.customerId?.name || "N/A"}
+                  </p>
+
+                  <p className="text-sm text-gray-300">
+                    <span className="text-gray-400">Phone:</span>{" "}
+                    {order.customerId?.phone || "N/A"}
+                  </p>
+
+                  {/* ✅ DELIVERY ADDRESS */}
+                  <p className="text-sm text-gray-300 line-clamp-3 mt-1">
+                    <span className="text-gray-400">Delivery Address:</span>{" "}
+                    {customerAddress}
+                  </p>
+
+                  {/* AMOUNTS */}
+                  <p className="text-sm text-green-400 font-semibold mt-2">
+                    Order Amount: ₹{order.totalPrice}
+                  </p>
+
+                  <p className="text-sm text-yellow-400 font-medium">
+                    Your Earning: ₹{earning}
+                  </p>
+
+                  {/* STATUS */}
+                  <span
+                    className={`mt-2 inline-block w-fit px-3 py-1 text-xs rounded-full capitalize ${
+                      order.status === "delivered"
+                        ? "bg-green-600/20 text-green-400"
+                        : order.status === "picked"
+                        ? "bg-yellow-600/20 text-yellow-400"
+                        : "bg-blue-600/20 text-blue-400"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+
+                  {/* ACTIONS */}
+                  <div className="mt-auto">
+                    {order.status === "ready" && (
+                      <button
+                        onClick={() =>
+                          updateStatus(order._id, "picked")
+                        }
+                        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded w-full"
+                      >
+                        Pick Up
+                      </button>
+                    )}
+
+                    {order.status === "picked" && (
+                      <button
+                        onClick={() =>
+                          updateStatus(order._id, "delivered")
+                        }
+                        className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded w-full"
+                      >
+                        Delivered
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
+            <div className="flex justify-center items-center gap-2 mt-10">
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}

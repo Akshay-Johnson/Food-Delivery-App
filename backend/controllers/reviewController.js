@@ -172,13 +172,16 @@ export const getRestaurantReview = async (req, res) => {
   try {
     const restaurantId = req.user.id;
 
-    const reviews = await Review.find({ restaurantId })
+    const reviews = await Review.find({
+      restaurantId,
+      isHidden: false, // ✅ hide admin-hidden reviews
+    })
       .populate("customerId", "name profileImage")
       .sort({ createdAt: -1 });
-    isHidden: false;
 
     res.status(200).json(reviews);
   } catch (error) {
+    console.error("Restaurant get reviews error:", error);
     res.status(500).json({
       message: "Error fetching restaurant reviews",
       error: error.message,
@@ -270,5 +273,29 @@ export const reportReviewByRestaurant = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to report review" });
+  }
+};
+
+// admin: get reviews for a specific restaurant
+export const getReviewsByRestaurantAdmin = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+
+    const reviews = await Review.find({ restaurantId })
+      .populate("customerId", "name email profileImage")
+      .populate("restaurantId", "name")
+      .sort({ createdAt: -1 });
+
+    const restaurant = await Restaurant.findById(restaurantId).select("name");
+
+    res.status(200).json({
+      restaurant,
+      reviews,
+    });
+  } catch (error) {
+    console.error("Admin restaurant reviews error:", error);
+    res.status(500).json({
+      message: "Failed to fetch restaurant reviews",
+    });
   }
 };

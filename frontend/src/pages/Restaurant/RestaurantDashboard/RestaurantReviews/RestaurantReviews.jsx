@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
-import { Star } from "lucide-react";
+import { Flag, Star } from "lucide-react";
 import Toast from "../../../../components/toast/toast";
 
 export default function RestaurantReviews() {
@@ -10,7 +10,7 @@ export default function RestaurantReviews() {
 
   //  Pagination
   const [page, setPage] = useState(1);
-  const reviewsPerPage = 5;
+  const reviewsPerPage = 15;
 
   const loadReviews = async () => {
     try {
@@ -32,8 +32,22 @@ export default function RestaurantReviews() {
 
   const report = async (id) => {
     if (!window.confirm("Report this review to admin?")) return;
-    await api.put(`/api/reviews/restaurant/${id}/report`);
-    setToast({ type: "success", message: "Review reported to admin" });
+
+    try {
+      await api.put(`/api/reviews/restaurant/${id}/report`);
+
+      // Update local state so UI shows "Reported"
+      setReviews((prev) =>
+        prev.map((review) =>
+          review._id === id ? { ...review, isFlagged: true } : review
+        )
+      );
+
+      setToast({ type: "success", message: "Review reported to admin" });
+    } catch (error) {
+      console.error("Failed to report review", error);
+      setToast({ type: "error", message: "Failed to report review" });
+    }
   };
 
   /* ================= PAGINATION LOGIC ================= */
@@ -57,15 +71,15 @@ export default function RestaurantReviews() {
       ) : (
         <>
           {/* REVIEWS LIST */}
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {paginatedReviews.map((r) => (
               <div
                 key={r._id}
-                className="bg-black/70 border border-white/20 rounded-lg p-4 w-sm max-w-2xl"
+                className="bg-black/70 border border-white/20 rounded-lg p-4 flex justify-between flex-col h-full relative"
               >
                 <div className="flex items-center mb-2 ">
                   <img
-                    className="w-22 h-22 object-cover  border border-white/30 mr-4"
+                    className="w-16 h-16 object-cover rounded-full border border-white/30 mr-4"
                     src={
                       r.customerId?.profileImage?.trim()
                         ? r.customerId.profileImage
@@ -74,13 +88,21 @@ export default function RestaurantReviews() {
                     alt="Customer"
                   />
 
-                  <div>
-                    <p className="font-semibold">
-                      {r.customerId?.name || "Anonymous"}
-                    </p>
-                    <span className="text-sm text-gray-400">
-                      {new Date(r.createdAt).toLocaleDateString()}
-                    </span>
+                  <div className="absolute top-2 right-2 flex items-center text-sm">
+                    {r.isFlagged ? (
+                      <span className="inline-flex items-center gap-1 text-red-400">
+                        <Flag size={14} className="text-red-400" />
+                        Reported
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => report(r._id)}
+                        className="flex items-center text-green-400 hover:text-red-500"
+                      >
+                        <Flag size={14} className="mr-1 text-green-400" />
+                        Report
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -98,19 +120,6 @@ export default function RestaurantReviews() {
                 </div>
 
                 <p className="text-white/80">{r.comment}</p>
-
-                {r.isFlagged ? (
-                  <span className="mt-3 inline-flex items-center gap-1 text-sm text-red-400">
-                    🚩 Reported
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => report(r._id)}
-                    className="mt-3 text-sm text-red-400 hover:text-red-500"
-                  >
-                    Report to Admin
-                  </button>
-                )}
               </div>
             ))}
           </div>

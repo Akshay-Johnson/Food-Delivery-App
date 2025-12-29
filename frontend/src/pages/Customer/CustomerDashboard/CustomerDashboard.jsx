@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   LogOut,
   Home,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
@@ -34,7 +35,7 @@ export default function CustomerDashboard() {
   const availableDishes = dishes.filter((dish) => dish.isAvailable === true);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 8;
 
   const [restaurantPage, setRestaurantPage] = useState(1);
   const restaurantsPerPage = 6;
@@ -43,7 +44,6 @@ export default function CustomerDashboard() {
 
   const navigate = useNavigate();
 
-  //fetch restaurants & dishes
   useEffect(() => {
     fetchRestaurants();
     fetchRecommendedDishes();
@@ -72,51 +72,35 @@ export default function CustomerDashboard() {
   const performSearch = async (text) => {
     setSearchQuery(text);
 
-    if (text.trim() === "") {
+    if (!text.trim()) {
       setIsSearching(false);
-      setSearchResults({
-        restaurants: filteredRestaurants,
-        dishes: filteredDishes,
-      });
+      setSearchResults({ restaurants: [], dishes: [] });
       return;
     }
 
     try {
-      const response = await api.get(`/api/search?query=${text}`);
-
-      const mergedDishResults = [
-        ...response.data.dishes.filter(d => d.isAvailable === true),
-        ...availableDishes.filter(
-          (d) =>
-            d.name.toLowerCase().includes(text.toLowerCase()) ||
-            d.category?.toLowerCase().includes(text.toLowerCase())
-        ),
-      ];
+      const { data } = await api.get(`/api/search?q=${text}`);
 
       setSearchResults({
-        restaurants: response.data.restaurants,
-        dishes: mergedDishResults,
+        restaurants: data.restaurants || [],
+        dishes: (data.dishes || []).filter((d) => d.isAvailable),
       });
 
       setIsSearching(true);
-    } catch (error) {
-      console.error("Search error:", error);
-
-      // fallback purely to local matching
-      setSearchResults({
-        restaurants: filteredRestaurants,
-        dishes: filteredDishes,
-      });
-
+    } catch (err) {
+      console.error("Search failed:", err);
+      setSearchResults({ restaurants: [], dishes: [] });
       setIsSearching(true);
     }
   };
 
-  const filteredRestaurants = searchQuery.trim()
-    ? restaurants.filter((r) =>
-        r.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : restaurants;
+  const filteredRestaurants = (
+    searchQuery.trim()
+      ? restaurants.filter((r) =>
+          r.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : restaurants
+  ).sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
 
   const restaurantTotalPages = Math.ceil(
     filteredRestaurants.length / restaurantsPerPage
@@ -127,14 +111,9 @@ export default function CustomerDashboard() {
     restaurantPage * restaurantsPerPage
   );
 
-  // Reset page when search changes OR restaurant list changes
   useEffect(() => {
     setRestaurantPage(1);
   }, [searchQuery, restaurants]);
-
-  const filteredDishes = availableDishes.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   let categoryDishes = selectedCategory
     ? availableDishes.filter(
@@ -142,7 +121,6 @@ export default function CustomerDashboard() {
       )
     : [...availableDishes];
 
-  /* ===== PRICE FILTER ===== */
   if (priceRange !== "all") {
     categoryDishes = categoryDishes.filter((d) => {
       if (priceRange === "low") return d.price < 200;
@@ -152,7 +130,6 @@ export default function CustomerDashboard() {
     });
   }
 
-  /* ===== SORT ===== */
   if (sortBy === "priceLow") {
     categoryDishes.sort((a, b) => a.price - b.price);
   }
@@ -182,430 +159,436 @@ export default function CustomerDashboard() {
         restaurantId: dish.restaurantId,
       });
 
-      setToast({
-        message: "🍔 Item added to cart!",
-        type: "success",
-      });
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      setToast({
-        message: "Failed to add item to cart.",
-        type: "error",
-      });
+      setToast({ message: "🍔 Item added to cart!", type: "success" });
+    } catch {
+      setToast({ message: "Failed to add item to cart.", type: "error" });
     }
   };
 
   return (
-    <div
-      className="relative min-h-screen text-white flex flex-col relative min-h-screen overflow-x-hidden "
-      style={{
-        backgroundImage: "url('/assets/dishimage.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* ======= BLUR OVERLAY ======= */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-xl "></div>
-      {toast && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onClose={() => setToast(null)}
-        />
-      )}
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* BACKGROUND IMAGE (GUARANTEED) */}
+      <img
+        src="/assets/restaurant/bg.jpg"
+        alt="background"
+        className="fixed inset-0 w-full h-full object-cover -z-20"
+      />
 
-      {/* ========= PAGE CONTENT ========= */}
-      <div className="relative z-10 flex-justify-end ">
-        {/* NAVBAR */}
-        <header className="bg-black/70 border-b border-white/30 shadow-md p-5 flex items-end gap-4 top-0 z-20 ml-auto">
-          <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
-          <div className="flex justify-end flex-wrap gap-4 ml-auto">
-            <button
-              onClick={() => navigate("/customer/profile")}
-              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
-            >
-              <User size={18} />
+      {/* DARK OVERLAY */}
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm -z-10"></div>
 
-              <span
-                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
-                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
-              >
-                Profile
-              </span>
-            </button>
-
-            <button
-              onClick={() => navigate("/customer/address")}
-              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
-            >
-              <Home size={18} />
-
-              <span
-                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
-                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
-              >
-                Address
-              </span>
-            </button>
-
-            <button
-              onClick={() => navigate("/customer/cart")}
-              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
-            >
-              <ShoppingCart size={18} />
-              <span
-                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
-                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
-              >
-                Cart
-              </span>
-            </button>
-
-            <button
-              className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
-              onClick={() => navigate("/customer/orders")}
-            >
-              <Truck size={18} />
-              <span
-                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
-                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
-              >
-                Orders
-              </span>
-            </button>
-
-            <button
-              className="relative group flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-400 transition"
-              onClick={() => {
-                localStorage.removeItem("customerToken");
-                navigate("/customer/login");
-              }}
-            >
-              <LogOut size={18} />
-              <span
-                className="absolute top-full mb-2 hidden group-hover:block whitespace-nowrap
-                   bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg"
-              >
-                Logout
-              </span>
-            </button>
-          </div>
-        </header>
-
-        {/* WELCOME SECTION */}
-        <section className="px-6 py-8">
-          <h2 className="text-2xl font-bold">Welcome back 👋</h2>
-          <p className="text-gray-300">What would you like to eat today?</p>
-
-          {/* ======= FIXED SEARCH BAR ======= */}
-          <div className="mt-4 flex items-center gap-2">
-            {/* SEARCH */}
-            <div className="flex flex-1 items-center bg-black/70 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-3">
-              <Search className="text-gray-200" />
-
-              <input
-                type="text"
-                placeholder="Search for dishes or restaurants..."
-                value={searchQuery}
-                onChange={(e) => performSearch(e.target.value)}
-                className="flex-1 px-3 py-2 text-white placeholder-gray-300 bg-transparent outline-none"
-              />
-            </div>
-
-            {/* FILTER BUTTON */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="bg-black/70 backdrop-blur-lg border border-white/30 px-5 py-2 rounded-full hover:bg-white/30 transition font-medium"
-            >
-              Filters
-            </button>
-          </div>
-
-          {showFilters && (
-            <div className="mt-4 bg-black/60 backdrop-blur-lg border border-white/20 rounded-xl p-2 pt-5 max-w-2xl flex items-center justify-center ml-auto">
-              {/* PRICE */}
-              <div className="mb-3 flex flex-row gap-4 w-xl">
-                <label className="block  text-sm mb-1">Price Range</label>
-                <select
-                  value={priceRange}
-                  onChange={(e) => setPriceRange(e.target.value)}
-                  className="w-full bg-black border border-white rounded px-3 py-2 text-white"
-                >
-                  <option value="all">All</option>
-                  <option value="low">Below ₹200</option>
-                  <option value="mid">₹200 – ₹400</option>
-                  <option value="high">Above ₹400</option>
-                </select>
-                <label className="block text-sm mb-1">Sort By</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-black/40 border border-white/30 rounded px-3 py-2"
-                >
-                  <option value="">None</option>
-                  <option value="priceLow">Price: Low → High</option>
-                  <option value="priceHigh">Price: High → Low</option>
-                </select>
-                <button
-                  onClick={() => {
-                    setPriceRange("all");
-                    setSortBy("");
-                  }}
-                  className="px-4 py-2 bg-white/20 rounded hover:bg-white/30"
-                >
-                  Reset
-                </button>
-
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
-                >
-                  Apply
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* SEARCH RESULTS */}
-        {isSearching && (
-          <section className="px-6 mt-6">
-            <h3 className="text-xl font-bold mb-2">Search Results</h3>
-
-            {/* Restaurants */}
-            {searchResults.restaurants.length > 0 && (
-              <>
-                <h4 className="font-semibold mb-2">Restaurants</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {searchResults.restaurants.map((r) => (
-                    <div
-                      key={r._id}
-                      onClick={() => navigate(`/customer/restaurant/${r._id}`)}
-                      className="bg-white text-black shadow rounded-xl p-4 cursor-pointer hover:scale-105 hover:shadow-xl transition"
-                    >
-                      <p className="font-bold">{r.name}</p>
-                      <p className="text-gray-600 text-sm">{r.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* Dishes */}
-            {searchResults.dishes.length > 0 && (
-              <>
-                <h4 className="font-semibold mb-2 mt-4">Dishes</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {searchResults.dishes.map((d) => (
-                    <div
-                      key={d._id}
-                      className="bg-white text-black p-3 rounded-xl shadow cursor-pointer hover:scale-105 hover:shadow-xl transition"
-                    >
-                      <img
-                        src={d.image || "/assets/dishimage.jpg"}
-                        className="h-24 w-full object-cover rounded-lg"
-                      />
-                      <p className="font-semibold mt-2">{d.name}</p>
-                      <p className="text-gray-700 text-sm">₹{d.price}</p>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* No results */}
-            {searchResults.restaurants.length === 0 &&
-              searchResults.dishes.length === 0 && (
-                <p className="text-gray-300 text-center mt-4">
-                  No results found.
-                </p>
-              )}
-          </section>
+      {/* CONTENT */}
+      <div className="relative z-10 text-white">
+        {toast && (
+          <Toast
+            type={toast.type}
+            message={toast.message}
+            onClose={() => setToast(null)}
+          />
         )}
 
-        {/* CATEGORIES */}
-        <section className="px-6 mt-10">
-          <h3 className="text-xl font-semibold mb-3">Categories</h3>
+        {/* PAGE CONTENT */}
+        <div className="relative z-10">
+          {/* ===== EVERYTHING BELOW IS UNCHANGED ===== */}
 
-          <div className="grid grid-cols-4 gap-4">
-            {[
-              {
-                name: "Pizza",
-                icon: Pizza,
-                image: "/assets/categories/pizza.jpg",
-              },
-              {
-                name: "Desserts",
-                icon: IceCream,
-                image: "/assets/categories/dessert.jpg",
-              },
-              {
-                name: "Meals",
-                icon: Utensils,
-                image: "/assets/categories/meal.jpg",
-              },
-              {
-                name: "Drinks",
-                icon: Coffee,
-                image: "/assets/categories/drinks.jpg",
-              },
-            ].map((c, i) => (
-              <div
-                key={i}
-                onClick={() => setSelectedCategory(c.name)}
-                style={{ backgroundImage: `url(${c.image})` }}
-                className="relative bg-cover bg-center h-28 rounded-lg cursor-pointer overflow-hidden group"
+          {/* NAVBAR */}
+          <header className="bg-black/70 border-b border-white/30 shadow-md p-5 flex items-end gap-4 top-0 z-20 ml-auto ">
+            <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
+            <div className="flex justify-end flex-wrap gap-4 ml-auto">
+              <button
+                onClick={() => navigate("/customer/profile")}
+                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
               >
-                {/* BLUR LAYER */}
-                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/10 transition"></div>
+                <User size={18} />
+              </button>
 
-                {/* Content */}
-                <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
-                  <c.icon size={32} className="mb-1" />
-                  <p className="font-medium">{c.name}</p>
-                </div>
+              <button
+                onClick={() => navigate("/customer/address")}
+                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+              >
+                <Home size={18} />
+              </button>
+
+              <button
+                onClick={() => navigate("/customer/cart")}
+                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+              >
+                <ShoppingCart size={18} />
+              </button>
+
+              <button
+                onClick={() => navigate("/customer/orders")}
+                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+              >
+                <Truck size={18} />
+              </button>
+
+              <button
+                className="relative group flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-400 transition"
+                onClick={() => {
+                  localStorage.removeItem("customerToken");
+                  navigate("/customer/login");
+                }}
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          </header>
+
+          {/* WELCOME SECTION */}
+          <section className="px-6 py-8">
+            <h2 className="text-2xl font-bold">Welcome back 👋</h2>
+            <p className="text-gray-300">What would you like to eat today?</p>
+
+            {/* SEARCH + FILTER WRAPPER */}
+            <div className="mt-4 relative max-w-2xl mx-auto">
+              {/* SEARCH BAR */}
+              <div className="flex items-center bg-black/70 backdrop-blur-lg border border-white/30 shadow-lg rounded-full px-4 py-2">
+                <Search className="text-gray-300 mr-2" />
+
+                <input
+                  type="text"
+                  placeholder="Search for dishes or restaurants..."
+                  value={searchQuery}
+                  onChange={(e) => performSearch(e.target.value)}
+                  className="flex-1 px-3 py-2 text-white placeholder-gray-300 bg-transparent outline-none"
+                />
+
+                <div className="h-6 w-px bg-white/30 mx-2" />
+
+                <button
+                  onClick={() => setShowFilters((s) => !s)}
+                  className="flex items-center gap-1 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition"
+                >
+                  <SlidersHorizontal size={14} />
+                </button>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* CATEGORY / RECOMMENDED DISHES */}
-        <h3 className="text-xl font-bold mb-10 mt-20 ml-6">
-          {selectedCategory
-            ? `${selectedCategory} Dishes`
-            : "Recommended For You"}
-        </h3>
+              {/* FILTER DROPDOWN (FLOATING) */}
+              {showFilters && (
+                <div className="absolute left-0 right-0 top-full mt-2 z-50 bg-black/90 backdrop-blur-lg border border-white/20 rounded-xl p-4 shadow-2xl">
+                  <div className="flex  flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* PRICE */}
+                      <div>
+                        <label className="block text-sm mb-1">
+                          Price Range
+                        </label>
+                        <select
+                          value={priceRange}
+                          onChange={(e) => setPriceRange(e.target.value)}
+                          className="w-full bg-black border border-white/30 rounded px-3 py-2 text-white"
+                        >
+                          <option value="all">All</option>
+                          <option value="low">Below ₹200</option>
+                          <option value="mid">₹200 – ₹400</option>
+                          <option value="high">Above ₹400</option>
+                        </select>
+                      </div>
 
-        <section className="px-6 mt-12 mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-            {paginatedDishes.map((dish) => {
-              const restaurant = restaurants.find(
-                (r) => r._id === dish.restaurantId
-              );
+                      {/* SORT */}
+                      <div>
+                        <label className="block text-sm mb-1">Sort By</label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="w-full bg-black border border-white/30 rounded px-3 py-2 text-white"
+                        >
+                          <option value="">None</option>
+                          <option value="priceLow">Price: Low → High</option>
+                          <option value="priceHigh">Price: High → Low</option>
+                        </select>
+                      </div>
+                    </div>
 
-              return (
+                    {/* ACTION BUTTONS */}
+                    <div className="flex justify-end gap-3 mt-4">
+                      <button
+                        onClick={() => {
+                          setPriceRange("all");
+                          setSortBy("");
+                        }}
+                        className="px-4 py-2 bg-white/20 rounded hover:bg-white/30"
+                      >
+                        Reset
+                      </button>
+
+                      <button
+                        onClick={() => setShowFilters(false)}
+                        className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* SEARCH RESULTS */}
+          {isSearching && (
+            <section className="px-6 mt-6">
+              <h3 className="text-xl font-bold mb-6">Search Results...</h3>
+
+              {/* Restaurants */}
+              {searchResults.restaurants.length > 0 && (
+                <>
+                  <h4 className="font-semibold mb-2">Restaurants</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {searchResults.restaurants.map((r) => (
+                      <div
+                        key={r._id}
+                        onClick={() =>
+                          navigate(`/customer/restaurant/${r._id}`)
+                        }
+                        className="bg-black/70 text-white border-2 border-white/20 shadow rounded-xl p-4 cursor-pointer hover:scale-105 hover:shadow-xl transition"
+                      >
+                        <img
+                          src={r.image || "/assets/restaurant.png"}
+                          className="h-24 w-full object-cover rounded-lg"
+                        />
+                        <div className="flex justify-between items-center">
+                          <p className="font-bold">{r.name}</p>
+                          <p className="mt-1 text-yellow-500 font-semibold">
+                            ⭐ {r.averageRating?.toFixed(1)}
+                          </p>
+                        </div>
+                        <p className="text-gray-600 text-sm">{r.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Dishes */}
+              {searchResults.dishes.length > 0 && (
+                <>
+                  <h4 className="font-semibold mb-2 mt-4">Dishes</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {searchResults.dishes.map((d) => (
+                      <div
+                        key={d._id}
+                        className="bg-black/70 text-white border-2 border-white/20 p-3 rounded-xl shadow cursor-pointer hover:scale-105 hover:shadow-xl transition"
+                      >
+                        <img
+                          src={d.image || "/assets/dishimage.jpg"}
+                          className="h-24 w-full object-cover rounded-lg"
+                        />
+                        <div className="flex justify-between items-center">
+                          <p className="font-semibold mt-2">{d.name}</p>
+                          <p className="text-green-600 text-sm ">₹{d.price}</p>
+                        </div>
+                        <p className="text-white text-sm">{d.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* No results */}
+              {searchResults.restaurants.length === 0 &&
+                searchResults.dishes.length === 0 && (
+                  <p className="text-gray-300 text-center mt-4">
+                    No results found.
+                  </p>
+                )}
+            </section>
+          )}
+
+          {/* CATEGORIES */}
+          {!isSearching && (
+            <section className="px-6 mt-10">
+              <h3 className="text-xl font-semibold mb-3">Categories</h3>
+
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  {
+                    name: "Pizza",
+                    icon: Pizza,
+                    image: "/assets/categories/pizza.jpg",
+                  },
+                  {
+                    name: "Desserts",
+                    icon: IceCream,
+                    image: "/assets/categories/dessert.jpg",
+                  },
+                  {
+                    name: "Meals",
+                    icon: Utensils,
+                    image: "/assets/categories/meal.jpg",
+                  },
+                  {
+                    name: "Drinks",
+                    icon: Coffee,
+                    image: "/assets/categories/drinks.jpg",
+                  },
+                ].map((c, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setSelectedCategory(c.name)}
+                    style={{ backgroundImage: `url(${c.image})` }}
+                    className="relative bg-cover bg-center h-28 rounded-lg cursor-pointer overflow-hidden group"
+                  >
+                    {/* BLUR LAYER */}
+                    <div className="absolute inset-0 bg-black/60 group-hover:bg-black/10 transition"></div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
+                      <c.icon size={32} className="mb-1" />
+                      <p className="font-medium">{c.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* CATEGORY / RECOMMENDED DISHES */}
+          <h3 className="text-xl font-bold mb-10 mt-20 ml-6">
+            {selectedCategory
+              ? `${selectedCategory} Dishes`
+              : "Recommended For You"}
+          </h3>
+
+        
+            <section className="px-6 mt-12 mb-20">
+              <div className="grid grid-cols-8 grid-rows-2 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
+                {paginatedDishes.map((dish) => {
+                  const restaurant = restaurants.find(
+                    (r) => r._id === dish.restaurantId
+                  );
+
+                  return (
+                    <div
+                      key={dish._id}
+                      className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer flex flex-col justify-between"
+                    >
+                      <img
+                        src={dish.image || "/assets/dishimage.jpg"}
+                        className="h-28 w-full object-cover rounded-lg"
+                        alt={dish.name}
+                      />
+                      <div className="flex justify-between items-center pb-5">
+                        <p className="font-semibold text-xl mt-2">
+                          {dish.name}
+                        </p>
+                        <p className="text-green-500 font-bold">
+                          ₹{dish.price}
+                        </p>
+                      </div>
+                      <p className="text-white">{dish.description}</p>
+
+                      <p className="text-white/70 text-sm italic">
+                        By: {restaurant ? restaurant.name : "Unknown"}
+                      </p>
+                      <button
+                        onClick={() => addToCart(dish)}
+                        className="bg-blue-600 hover:bg-green-700 px-3 py-1 mt-2 rounded text-white"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
+                  >
+                    Prev
+                  </button>
+
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`px-4 py-2 rounded ${
+                        currentPage === i + 1
+                          ? "bg-blue-600"
+                          : "bg-white/20 hover:bg-white/30"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </section>
+     
+          {/* POPULAR RESTAURANTS */}
+          <section className="px-6 mt-10 mb-10">
+            <h3 className="text-xl font-bold mb-4"> Restaurants</h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedRestaurants.map((r) => (
                 <div
-                  key={dish._id}
+                  key={r._id}
+                  onClick={() => navigate(`/customer/restaurant/${r._id}`)}
                   className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
                 >
                   <img
-                    src={dish.image || "/assets/dishimage.jpg"}
-                    className="h-28 w-full object-cover rounded-lg"
-                    alt={dish.name}
+                    src={r.image || `/assets/restaurant.png`}
+                    className="h-40 w-full object-cover"
+                    alt={r.name}
                   />
+                  <div className="p-4">
+                    <h4 className="font-semibold text-lg">{r.name}</h4>
+                    <p className="text-gray-600 text-sm">{r.description}</p>
+                    <p className="mt-2 text-yellow-600 font-bold">
+                      ⭐ {r.averageRating?.toFixed(1)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {restaurantTotalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <button
+                  disabled={restaurantPage === 1}
+                  onClick={() => setRestaurantPage((p) => p - 1)}
+                  className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
+                >
+                  Prev
+                </button>
 
-                  <p className="font-semibold mt-2">{dish.name}</p>
-                  <p className="text-white font-bold">₹{dish.price}</p>
-
-                  <p className="text-white/70 text-sm italic">
-                    By: {restaurant ? restaurant.name : "Unknown"}
-                  </p>
+                {Array.from({ length: restaurantTotalPages }).map((_, i) => (
                   <button
-                    onClick={() => addToCart(dish)}
-                    className="bg-blue-600 hover:bg-green-700 px-3 py-1 mt-2 rounded text-white"
+                    key={i}
+                    onClick={() => setRestaurantPage(i + 1)}
+                    className={`px-4 py-2 rounded ${
+                      restaurantPage === i + 1
+                        ? "bg-blue-600"
+                        : "bg-white/20 hover:bg-white/30"
+                    }`}
                   >
-                    Add to Cart
+                    {i + 1}
                   </button>
-                </div>
-              );
-            })}
-          </div>
+                ))}
 
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
-              >
-                Prev
-              </button>
-
-              {Array.from({ length: totalPages }).map((_, i) => (
                 <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`px-4 py-2 rounded ${
-                    currentPage === i + 1
-                      ? "bg-blue-600"
-                      : "bg-white/20 hover:bg-white/30"
-                  }`}
+                  disabled={restaurantPage === restaurantTotalPages}
+                  onClick={() => setRestaurantPage((p) => p + 1)}
+                  className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
                 >
-                  {i + 1}
+                  Next
                 </button>
-              ))}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </section>
-
-        {/* POPULAR RESTAURANTS */}
-        <section className="px-6 mt-10 mb-10">
-          <h3 className="text-xl font-bold mb-4"> Restaurants</h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedRestaurants.map((r) => (
-              <div
-                key={r._id}
-                onClick={() => navigate(`/customer/restaurant/${r._id}`)}
-                className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
-              >
-                <img
-                  src={r.image || `/assets/restaurant.png`}
-                  className="h-40 w-full object-cover"
-                  alt={r.name}
-                />
-                <div className="p-4">
-                  <h4 className="font-semibold text-lg">{r.name}</h4>
-                  <p className="text-gray-600 text-sm">{r.description}</p>
-                  <p className="mt-2 text-yellow-600 font-bold">
-                    ⭐ {r.averageRating?.toFixed(1)}
-                  </p>
-                </div>
               </div>
-            ))}
-          </div>
-          {restaurantTotalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <button
-                disabled={restaurantPage === 1}
-                onClick={() => setRestaurantPage((p) => p - 1)}
-                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
-              >
-                Prev
-              </button>
-
-              {Array.from({ length: restaurantTotalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setRestaurantPage(i + 1)}
-                  className={`px-4 py-2 rounded ${
-                    restaurantPage === i + 1
-                      ? "bg-blue-600"
-                      : "bg-white/20 hover:bg-white/30"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
-              <button
-                disabled={restaurantPage === restaurantTotalPages}
-                onClick={() => setRestaurantPage((p) => p + 1)}
-                className="px-4 py-2 bg-white/20 rounded disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );

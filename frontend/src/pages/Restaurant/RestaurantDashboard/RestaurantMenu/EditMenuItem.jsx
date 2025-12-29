@@ -83,9 +83,10 @@ export default function EditMenuItem() {
 
   return (
     <div className="p-6 text-white">
-      <h1 className="text-3xl font-bold mb-6">Edit Menu Item</h1>
+      {toast && <Toast type={toast.type} message={toast.message} />}
+      <h1 className="text-3xl font-bold mb-6 ">Edit Menu Item</h1>
 
-      <div className="bg-white/10 p-6 rounded-xl border border-white/20 max-w-2xl">
+      <div className="bg-black/70 p-6 rounded-xl border border-white/20 max-w-2xl align-center justify-center flex   items-center m-auto ">
         <form onSubmit={submit} className="space-y-4">
           {/* Image */}
           <div className="flex flex-col items-center">
@@ -96,7 +97,6 @@ export default function EditMenuItem() {
 
             <label className="mt-3 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
               <Upload size={16} />
-              Upload New Image
               <input
                 type="file"
                 className="hidden"
@@ -107,9 +107,9 @@ export default function EditMenuItem() {
 
           {/* Name */}
           <div>
-            <label className="text-sm">Dish Name</label>
             <input
               type="text"
+              placeholder="Dish Name"
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -119,9 +119,10 @@ export default function EditMenuItem() {
 
           {/* Description */}
           <div>
-            <label className="text-sm">Description</label>
+          
             <textarea
               rows="3"
+              placeholder="Description"
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.description}
               onChange={(e) =>
@@ -132,22 +133,20 @@ export default function EditMenuItem() {
           </div>
 
           {/* Price */}
-          <div>
-            <label className="text-sm">Price</label>
+          <div className="flex w-xl gap-6 " >
+            
             <input
               type="number"
+              placeholder="Price"
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
               required
             />
-          </div>
 
-          {/* Category */}
-          <div>
-            <label className="text-sm">Category</label>
             <input
               type="text"
+              placeholder="Category"
               className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -156,7 +155,7 @@ export default function EditMenuItem() {
           </div>
 
           {/* Submit */}
-          <button className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2">
+          <button className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2 m-auto ">
             <Save size={18} />
             Save Changes
           </button>

@@ -143,10 +143,6 @@ export default function AdminDashboard() {
             <SidebarTooltip text="Orders" />
           </NavLink>
 
-          <NavLink to="/admin/dashboard/reviews" className={navItem}>
-            <MessageSquare size={18} />
-            <SidebarTooltip text="Reviews" />
-          </NavLink>
         </nav>
 
         {/* LOGOUT */}

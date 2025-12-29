@@ -88,8 +88,8 @@ export default function RestaurantProfile() {
   if (loading) return <p className="text-white p-6">Loading...</p>;
 
   return (
-    <div className="p-6 text-white flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-6">Restaurant Profile</h1>
+    <div className="p-1 text-white flex flex-col items-center">
+      <h1 className="text-3xl font-bold mb-2">Restaurant Profile</h1>
 
       {toast && <Toast type={toast.type} message={toast.message} />}
 
@@ -107,7 +107,6 @@ export default function RestaurantProfile() {
 
             <label className="mt-3 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
               <Upload size={16} />
-              Upload Image
               <input
                 type="file"
                 className="hidden"

@@ -11,7 +11,7 @@ export default function AdminAgents() {
 
   // Pagination
   const [page, setPage] = useState(1);
-  const agentsPerPage = 6;
+  const agentsPerPage = 10;
 
   const load = async () => {
     try {
@@ -24,7 +24,8 @@ export default function AdminAgents() {
 
   const toggleStatus = async (id, approvalStatus) => {
     try {
-      const nextStatus = approvalStatus === "approved" ? "blocked" : "approved";
+      const nextStatus =
+        approvalStatus === "approved" ? "blocked" : "approved";
 
       await api.put(`/api/admins/agent/status/${id}`, {
         approvalStatus: nextStatus,
@@ -39,7 +40,6 @@ export default function AdminAgents() {
     }
   };
 
-  // 🔥 ADMIN UNFLAG (remove single restaurant flag)
   const unflagAgent = async (agentId, restaurantId) => {
     try {
       await api.put(
@@ -52,7 +52,7 @@ export default function AdminAgents() {
       });
 
       load();
-    } catch (err) {
+    } catch {
       setToast({
         type: "error",
         message: "Failed to remove flag",
@@ -64,17 +64,19 @@ export default function AdminAgents() {
     load();
   }, []);
 
-  // SEARCH
+  /* 🔍 FILTER */
   const filteredAgents = list.filter((a) => {
     const q = search.toLowerCase();
+    const statusText = a.isActive ? "active" : "blocked";
     return (
       a.name?.toLowerCase().includes(q) ||
       a.email?.toLowerCase().includes(q) ||
-      a.approvalStatus?.toLowerCase().includes(q)
+      a.approvalStatus?.toLowerCase().includes(q) ||
+      statusText.includes(q)
     );
   });
 
-  // PAGINATION
+  /* 📄 PAGINATION */
   const totalPages = Math.ceil(filteredAgents.length / agentsPerPage);
   const paginatedAgents = filteredAgents.slice(
     (page - 1) * agentsPerPage,
@@ -86,8 +88,19 @@ export default function AdminAgents() {
   }, [search]);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Delivery Agents</h2>
+    <div className="text-white">
+      {/* HEADER */}
+      <div className="flex items-center gap-6 mb-6">
+        <h2 className="text-2xl font-bold">Delivery Agents</h2>
+
+        <input
+          type="text"
+          placeholder="Search by name, email, or status..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+        />
+      </div>
 
       {toast && (
         <Toast
@@ -97,44 +110,38 @@ export default function AdminAgents() {
         />
       )}
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Search by name, email, or status..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-xl mb-6 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
-      />
-
       {paginatedAgents.length === 0 ? (
         <p className="text-center text-gray-400 py-8">
           No matching agents found.
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* GRID — SAME AS OTHER ADMIN PAGES */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {paginatedAgents.map((a) => {
               const flagCount = a.flaggedByRestaurants?.length || 0;
 
               return (
                 <div
                   key={a._id}
-                  className="bg-black/60 border border-white/20 rounded-xl p-5 flex flex-col justify-between"
+                  className="bg-black/70 backdrop-blur-lg border border-white/20
+                             rounded-xl p-4 flex flex-col h-70"
                 >
-                  {/* INFO */}
-                  <div>
-                    <img
-                      src={a.image || "/assets/agent-avatar.png"}
-                      alt={a.name}
-                      className="w-full h-20 object-cover rounded-md mb-3"
-                    />
+                  {/* IMAGE */}
+                  <img
+                    src={a.image || "/assets/agent.png"}
+                    alt={a.name}
+                    className="w-full h-32 object-cover rounded-md"
+                  />
 
-                    <h3 className="text-lg font-semibold">{a.name}</h3>
-                    <p className="text-sm text-gray-400 mb-2">{a.email}</p>
+                  {/* NAME + STATUS */}
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <h3 className="text-lg font-semibold line-clamp-1">
+                      {a.name}
+                    </h3>
 
-                    {/* APPROVAL STATUS */}
                     <span
-                      className={`inline-block px-3 py-1 text-xs rounded-full capitalize ${
+                      className={`px-3 py-1 text-xs rounded-full capitalize whitespace-nowrap ${
                         a.approvalStatus === "approved"
                           ? "bg-green-600/20 text-green-400"
                           : "bg-red-600/20 text-red-400"
@@ -142,74 +149,79 @@ export default function AdminAgents() {
                     >
                       {a.approvalStatus}
                     </span>
-
-                    {/* FLAG COUNT */}
-                    {flagCount > 0 && (
-                      <button
-                        onClick={() =>
-                          setExpandedAgentId(
-                            expandedAgentId === a._id ? null : a._id
-                          )
-                        }
-                        className="mt-3 flex items-center gap-2 text-sm text-red-400 hover:underline"
-                      >
-                        <Flag size={14} />
-                        Flagged by {flagCount} restaurant
-                        {flagCount > 1 ? "s" : ""} — View reasons
-                      </button>
-                    )}
-
-                    {/* 🔽 FLAG DETAILS */}
-                    {expandedAgentId === a._id && (
-                      <div className="mt-3 space-y-3 text-sm bg-black/40 border border-red-500/30 rounded-lg p-3">
-                        {a.flaggedByRestaurants.map((f, idx) => (
-                          <div
-                            key={idx}
-                            className="border-b border-white/10 pb-2 last:border-b-0"
-                          >
-                            <p className="text-gray-300">
-                              <span className="text-red-400 font-medium">
-                                Restaurant ID:
-                              </span>{" "}
-                              {f.restaurantId}
-                            </p>
-
-                            {f.reason && (
-                              <p className="text-gray-400 italic mt-1">
-                                “{f.reason}”
-                              </p>
-                            )}
-
-                            <div className="flex justify-between items-center mt-2">
-                              <p className="text-xs text-gray-500">
-                                {new Date(f.flaggedAt).toLocaleString()}
-                              </p>
-
-                              {/* ADMIN UNFLAG */}
-                              <button
-                                onClick={() =>
-                                  unflagAgent(a._id, f.restaurantId)
-                                }
-                                className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300"
-                              >
-                                <XCircle size={14} />
-                                Unflag
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
-                  {/* APPROVE / BLOCK */}
+                  {/* EMAIL */}
+                  <p className="text-sm text-gray-400 line-clamp-1 mt-1">
+                    {a.email}
+                  </p>
+
+                  {/* FLAGS */}
+                  {flagCount > 0 && (
+                    <button
+                      onClick={() =>
+                        setExpandedAgentId(
+                          expandedAgentId === a._id ? null : a._id
+                        )
+                      }
+                      className="mt-2 flex items-center gap-1 text-xs text-red-400 hover:underline"
+                    >
+                      <Flag size={12} />
+                      Flagged ({flagCount})
+                    </button>
+                  )}
+
+                  {/* FLAG DETAILS */}
+                  {expandedAgentId === a._id && (
+                    <div className="mt-2 space-y-2 text-xs bg-black/40 border border-red-500/30 rounded-lg p-2 max-h-28 overflow-y-auto">
+                      {a.flaggedByRestaurants.map((f, idx) => (
+                        <div
+                          key={idx}
+                          className="border-b border-white/10 pb-1 last:border-b-0"
+                        >
+                          <p className="text-gray-300">
+                            <span className="text-red-400">
+                              Restaurant:
+                            </span>{" "}
+                            {f.restaurantId}
+                          </p>
+
+                          {f.reason && (
+                            <p className="text-gray-400 italic">
+                              “{f.reason}”
+                            </p>
+                          )}
+
+                          <div className="flex justify-between items-center mt-1">
+                            <p className="text-gray-500">
+                              {new Date(f.flaggedAt).toLocaleDateString()}
+                            </p>
+
+                            <button
+                              onClick={() =>
+                                unflagAgent(a._id, f.restaurantId)
+                              }
+                              className="flex items-center gap-1 text-red-400 hover:text-red-300"
+                            >
+                              <XCircle size={12} />
+                              Unflag
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* ACTION BUTTON — FIXED BOTTOM */}
                   <button
-                    className={`mt-5 py-2 rounded-lg font-medium transition ${
+                    className={`mt-auto w-full py-2 rounded-lg font-medium transition ${
                       a.approvalStatus === "approved"
                         ? "bg-red-600 hover:bg-red-700"
                         : "bg-green-600 hover:bg-green-700"
                     }`}
-                    onClick={() => toggleStatus(a._id, a.approvalStatus)}
+                    onClick={() =>
+                      toggleStatus(a._id, a.approvalStatus)
+                    }
                   >
                     {a.approvalStatus === "approved"
                       ? "Block Agent"

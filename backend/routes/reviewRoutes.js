@@ -9,6 +9,7 @@ import {
   toggleHideReview,
   flagReview,
   reportReviewByRestaurant,
+  getReviewsByRestaurantAdmin,
 } from "../controllers/reviewController.js";
 
 import auth from "../middlewares/authMiddleware.js";
@@ -24,6 +25,12 @@ router.get("/restaurant/my-reviews", restaurantAuth, getRestaurantReview);
 router.post("/:restaurantId", auth, postReview);
 router.put("/:restaurantId/:reviewId", auth, updateReview);
 router.delete("/:restaurantId/:reviewId", auth, deleteReview);
+
+router.get(
+  "/admin/restaurant/:restaurantId",
+  protectAdmin,
+  getReviewsByRestaurantAdmin
+);
 
 // PUBLIC
 router.get("/:restaurantId", getReviews);
