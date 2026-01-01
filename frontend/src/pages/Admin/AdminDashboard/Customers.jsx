@@ -11,6 +11,7 @@ export default function Customers() {
   const [page, setPage] = useState(1);
   const customersPerPage = 10;
 
+  /* ================= LOAD ================= */
   const load = async () => {
     const res = await api.get("/api/admins/customers");
     setList(res.data || []);
@@ -20,7 +21,7 @@ export default function Customers() {
     load();
   }, []);
 
-  // BLOCK / UNBLOCK CUSTOMER
+  /* ================= BLOCK / UNBLOCK ================= */
   const toggleStatus = async (id, isActive) => {
     try {
       await api.put(`/api/admins/customer/status/${id}`, {
@@ -44,43 +45,58 @@ export default function Customers() {
     }
   };
 
-  /* 🔍 FILTER */
+  /* ================= FILTER ================= */
   const filteredCustomers = list.filter((c) => {
     const q = search.toLowerCase();
     const statusText = c.isActive ? "active" : "blocked";
-    
+
     return (
       c.name?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q) ||
       c.phone?.toLowerCase().includes(q) ||
-      statusText.includes(q) 
+      statusText.includes(q)
     );
   });
 
-  /* 📄 PAGINATION */
+  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+
   const paginatedCustomers = filteredCustomers.slice(
     (page - 1) * customersPerPage,
     page * customersPerPage
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
+  useEffect(() => setPage(1), [search]);
+
+  /* ================= STATUS COUNTS ================= */
+  const activeCount = list.filter((c) => c.isActive).length;
+  const blockedCount = list.filter((c) => !c.isActive).length;
 
   return (
     <div className="text-white">
       {/* HEADER */}
-      <div className="flex items-center gap-6 mb-6">
-        <h2 className="text-2xl font-bold">Customers</h2>
+      <div className="flex items-center justify-between gap-6 mb-6">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold">Customers</h2>
+          {/* SEARCH — SAME POSITION */}
+          <input
+            type="text"
+            placeholder="Search by name, email, or phone..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search by name, email, or phone..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
-        />
+        {/* COUNTS */}
+        <div className="flex gap-2 text-sm">
+          <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400">
+            Active: {activeCount}
+          </span>
+          <span className="px-3 py-1 rounded-full bg-red-600/20 text-red-400">
+            Blocked: {blockedCount}
+          </span>
+        </div>
       </div>
 
       {toast && (
@@ -97,7 +113,7 @@ export default function Customers() {
         </p>
       ) : (
         <>
-          {/* GRID — SAME AS RESTAURANTS */}
+          {/* GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {paginatedCustomers.map((c) => (
               <div
@@ -137,7 +153,7 @@ export default function Customers() {
                 {/* PHONE */}
                 <p className="text-sm text-gray-300 mt-1">{c.phone}</p>
 
-                {/* ACTION BUTTON — FIXED BOTTOM */}
+                {/* ACTION */}
                 <button
                   onClick={() => toggleStatus(c._id, c.isActive)}
                   className={`mt-auto w-full py-2 rounded-lg font-medium transition ${

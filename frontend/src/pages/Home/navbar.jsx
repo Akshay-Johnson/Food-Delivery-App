@@ -11,7 +11,7 @@ export default function Navbar() {
       {/* Home Button */}
       <button
         onClick={() => scrollTo("home")}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+        className="px-4 py-2  bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Home
       </button>
@@ -19,7 +19,7 @@ export default function Navbar() {
       {/* About Button */}
       <button
         onClick={() => scrollTo("about")}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+        className="px-4 py-2  bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         About
       </button>
@@ -27,7 +27,7 @@ export default function Navbar() {
       {/* Testimonials Button */}
       <button
         onClick={() => scrollTo("review")}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+        className="px-4 py-2  bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Testimonials
       </button>
@@ -35,7 +35,7 @@ export default function Navbar() {
       {/* Contact Us Button */}
       <button
         onClick={() => scrollTo("contact")}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center gap-2 transition"
+        className="px-4 py-2  bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded-md shadow-md flex items-center gap-2 transition"
       >
         Contact Us
       </button>
@@ -49,7 +49,6 @@ export default function Navbar() {
         Login
       </Link>
       */}
-      
     </div>
   );
 }

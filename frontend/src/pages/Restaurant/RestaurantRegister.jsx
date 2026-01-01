@@ -79,7 +79,7 @@ export default function RestaurantRegister() {
 
       setToast({
         type: "success",
-        message: "Registration successful 🎉",
+        message: "Registration successful 🎉, Wait for admin approval.",
       });
 
       setTimeout(() => {

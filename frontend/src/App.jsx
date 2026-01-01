@@ -25,7 +25,8 @@ import AdminDashboard from "./pages/Admin/AdminDashboard/AdminDashboard.jsx";
 import Restaurants from "./pages/Admin/AdminDashboard/Restaurants.jsx";
 import Customers from "./pages/Admin/AdminDashboard/Customers.jsx";
 import AdminAgents from "./pages/Admin/AdminDashboard/Agents.jsx";
-import AdminOrders from "./pages/Admin/AdminDashboard/Orders.jsx";
+import AdminRestaurantOrders from "./pages/Admin/AdminDashboard/AdminRestauratOrders.jsx";
+import AdminOrdersByRestaurant from "./pages/Admin/AdminDashboard/AdminOrdersByRestaurant.jsx";
 
 //login and register for restaurant
 import RestaurantLogin from "./pages/Restaurant/RestaurantLogin.jsx";
@@ -103,7 +104,11 @@ export default function App() {
           <Route path="restaurants" element={<Restaurants />} />
           <Route path="customers" element={<Customers />} />
           <Route path="agents" element={<AdminAgents />} />
-          <Route path="orders" element={<AdminOrders />} />
+          <Route path="orders" element={<AdminRestaurantOrders />} />
+          <Route
+            path="orders/restaurant/:restaurantId"
+            element={<AdminOrdersByRestaurant />}
+          />
           <Route path="reviews/:restaurantId" element={<AdminReviews />} />
         </Route>
 

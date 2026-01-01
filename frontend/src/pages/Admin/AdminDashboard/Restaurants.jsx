@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ⭐ NEW
+import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 
 export default function Restaurants() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
-
-  const navigate = useNavigate(); // ⭐ NEW
+  const navigate = useNavigate();
 
   // Pagination
   const [page, setPage] = useState(1);
   const restaurantsPerPage = 10;
 
+  /* ================= LOAD DATA ================= */
   const loadData = async () => {
     const res = await api.get("/api/admins/restaurants");
     setList(res.data || []);
@@ -26,43 +26,61 @@ export default function Restaurants() {
     loadData();
   }, []);
 
-  /* 🔍 FILTER */
+  /* ================= FILTER ================= */
   const filteredRestaurants = list.filter((r) => {
     const q = search.toLowerCase();
-    const displayStatus = r.status === "approved" ? "approved" : "blocked";
     return (
       r.name?.toLowerCase().includes(q) ||
       r.email?.toLowerCase().includes(q) ||
-      r.status?.toLowerCase().includes(q) ||
-      displayStatus.includes(q)
+      r.status?.toLowerCase().includes(q)
     );
   });
 
-  /* 📄 PAGINATION */
+  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filteredRestaurants.length / restaurantsPerPage);
-  const startIndex = (page - 1) * restaurantsPerPage;
+
   const paginatedRestaurants = filteredRestaurants.slice(
-    startIndex,
-    startIndex + restaurantsPerPage
+    (page - 1) * restaurantsPerPage,
+    page * restaurantsPerPage
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
+  useEffect(() => setPage(1), [search]);
+
+  /* ================= STATUS COUNTS ================= */
+  const approvedCount = list.filter((r) => r.status === "approved").length;
+
+  const pendingCount = list.filter((r) => r.status === "pending").length;
+
+  const blockedCount = list.filter((r) => r.status === "blocked").length;
 
   return (
     <div className="text-white">
       {/* HEADER */}
-      <div className="flex items-center gap-6 mb-6">
-        <h2 className="text-2xl font-bold">Restaurants</h2>
+      <div className="flex items-center justify-between gap-6 mb-6">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold">Restaurants</h2>
+          {/* SEARCH — SAME POSITION AS BEFORE */}
+          <input
+            type="text"
+            placeholder="Search by name, email, or status..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search by name, email, or status..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
-        />
+        {/* COUNTS */}
+        <div className="flex gap-2 text-sm">
+          <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400">
+            Approved: {approvedCount}
+          </span>
+          <span className="px-3 py-1 rounded-full bg-yellow-600/20 text-yellow-400">
+            Pending: {pendingCount}
+          </span>
+          <span className="px-3 py-1 rounded-full bg-red-600/20 text-red-400">
+            Blocked: {blockedCount}
+          </span>
+        </div>
       </div>
 
       {paginatedRestaurants.length === 0 ? (
@@ -78,17 +96,17 @@ export default function Restaurants() {
                 key={r._id}
                 onClick={() => navigate(`/admin/dashboard/reviews/${r._id}`)}
                 className="cursor-pointer bg-black/70 backdrop-blur-lg border border-white/20
-                           rounded-xl p-4 flex flex-col h-70 hover:bg-white/10 transition"
+                           rounded-xl p-4 flex flex-col h-72 hover:bg-white/10 transition"
               >
                 {/* IMAGE */}
                 <img
                   src={r.image || "/assets/restaurant.png"}
                   alt={r.name}
-                  className="w-full h-25 object-cover rounded-md"
+                  className="w-full h-28 object-cover rounded-md"
                 />
 
                 {/* NAME + STATUS */}
-                <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="mt-2 flex justify-between items-center gap-2">
                   <h3 className="text-lg font-semibold line-clamp-1">
                     {r.name}
                   </h3>
@@ -97,6 +115,8 @@ export default function Restaurants() {
                     className={`px-3 py-1 text-xs rounded-full capitalize ${
                       r.status === "approved"
                         ? "bg-green-600/20 text-green-400"
+                        : r.status === "pending"
+                        ? "bg-yellow-600/20 text-yellow-400"
                         : "bg-red-600/20 text-red-400"
                     }`}
                   >
@@ -109,15 +129,21 @@ export default function Restaurants() {
                   {r.email}
                 </p>
 
-                {/* RATING */}
-                <p className="text-sm text-yellow-400 font-semibold mt-1">
-                  ⭐ {r.averageRating?.toFixed(1) || "0.0"}
-                </p>
+                {/* RATING + REVIEWS */}
+                <div className="flex justify-between gap-4 mt-2">
+                  <p className="text-sm text-yellow-400 font-semibold">
+                    ⭐ {r.averageRating?.toFixed(1) || "0.0"}
+                  </p>
 
-                {/* ACTION BUTTON */}
+                  <p className="text-sm text-blue-400">
+                    📝 {r.reviewCount || 0} reviews
+                  </p>
+                </div>
+
+                {/* ACTION */}
                 <button
                   onClick={(e) => {
-                    e.stopPropagation(); // ⭐ IMPORTANT
+                    e.stopPropagation();
                     toggleStatus(
                       r._id,
                       r.status === "approved" ? "blocked" : "approved"

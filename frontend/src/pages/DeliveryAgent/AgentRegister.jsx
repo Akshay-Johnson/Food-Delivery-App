@@ -78,7 +78,7 @@ export default function AgentRegister() {
 
       setToast({
         type: "success",
-        message: "Registration successful 🎉",
+        message: "Registration successful 🎉, Wait for admin approval",
       });
 
       setTimeout(() => {

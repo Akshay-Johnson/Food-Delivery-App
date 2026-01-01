@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../../api/axiosInstance";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ArrowLeft } from "lucide-react";
 
 /* ⭐ STAR RENDER */
 function Stars({ rating }) {
@@ -81,11 +81,18 @@ export default function AdminReviews() {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.history.back()}
+            className="px-4 py-2 bg-black/70 hover:bg-gray-600 rounded-md shadow-md transition border border-white/20"
+          >
+            <ArrowLeft size={16} />
+          </button>
           <h2 className="text-2xl font-bold">
             Reviews - {restaurant?.name || "Restaurant"}
           </h2>
           <p className="text-sm text-gray-400">
-            <MessageSquare className="inline-block w-4 h-4 mr-1" /> {reviews.length}
+            <MessageSquare className="inline-block w-4 h-4 mr-1" />{" "}
+            {reviews.length}
           </p>
         </div>
 

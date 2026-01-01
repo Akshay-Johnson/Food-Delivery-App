@@ -99,9 +99,9 @@ export default function MenuManagement() {
     <div>
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Manage Menu</h2>
-
         {toast && <Toast type={toast.type} message={toast.message} />}
+        <div className="flex flex justify-between gap-4">
+        <h2 className="text-2xl font-bold">Manage Menu</h2>
 
         {/* SEARCH */}
         <input
@@ -111,6 +111,7 @@ export default function MenuManagement() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-sm mb-4 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white "
         />
+        </div>
 
         <button
           onClick={() => navigate("/restaurant/dashboard/menu/add")}

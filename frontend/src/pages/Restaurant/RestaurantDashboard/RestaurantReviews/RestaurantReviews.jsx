@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
-import { Flag, Star } from "lucide-react";
+import { Flag, Star, Search } from "lucide-react";
 import Toast from "../../../../components/toast/toast";
 
 export default function RestaurantReviews() {
@@ -8,16 +8,16 @@ export default function RestaurantReviews() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  //  Pagination
+  /* SEARCH */
+  const [search, setSearch] = useState("");
+
+  /* PAGINATION */
   const [page, setPage] = useState(1);
   const reviewsPerPage = 15;
 
   const loadReviews = async () => {
     try {
       const res = await api.get("/api/reviews/restaurant/my-reviews");
-
-      console.log("Restaurant Reviews API:", res.data);
-
       setReviews(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error("Failed to load reviews", error);
@@ -30,56 +30,84 @@ export default function RestaurantReviews() {
     loadReviews();
   }, []);
 
+  /* REPORT REVIEW */
   const report = async (id) => {
     if (!window.confirm("Report this review to admin?")) return;
 
     try {
       await api.put(`/api/reviews/restaurant/${id}/report`);
 
-      // Update local state so UI shows "Reported"
       setReviews((prev) =>
-        prev.map((review) =>
-          review._id === id ? { ...review, isFlagged: true } : review
-        )
+        prev.map((r) => (r._id === id ? { ...r, isFlagged: true } : r))
       );
 
       setToast({ type: "success", message: "Review reported to admin" });
-    } catch (error) {
-      console.error("Failed to report review", error);
+    } catch {
       setToast({ type: "error", message: "Failed to report review" });
     }
   };
 
-  /* ================= PAGINATION LOGIC ================= */
-  const totalPages = Math.ceil(reviews.length / reviewsPerPage);
+  /* ================= SEARCH FILTER ================= */
+  const filteredReviews = reviews.filter((r) => {
+    const name = r.customerId?.name?.toLowerCase() || "";
+    const comment = r.comment?.toLowerCase() || "";
+
+    return (
+      name.includes(search.toLowerCase()) ||
+      comment.includes(search.toLowerCase())
+    );
+  });
+
+  /* ================= PAGINATION ================= */
+  const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
   const startIndex = (page - 1) * reviewsPerPage;
-  const paginatedReviews = reviews.slice(
+  const paginatedReviews = filteredReviews.slice(
     startIndex,
     startIndex + reviewsPerPage
   );
+
+  useEffect(() => {
+    setPage(1); // reset page on search
+  }, [search]);
 
   if (loading) return <p className="text-white">Loading reviews...</p>;
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-
       {toast && <Toast type={toast.type} message={toast.message} />}
 
-      {reviews.length === 0 ? (
-        <p className="text-gray-400">No reviews yet.</p>
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex justify-between gap-4">
+        <h2 className="text-2xl font-bold">Customer Reviews</h2>
+
+        {/* SEARCH */}
+   
+          <input
+            type="text"
+            placeholder="Search by name or comment..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-64 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          />
+        </div>
+      </div>
+
+      {filteredReviews.length === 0 ? (
+        <p className="text-gray-400">No matching reviews found.</p>
       ) : (
         <>
-          {/* REVIEWS LIST */}
+          {/* REVIEWS GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {paginatedReviews.map((r) => (
               <div
                 key={r._id}
-                className="bg-black/70 border border-white/20 rounded-lg p-4 flex justify-between flex-col h-full relative"
+                className="bg-black/70 border border-white/20 rounded-lg p-4 flex flex-col justify-between relative"
               >
-                <div className="flex items-center mb-2 ">
+                {/* USER INFO */}
+                <div className="flex items-center mb-3">
                   <img
-                    className="w-16 h-16 object-cover rounded-full border border-white/30 mr-4"
+                    className="w-14 h-14 object-cover rounded-full border border-white/30 mr-3"
                     src={
                       r.customerId?.profileImage?.trim()
                         ? r.customerId.profileImage
@@ -88,19 +116,27 @@ export default function RestaurantReviews() {
                     alt="Customer"
                   />
 
-                  <div className="absolute top-2 right-2 flex items-center text-sm">
+                  <div>
+                    <p className="font-semibold truncate">
+                      {r.customerId?.name || "Anonymous"}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {/* REPORT */}
+                  <div className="absolute top-2 right-2">
                     {r.isFlagged ? (
-                      <span className="inline-flex items-center gap-1 text-red-400">
-                        <Flag size={14} className="text-red-400" />
-                        Reported
+                      <span className="flex items-center gap-1 text-xs text-red-400">
+                        <Flag size={14} /> Reported
                       </span>
                     ) : (
                       <button
                         onClick={() => report(r._id)}
-                        className="flex items-center text-green-400 hover:text-red-500"
+                        className="flex items-center gap-1 text-xs text-green-400 hover:text-red-500"
                       >
-                        <Flag size={14} className="mr-1 text-green-400" />
-                        Report
+                        <Flag size={14} /> Report
                       </button>
                     )}
                   </div>
@@ -119,7 +155,10 @@ export default function RestaurantReviews() {
                   ))}
                 </div>
 
-                <p className="text-white/80">{r.comment}</p>
+                {/* COMMENT */}
+                <p className="text-white/80 text-sm line-clamp-4">
+                  {r.comment}
+                </p>
               </div>
             ))}
           </div>

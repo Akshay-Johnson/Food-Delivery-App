@@ -10,6 +10,7 @@ import {
   updateAgentStatus,
   getAllOrders,
   sendAdminEmailOtp,
+  getOrdersByRestaurant,
 } from "../controllers/adminController.js";
 
 import { updateCustomerStatus } from "../controllers/customerController.js";
@@ -58,6 +59,12 @@ router.put(
 
 //order controls
 router.get("/orders", protectAdmin, getAllOrders);
+
+router.get(
+  "/orders/restaurant/:restaurantId",
+  protectAdmin,
+  getOrdersByRestaurant
+);
 
 //review controls
 router.get("/reviews", protectAdmin, async (req, res) => {

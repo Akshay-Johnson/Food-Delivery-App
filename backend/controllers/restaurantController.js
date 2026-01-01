@@ -44,6 +44,7 @@ export const sendRestaurantEmailOtp = async (req, res) => {
 // Register a new restaurant
 export const registerRestaurant = async (req, res) => {
   const { name, email, password, phone, address, otp } = req.body;
+
   try {
     const otpRecord = await EmailOtp.findOne({ email, otp });
 
@@ -55,14 +56,13 @@ export const registerRestaurant = async (req, res) => {
       return res.status(400).json({ message: "OTP has expired" });
     }
 
-    const exists = await Restaurant.findOne({ email });
-
     if (await emailExistsAnywhere(email)) {
       return res.status(400).json({
         message: "Email already registered with another role",
       });
     }
 
+    const exists = await Restaurant.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "Restaurant already exists" });
     }
@@ -76,16 +76,21 @@ export const registerRestaurant = async (req, res) => {
       phone,
       address,
       isEmailVerified: true,
+      status: "pending", // ✅ IMPORTANT
     });
-
-    const token = generateToken(restaurant._id);
 
     res.status(201).json({
-      message: "Restaurant registered successfully",
-      token,
-      restaurant,
+      message:
+        "Registration successful. Wait for admin approval.",
+      restaurant: {
+        _id: restaurant._id,
+        name: restaurant.name,
+        email: restaurant.email,
+        status: restaurant.status,
+      },
     });
   } catch (error) {
+    console.error("Restaurant register error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -93,20 +98,31 @@ export const registerRestaurant = async (req, res) => {
 // Login restaurant
 export const loginRestaurant = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const restaurant = await Restaurant.findOne({ email });
+
     if (!restaurant) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
+
     const isMatch = await bcrypt.compare(password, restaurant.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    // 🚫 BLOCK LOGIN IF NOT APPROVED
+    if (restaurant.status === "pending") {
+      return res.status(403).json({
+        message:
+          "Your restaurant account is pending admin approval. Please wait.",
+      });
+    }
+
     if (restaurant.status === "blocked") {
       return res
         .status(403)
-        .json({ message: "Restaurant is blocked by Admin" });
+        .json({ message: "Restaurant is blocked by admin" });
     }
 
     const token = generateToken(restaurant._id);
@@ -117,7 +133,8 @@ export const loginRestaurant = async (req, res) => {
       restaurant,
     });
   } catch (error) {
-    res.status(500).json({ message: "error logging in" });
+    console.error("Restaurant login error:", error);
+    res.status(500).json({ message: "Error logging in" });
   }
 };
 
@@ -175,7 +192,7 @@ export const getAllRestaurants = async (req, res) => {
   try {
     const { category, search, minRating } = req.query;
 
-    const filter = {};
+    const filter = { status: "approved" };
 
     if (category) {
       filter.categories = category;
@@ -199,22 +216,29 @@ export const getAllRestaurants = async (req, res) => {
 //Public - Get restaurant by ID
 export const getRestaurantById = async (req, res) => {
   try {
-    const restaurant = await Restaurant.findById(req.params.id).select(
-      "-password"
-    );
+    const restaurant = await Restaurant.findOne({
+      _id: req.params.id,
+      status: "approved", // ✅ IMPORTANT
+    }).select("-password");
+
     if (!restaurant) {
-      return res.status(404).json({ message: "Restaurant not found" });
+      return res
+        .status(404)
+        .json({ message: "Restaurant not found or not approved yet" });
     }
 
-    //fetch menu items for the restaurant
-    const menuItems = await Menu.find({ restaurant: restaurant._id });
+    // Fetch menu items for the restaurant
+    const menuItems = await Menu.find({
+      restaurant: restaurant._id,
+    });
 
     res.status(200).json({
       restaurant,
       menuItems,
     });
   } catch (error) {
-    res.status(500).json({ message: "error fetching restaurant", error });
+    console.error("Get restaurant by ID error:", error);
+    res.status(500).json({ message: "Error fetching restaurant" });
   }
 };
 
@@ -293,6 +317,7 @@ export const getCategories = async (req, res) => {
 export const searchRestaurants = async (req, res) => {
   try {
     const { query } = req.query;
+
     if (!query || query.trim() === "") {
       return res.status(400).json({ message: "Search query is required" });
     }
@@ -300,6 +325,7 @@ export const searchRestaurants = async (req, res) => {
     const searchText = query.trim();
 
     const restaurants = await Restaurant.find({
+      status: "approved", // ✅ IMPORTANT
       $or: [
         { name: { $regex: searchText, $options: "i" } },
         { categories: { $regex: searchText, $options: "i" } },
@@ -308,7 +334,10 @@ export const searchRestaurants = async (req, res) => {
 
     res.status(200).json(restaurants);
   } catch (error) {
-    res.status(500).json({ message: "error searching restaurants", error });
+    console.error("Search restaurants error:", error);
+    res.status(500).json({
+      message: "Error searching restaurants",
+    });
   }
 };
 

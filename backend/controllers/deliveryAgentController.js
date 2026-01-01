@@ -48,7 +48,6 @@ export const registerAgent = async (req, res) => {
     const { name, email, phone, password, otp } = req.body;
 
     const otpRecord = await EmailOtp.findOne({ email, otp });
-
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
@@ -57,16 +56,10 @@ export const registerAgent = async (req, res) => {
       return res.status(400).json({ message: "OTP has expired" });
     }
 
-    const emailLower = email.toLowerCase();
-
     if (await emailExistsAnywhere(email)) {
       return res.status(400).json({
         message: "Email already registered with another role",
       });
-    }
-
-    if (!name || !email || !phone || !password) {
-      return res.status(400).json({ message: "All fields are required" });
     }
 
     const exists = await DeliveryAgent.findOne({ email });
@@ -78,30 +71,29 @@ export const registerAgent = async (req, res) => {
 
     const agent = await DeliveryAgent.create({
       name,
-      email: emailLower,
+      email: email.toLowerCase(),
       phone,
       password: hashedPassword,
-      approvalStatus: "approved",
-      isActive: true,
+
+      // ⏳ WAITING FOR ADMIN
+      approvalStatus: "pending",
+      isActive: false,
       isEmailVerified: true,
     });
 
-    const token = generateToken(agent._id);
-
     res.status(201).json({
-      message: "Delivery agent registered successfully",
-      token,
+      message:
+        "Registration successful. Your account is pending admin approval.",
       agent: {
         _id: agent._id,
         name: agent.name,
         email: agent.email,
-        phone: agent.phone,
         approvalStatus: agent.approvalStatus,
       },
     });
   } catch (error) {
     console.error("REGISTER AGENT ERROR:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -111,15 +103,21 @@ export const loginAgent = async (req, res) => {
     const { email, password } = req.body;
 
     const agent = await DeliveryAgent.findOne({ email }).select("+password");
-
     if (!agent) {
       return res.status(400).json({ message: "Agent not found" });
     }
 
-    // 🔴 BLOCK CHECK
-    if (agent.approvalStatus !== "approved" || !agent.isActive) {
+    // ⛔ PENDING
+    if (agent.approvalStatus === "pending") {
       return res.status(403).json({
-        message: "Your account is blocked. Please contact admin.",
+        message: "Your account is pending admin approval",
+      });
+    }
+
+    // ⛔ BLOCKED
+    if (agent.approvalStatus === "blocked") {
+      return res.status(403).json({
+        message: "Your account has been blocked by admin",
       });
     }
 
@@ -137,8 +135,8 @@ export const loginAgent = async (req, res) => {
         _id: agent._id,
         name: agent.name,
         email: agent.email,
-        phone: agent.phone,
         status: agent.status,
+        approvalStatus: agent.approvalStatus,
       },
     });
   } catch (error) {
@@ -146,6 +144,7 @@ export const loginAgent = async (req, res) => {
   }
 };
 
+// GET AGENT PROFILE
 export const getAgentProfile = async (req, res) => {
   try {
     const agent = await DeliveryAgent.findById(req.user.id).select(
@@ -415,8 +414,7 @@ export const toggleAgentStatus = async (req, res) => {
     }
 
     // toggle status
-    agent.status =
-      agent.status === "available" ? "offline" : "available";
+    agent.status = agent.status === "available" ? "offline" : "available";
 
     await agent.save();
 
@@ -429,4 +427,3 @@ export const toggleAgentStatus = async (req, res) => {
     res.status(500).json({ message: "Failed to update status" });
   }
 };
-

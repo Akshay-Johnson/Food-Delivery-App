@@ -121,6 +121,7 @@ export default function RestaurantAgents() {
       )}
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+        <div className="flex justify-between gap-4">
         <h1 className="text-3xl font-bold">Delivery Agents</h1>
 
         {/* SEARCH */}
@@ -131,6 +132,7 @@ export default function RestaurantAgents() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:w-64 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
         />
+      </div>
       </div>
 
       {/* ================= AVAILABLE AGENTS ================= */}

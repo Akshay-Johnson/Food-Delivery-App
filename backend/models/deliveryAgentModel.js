@@ -38,10 +38,10 @@ const deliveryAgentschema = new mongoose.Schema(
 
     approvalStatus: {
       type: String,
-      enum: ["approved", "blocked"],
-      default: "approved",
+      enum: ["pending", "approved", "blocked"],
+      default: "pending", 
     },
-    
+
     flaggedByRestaurants: [
       {
         restaurantId: {
@@ -67,7 +67,7 @@ const deliveryAgentschema = new mongoose.Schema(
 
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     location: {

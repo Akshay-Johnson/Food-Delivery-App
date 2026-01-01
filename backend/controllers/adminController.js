@@ -8,6 +8,7 @@ import EmailOtp from "../models/EmailOtp.js";
 import { generateOtp, sendEmailOtp } from "../utils/emailOtp.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { sendRestaurantApprovalEmail, sendAgentApprovalEmail } from "../utils/sendApprovalEmail.js";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
@@ -132,9 +133,43 @@ export const loginAdmin = async (req, res) => {
 //get all restaurants
 export const getAllRestaurants = async (req, res) => {
   try {
-    const restaurants = await Restaurant.find().select("-password");
+    const restaurants = await Restaurant.aggregate([
+      // Orders count
+      {
+        $lookup: {
+          from: "orders",
+          localField: "_id",
+          foreignField: "restaurantId",
+          as: "orders",
+        },
+      },
+      // Reviews count
+      {
+        $lookup: {
+          from: "reviews", // ✅ reviews collection
+          localField: "_id",
+          foreignField: "restaurantId",
+          as: "reviews",
+        },
+      },
+      {
+        $addFields: {
+          orderCount: { $size: "$orders" },
+          reviewCount: { $size: "$reviews" }, // ✅ NEW
+        },
+      },
+      {
+        $project: {
+          orders: 0,
+          reviews: 0,
+          password: 0,
+        },
+      },
+    ]);
+
     res.json(restaurants);
   } catch (error) {
+    console.error("Error fetching restaurants", error);
     res.status(500).json({ message: "Error fetching restaurants" });
   }
 };
@@ -143,21 +178,41 @@ export const getAllRestaurants = async (req, res) => {
 export const updateRestaurantStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body; // 'approved' or 'blocked'
+    const { status } = req.body; // "approved" | "blocked"
 
-    let restaurant = await Restaurant.findById(id);
+    if (!["approved", "blocked", "pending"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const restaurant = await Restaurant.findById(id);
+
     if (!restaurant) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
+    const previousStatus = restaurant.status;
+
     restaurant.status = status;
     await restaurant.save();
 
-    res.json({ message: `Restaurant updated to ${status}`, restaurant });
+    // ✅ SEND APPROVAL EMAIL (only when moving to approved)
+    if (previousStatus !== "approved" && status === "approved") {
+      try {
+        await sendRestaurantApprovalEmail(restaurant.email, restaurant.name);
+      } catch (emailErr) {
+        console.error("Approval email failed:", emailErr);
+        // ❗ Do NOT fail the request if email fails
+      }
+    }
+
+    res.json({
+      message: `Restaurant status updated to ${status}`,
+      restaurant,
+    });
   } catch (error) {
+    console.error("Update restaurant status error:", error);
     res.status(500).json({
       message: "Error updating restaurant status",
-      error: error.message,
     });
   }
 };
@@ -177,7 +232,10 @@ export const getAllCustomers = async (req, res) => {
 //get all delivery agents
 export const getAllAgents = async (req, res) => {
   try {
-    const agents = await DeliveryAgent.find().select("-password");
+    const agents = await DeliveryAgent.find()
+      .select("-password")
+      .populate("flaggedByRestaurants.restaurantId", "name");
+
     res.json(agents);
   } catch (error) {
     res.status(500).json({ message: "Error fetching delivery agents" });
@@ -188,22 +246,32 @@ export const getAllAgents = async (req, res) => {
 export const updateAgentStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { approvalStatus } = req.body; // ✅ correct field
+    const { approvalStatus } = req.body; // pending | approved | blocked
 
-    if (!["approved", "blocked"].includes(approvalStatus)) {
+    if (!["pending", "approved", "blocked"].includes(approvalStatus)) {
       return res.status(400).json({ message: "Invalid approval status" });
     }
 
     const agent = await DeliveryAgent.findById(id);
-
     if (!agent) {
       return res.status(404).json({ message: "Delivery Agent not found" });
     }
+
+    const previousStatus = agent.approvalStatus;
 
     agent.approvalStatus = approvalStatus;
     agent.isActive = approvalStatus === "approved";
 
     await agent.save();
+
+    // 📧 SEND APPROVAL EMAIL
+    if (previousStatus !== "approved" && approvalStatus === "approved") {
+      try {
+        await sendAgentApprovalEmail(agent.email, agent.name);
+      } catch (err) {
+        console.error("Agent approval email failed:", err);
+      }
+    }
 
     res.json({
       message: `Delivery Agent ${approvalStatus} successfully`,
@@ -228,5 +296,31 @@ export const getAllOrders = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching orders", error: error.message });
+  }
+};
+
+export const getOrdersByRestaurant = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+
+    const restaurant = await Restaurant.findById(restaurantId).select(
+      "name image"
+    );
+
+    if (!restaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    const orders = await Order.find({ restaurantId })
+      .populate("customerId", "name")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      restaurant,
+      orders,
+    });
+  } catch (err) {
+    console.error("Admin get orders by restaurant failed:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
