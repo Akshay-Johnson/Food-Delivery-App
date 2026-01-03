@@ -105,13 +105,13 @@ export default function CustomerEditProfile() {
           <div className=" bg-black/90 rounded-xl p-6 border border-white border-2 max-w-md mx-auto ">
             <div className="flex justify-end  mb-4 gap-2">
               <Link to="/customer/dashboard">
-                <button className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle">
+                <button className="text-sm bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-lg transition mb-4 align-middle">
                   <Home />
                 </button>
               </Link>
               <button
                 onClick={() => navigate(-1)}
-                className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"
+                className="text-sm bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-lg transition mb-4 align-middle"
               >
                 ← Back
               </button>
@@ -128,7 +128,7 @@ export default function CustomerEditProfile() {
                   />
                 )}
 
-                <label className="inline-flex items-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white transition">
+                <label className="inline-flex items-center gap-2 cursor-pointer bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-md text-white transition">
                   <Upload size={16} />
                   <input
                     type="file"
@@ -174,7 +174,7 @@ export default function CustomerEditProfile() {
               <div className="flex gap-4 mt-6">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 py-2 rounded-md hover:bg-blue-700 transition"
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 py-2 rounded-md transition"
                 >
                   Save Changes
                 </button>
@@ -182,7 +182,7 @@ export default function CustomerEditProfile() {
                 <button
                   type="button"
                   onClick={() => navigate("/customer/profile")}
-                  className="flex-1 bg-red-600 py-2 rounded-md hover:bg-red-700 transition"
+                  className="flex-1 bg-red-600 py-2 rounded-md hover:bg-red-400 transition"
                 >
                   Cancel
                 </button>

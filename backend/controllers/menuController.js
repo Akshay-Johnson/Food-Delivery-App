@@ -1,4 +1,6 @@
 import Menu from "../models/menuModel.js";
+import Order from "../models/orderModel.js";
+import mongoose from "mongoose";
 
 //add menu item
 export const addMenuItem = async (req, res) => {
@@ -145,7 +147,7 @@ export const updateAvailability = async (req, res) => {
 
     const item = await Menu.findOne({
       _id: req.params.id,
-      restaurantId, 
+      restaurantId,
     });
 
     if (!item) {
@@ -161,5 +163,145 @@ export const updateAvailability = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// PUBLIC : get trending dishes (PER RESTAURANT)
+export const getTrendingDishes = async (req, res) => {
+  try {
+    const { restaurantId } = req.query;
+
+    if (!restaurantId) {
+      return res.status(400).json({ message: "restaurantId is required" });
+    }
+
+    const restaurantObjectId = new mongoose.Types.ObjectId(restaurantId);
+
+    const trending = await Order.aggregate([
+      // ✅ 1. FILTER BY RESTAURANT (FIX)
+      {
+        $match: {
+          restaurantId: restaurantObjectId,
+        },
+      },
+
+      // 2. Break order items
+      { $unwind: "$items" },
+
+      // 3. Group by menu item
+      {
+        $group: {
+          _id: "$items.itemId",
+          orderCount: { $sum: "$items.quantity" },
+        },
+      },
+
+      // 4. Sort by popularity
+      { $sort: { orderCount: -1 } },
+
+      // 5. Limit
+      { $limit: 12 },
+
+      // 6. Join Menu
+      {
+        $lookup: {
+          from: "menus",
+          localField: "_id",
+          foreignField: "_id",
+          as: "dish",
+        },
+      },
+
+      // 7. Flatten
+      { $unwind: "$dish" },
+
+      // 8. Only available dishes
+      {
+        $match: {
+          "dish.isAvailable": true,
+        },
+      },
+
+      // 9. Merge orderCount into dish
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$dish", { orderCount: "$orderCount" }],
+          },
+        },
+      },
+    ]);
+
+    res.json(trending);
+  } catch (error) {
+    console.error("Trending dishes error:", error);
+    res.status(500).json({ message: "Failed to fetch trending dishes" });
+  }
+};
+
+// PUBLIC : GLOBAL trending dishes (Customer Dashboard)
+export const getGlobalTrendingDishes = async (req, res) => {
+  try {
+    const trending = await Order.aggregate([
+      {
+        $match: {
+          status: {
+            $in: ["accepted", "preparing", "ready", "picked", "delivered"],
+          },
+        },
+      },
+
+      { $unwind: "$items" },
+
+      {
+        $group: {
+          _id: "$items.itemId",
+          orderCount: { $sum: "$items.quantity" },
+        },
+      },
+
+      { $sort: { orderCount: -1 } },
+      { $limit: 16 },
+
+      {
+        $lookup: {
+          from: "menus",
+          localField: "_id",
+          foreignField: "_id",
+          as: "dish",
+        },
+      },
+
+      { $unwind: "$dish" },
+
+      {
+        $match: {
+          "dish.isAvailable": true,
+        },
+      },
+
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$dish", { orderCount: "$orderCount" }],
+          },
+        },
+      },
+    ]);
+
+    res.json(trending);
+  } catch (error) {
+    console.error("Global trending error:", error);
+    res.status(500).json({ message: "Failed to fetch trending dishes" });
+  }
+};
+
+// PUBLIC: get ALL dishes (no limit)
+export const getAllDishes = async (req, res) => {
+  try {
+    const dishes = await Menu.find({ isAvailable: true });
+    res.json(dishes);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch all dishes" });
   }
 };

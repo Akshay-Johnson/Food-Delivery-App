@@ -66,7 +66,7 @@ export default function AddressForm({
           {showBack && (
             <button
               onClick={onBack}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded flex items-center gap-2"
             >
               ← Back
             </button>
@@ -117,8 +117,8 @@ export default function AddressForm({
 
           <button
             type="submit"
-            className="w-full mt-6 py-3 rounded-xl bg-blue-600 font-semibold
-                       hover:bg-blue-700 active:scale-[0.98] transition"
+            className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 font-semibold
+                       active:scale-[0.98] transition"
           >
             {submitText}
           </button>

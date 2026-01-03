@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
-import { Trash, Plus, Minus, Home } from "lucide-react";
+import { Trash, Plus, Minus, Home, ArrowLeft } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function CustomerCart() {
@@ -51,16 +51,16 @@ export default function CustomerCart() {
 
           <div className="flex justify-end gap-2">
             <Link to="/customer/dashboard">
-              <button className="bg-blue-600 p-4 rounded-lg hover:bg-blue-500 transition">
+              <button className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 p-4 rounded-lg transition">
                 <Home size={18} />
               </button>
             </Link>
 
             <button
               onClick={() => navigate(-1)}
-              className="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition"
+              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 p-2 rounded-lg transition"
             >
-              ← Back
+              <ArrowLeft size={24} />
             </button>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function CustomerCart() {
               </div>
 
               <button
-                className="  w-full bg-blue-600 py-3 rounded-lg text-lg font-semibold hover:bg-green-500 transition"
+                className="  w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 py-3 rounded-lg text-lg font-semibold transition"
                 onClick={() => navigate("/customer/checkout")}
               >
                 Proceed to Checkout

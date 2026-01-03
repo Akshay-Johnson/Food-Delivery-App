@@ -5,13 +5,13 @@ import { Home } from "lucide-react";
 
 /* 🔁 REUSABLE BUTTON STYLES */
 const headerBtnBase =
-  "h-11 flex items-center justify-center bg-blue-600 rounded hover:bg-blue-700 transition";
+  "h-11 flex items-center justify-center  rounded bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition";
 
 const headerIconBtn = `${headerBtnBase} w-11`;
 const headerTextBtn = `${headerBtnBase} px-5`;
 
 const cardActionBtn =
-  "h-10 flex items-center justify-center bg-blue-600 rounded hover:bg-blue-700 transition";
+  "h-10 flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded transition";
 
 /* 🎨 STATUS COLOR */
 const statusColor = (status) => {
@@ -89,33 +89,24 @@ export default function CustomerOrders() {
               </button>
             </Link>
 
-            <button
-              onClick={() => navigate(-1)}
-              className={headerTextBtn}
-            >
+            <button onClick={() => navigate(-1)} className={headerTextBtn}>
               ← Back
             </button>
           </div>
         </div>
 
         {loading ? (
-          <p className="text-center text-gray-300 py-20">
-            Loading orders...
-          </p>
+          <p className="text-center text-gray-300 py-20">Loading orders...</p>
         ) : orders.length === 0 ? (
-          <p className="text-gray-300">
-            You have not placed any orders yet.
-          </p>
+          <p className="text-gray-300">You have not placed any orders yet.</p>
         ) : (
           <>
             {/* ORDERS GRID — 2 ROWS × 5 COLUMNS */}
             <div className="grid grid-cols-5 grid-rows-2 gap-6 pb-6">
               {orders.map((order) => {
                 const itemsTotal = Number(order.totalPrice) || 0;
-                const deliveryCharge =
-                  Number(order.deliveryCharge) || 0;
-                const totalPayable =
-                  itemsTotal + deliveryCharge;
+                const deliveryCharge = Number(order.deliveryCharge) || 0;
+                const totalPayable = itemsTotal + deliveryCharge;
 
                 return (
                   <div
@@ -128,9 +119,7 @@ export default function CustomerOrders() {
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-semibold line-clamp-2">
-                          {order.items
-                            .map((i) => i.name)
-                            .join(", ")}
+                          {order.items.map((i) => i.name).join(", ")}
                         </h3>
 
                         <span
@@ -143,15 +132,11 @@ export default function CustomerOrders() {
                       </div>
 
                       <p className="text-sm text-gray-300 mb-1">
-                        {new Date(
-                          order.createdAt
-                        ).toLocaleString()}
+                        {new Date(order.createdAt).toLocaleString()}
                       </p>
 
                       <p className="text-sm text-gray-300 mb-2">
-                        From:{" "}
-                        {order.restaurantId?.name ||
-                          "Restaurant"}
+                        From: {order.restaurantId?.name || "Restaurant"}
                       </p>
 
                       <p className="text-sm text-gray-300">
@@ -169,11 +154,7 @@ export default function CustomerOrders() {
 
                     {/* ACTION BUTTON */}
                     <button
-                      onClick={() =>
-                        navigate(
-                          `/customer/orders/${order._id}`
-                        )
-                      }
+                      onClick={() => navigate(`/customer/orders/${order._id}`)}
                       className={`${cardActionBtn} mt-auto`}
                     >
                       View Details
@@ -188,9 +169,7 @@ export default function CustomerOrders() {
               <div className="flex justify-center items-center gap-2 pb-12">
                 <button
                   disabled={page === 1 || loading}
-                  onClick={() =>
-                    setPage((p) => p - 1)
-                  }
+                  onClick={() => setPage((p) => p - 1)}
                   className={`${headerTextBtn} disabled:opacity-50`}
                 >
                   Prev
@@ -203,7 +182,7 @@ export default function CustomerOrders() {
                     disabled={loading}
                     className={`h-11 px-4 rounded ${
                       page === i + 1
-                        ? "bg-green-600"
+                        ? "bg-orange-600 hover:bg-orange-700 font-bold"
                         : "bg-white/20 hover:bg-white/30"
                     }`}
                   >
@@ -212,12 +191,8 @@ export default function CustomerOrders() {
                 ))}
 
                 <button
-                  disabled={
-                    page === totalPages || loading
-                  }
-                  onClick={() =>
-                    setPage((p) => p + 1)
-                  }
+                  disabled={page === totalPages || loading}
+                  onClick={() => setPage((p) => p + 1)}
                   className={`${headerTextBtn} disabled:opacity-50`}
                 >
                   Next

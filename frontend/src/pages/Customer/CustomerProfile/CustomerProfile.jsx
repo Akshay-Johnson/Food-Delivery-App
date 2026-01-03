@@ -62,14 +62,14 @@ export default function CustomerProfile() {
             {/* Avatar Section */}
             <div className="flex justify-end gap-2">
               <Link to="/customer/dashboard">
-                <button className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle">
+                <button className="text-sm bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-lg transition mb-4 align-middle">
                   <Home />
                 </button>
               </Link>
 
               <button
                 onClick={() => navigate(-1)}
-                className="text-sm bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition mb-4 align-middle"
+                className="text-sm bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-2 rounded-lg transition mb-4 align-middle"
               >
                 ← Back
               </button>
@@ -130,7 +130,7 @@ export default function CustomerProfile() {
             <div className="flex justify-between mt-10 gap-4 h-8 text-sm">
               <button
                 onClick={() => navigate("/customer/profile/edit")}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg shadow-lg shadow-blue-900/40 transition-all"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-4 py-3 rounded-lg shadow-lg shadow-red-900/40 transition-all"
               >
                 <Edit3 size={18} />
                 Edit Profile

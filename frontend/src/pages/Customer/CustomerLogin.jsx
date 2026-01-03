@@ -99,14 +99,14 @@ export default function CustomerLogin() {
         <div className="flex gap-3 mt-4">
           <button
             type="submit"
-            className="w-1/2 bg-blue-600 text-white py-2 rounded-md"
+            className="w-1/2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white py-2 rounded-md"
           >
             Login
           </button>
 
           <Link
             to="/customer/register"
-            className="w-1/2 text-center bg-blue-600 text-white py-2 rounded-md"
+            className="w-1/2 text-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white py-2 rounded-md"
           >
             Register?
           </Link>

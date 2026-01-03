@@ -211,7 +211,7 @@ export default function CustomerRegister() {
               type="button"
               onClick={sendOtp}
               disabled={loading}
-              className="w-30 bg-blue-600 text-white py-2 rounded-md"
+              className="w-30 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white py-2 rounded-md"
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -219,7 +219,7 @@ export default function CustomerRegister() {
             <button
               type="submit"
               disabled={loading}
-              className="w-30 bg-green-600 text-white py-2 rounded-md"
+              className="w-30 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white py-2 rounded-md"
             >
               {loading ? "Registering..." : "Verify & Register"}
             </button>
@@ -228,7 +228,7 @@ export default function CustomerRegister() {
           <button
             type="button"
             onClick={() => navigate("/customer/login")}
-            className="w-30 bg-blue-600 text-white py-2 rounded-md
+            className="w-30 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white py-2 rounded-md
               cursor-pointer "
           >
             Back to Login

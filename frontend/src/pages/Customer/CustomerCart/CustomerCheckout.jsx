@@ -272,14 +272,14 @@ export default function CustomerCheckout() {
         <div className="flex gap-4 mt-10">
           <button
             onClick={() => navigate("/customer/address")}
-            className="flex-1 bg-blue-600 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 py-2 rounded-lg transition"
           >
             Change / Edit Address
           </button>
 
           <button
             onClick={placeOrder}
-            className="flex-1 bg-green-600 py-2 rounded-lg text-lg font-bold hover:bg-green-700 transition"
+            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 py-2 rounded-lg text-lg font-bold transition"
           >
             Place Order
           </button>

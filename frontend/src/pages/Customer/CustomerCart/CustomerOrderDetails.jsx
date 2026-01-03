@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import { listenToAgentLocation } from "../../../services/liveTracking";
-import { Home } from "lucide-react";
+import { Home, ArrowLeft } from "lucide-react";
 
 /* 🔁 REUSABLE BUTTON STYLES (SAME AS CustomerOrders) */
 const headerBtnBase =
-  "h-11 flex items-center justify-center bg-blue-600 rounded hover:bg-blue-700 transition";
+  "h-11 flex items-center justify-center  rounded bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition";
 
 const headerIconBtn = `${headerBtnBase} w-11`;
 const headerTextBtn = `${headerBtnBase} px-5`;
@@ -81,7 +81,7 @@ export default function CustomerOrderDetails() {
               onClick={() => navigate(-1)}
               className={headerTextBtn}
             >
-              ← Back
+              <ArrowLeft size={18} /> 
             </button>
           </div>
         </div>

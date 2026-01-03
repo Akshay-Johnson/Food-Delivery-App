@@ -75,6 +75,12 @@ export const addToCart = async (req, res) => {
       return res.status(201).json(cart);
     }
 
+    // ✅ If cart is empty, allow new restaurant
+    if (!cart.restaurantId) {
+      cart.restaurantId = restaurantId;
+    }
+
+    // ❌ Only block if restaurantId exists and mismatches
     if (cart.restaurantId.toString() !== restaurantId) {
       return res.status(400).json({
         message: "You can only order items from one restaurant at a time",
@@ -194,12 +200,15 @@ export const clearCart = async (req, res) => {
 
     cart.items = [];
     cart.totalPrice = 0;
+    cart.restaurantId = null; // ✅ CRITICAL FIX
+
     await cart.save();
 
     res.json(cart);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error clearing cart", error: error.message });
+    res.status(500).json({
+      message: "Error clearing cart",
+      error: error.message,
+    });
   }
 };

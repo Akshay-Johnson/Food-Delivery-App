@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Trash, Edit, Star, Loader, Home } from "lucide-react";
+import { Plus, Trash, Edit, Star, Loader, Home, ArrowLeft } from "lucide-react";
 
 export default function CustomerAddressList() {
   const [addresses, setAddresses] = useState([]);
@@ -48,24 +48,24 @@ export default function CustomerAddressList() {
       <div className="relative z-10">
         <div className="flex justify-between items-center mb-20">
           <h1 className="text-4xl font-extrabold pl-2 ">My Addresses</h1>
-          <div className="flex gap-4">
-            <Link
-              to="/customer/dashboard"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
-            >
-              <Home /> Home
-            </Link>
+          <div className="flex gap-4 mr-2">
             <Link
               to="/customer/address/add"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded flex items-center gap-2"
             >
               <Plus /> Add New Address
             </Link>
+            <Link
+              to="/customer/dashboard"
+              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded flex items-center gap-2"
+            >
+              <Home />
+            </Link>
             <button
               onClick={() => navigate(-1)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded flex items-center gap-2"
             >
-              ← Back
+              <ArrowLeft />
             </button>{" "}
           </div>
         </div>

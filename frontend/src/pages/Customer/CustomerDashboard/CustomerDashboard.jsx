@@ -19,7 +19,9 @@ import Toast from "../../../components/toast/toast";
 
 export default function CustomerDashboard() {
   const [restaurants, setRestaurants] = useState([]);
-  const [dishes, setDishes] = useState([]);
+  const [trendingDishes, setTrendingDishes] = useState([]);
+  const [allDishes, setAllDishes] = useState([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
     restaurants: [],
@@ -32,7 +34,11 @@ export default function CustomerDashboard() {
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("");
 
-  const availableDishes = dishes.filter((dish) => dish.isAvailable === true);
+  const [showTrending, setShowTrending] = useState(true);
+
+  const baseDishes = selectedCategory ? allDishes : trendingDishes;
+
+  const availableDishes = baseDishes.filter((d) => d.isAvailable);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -46,7 +52,8 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     fetchRestaurants();
-    fetchRecommendedDishes();
+    fetchTrendingDishes();
+    fetchAllDishes();
   }, []);
 
   const fetchRestaurants = async () => {
@@ -58,12 +65,21 @@ export default function CustomerDashboard() {
     }
   };
 
-  const fetchRecommendedDishes = async () => {
+  const fetchTrendingDishes = async () => {
     try {
-      const response = await api.get("/api/menu/recommended");
-      setDishes(response.data);
+      const response = await api.get("/api/menu/trending/global");
+      setTrendingDishes(response.data);
     } catch (error) {
-      console.error("Error fetching recommended dishes:", error);
+      console.error("Error fetching trending dishes:", error);
+    }
+  };
+
+  const fetchAllDishes = async () => {
+    try {
+      const response = await api.get("/api/menu/all"); // OR /api/menu/all
+      setAllDishes(response.data.filter((d) => d.isAvailable));
+    } catch (error) {
+      console.error("Error fetching all dishes:", error);
     } finally {
       setLoading(false);
     }
@@ -115,11 +131,24 @@ export default function CustomerDashboard() {
     setRestaurantPage(1);
   }, [searchQuery, restaurants]);
 
-  let categoryDishes = selectedCategory
-    ? availableDishes.filter(
-        (d) => d.category?.toLowerCase() === selectedCategory.toLowerCase()
-      )
-    : [...availableDishes];
+  let categoryDishes = [...availableDishes];
+  console.log("showTrending:", showTrending);
+  console.log("trendingDishes:", trendingDishes.length);
+  console.log("allDishes:", allDishes.length);
+  console.log("baseDishes:", baseDishes.length);
+
+  console.log("Selected:", selectedCategory);
+  console.log("Available categories:", [
+    ...new Set(availableDishes.map((d) => d.category)),
+  ]);
+
+  if (selectedCategory) {
+    const normalizedCategory = selectedCategory.trim().toLowerCase();
+
+    categoryDishes = categoryDishes.filter(
+      (d) => d.category?.trim().toLowerCase() === normalizedCategory
+    );
+  }
 
   if (priceRange !== "all") {
     categoryDishes = categoryDishes.filter((d) => {
@@ -165,6 +194,12 @@ export default function CustomerDashboard() {
     }
   };
 
+  useEffect(() => {
+    if (!selectedCategory) {
+      setShowTrending(true);
+    }
+  }, [selectedCategory]);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       {/* BACKGROUND IMAGE (GUARANTEED) */}
@@ -189,36 +224,38 @@ export default function CustomerDashboard() {
 
         {/* PAGE CONTENT */}
         <div className="relative z-10">
-          {/* ===== EVERYTHING BELOW IS UNCHANGED ===== */}
-
           {/* NAVBAR */}
-          <header className="bg-black/70 border-b border-white/30 shadow-md p-5 flex items-end gap-4 top-0 z-20 ml-auto ">
-            <h1 className="text-3xl font-extrabold text-blue-600">DineX</h1>
+          <header className="fixed top-0 z-50 w-full bg-black/50 backdrop-blur-md border-b border-white/30 shadow-md p-5 flex items-center gap-4">
+            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 bg-clip-text text-transparent">
+              DineX
+            </h1>
+            <h2 className="text-2xl font-bold">Welcome back 👋</h2>
+            <p className="text-gray-300">What would you like to eat today?</p>
             <div className="flex justify-end flex-wrap gap-4 ml-auto">
               <button
                 onClick={() => navigate("/customer/profile")}
-                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+                className="relative group flex items-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-md "
               >
                 <User size={18} />
               </button>
 
               <button
                 onClick={() => navigate("/customer/address")}
-                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+                className="relative group flex items-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-md "
               >
                 <Home size={18} />
               </button>
 
               <button
                 onClick={() => navigate("/customer/cart")}
-                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+                className="relative group flex items-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-md "
               >
                 <ShoppingCart size={18} />
               </button>
 
               <button
                 onClick={() => navigate("/customer/orders")}
-                className="relative group flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-400 transition"
+                className="relative group flex items-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-md "
               >
                 <Truck size={18} />
               </button>
@@ -236,10 +273,7 @@ export default function CustomerDashboard() {
           </header>
 
           {/* WELCOME SECTION */}
-          <section className="px-6 py-8">
-            <h2 className="text-2xl font-bold">Welcome back 👋</h2>
-            <p className="text-gray-300">What would you like to eat today?</p>
-
+          <section className="px-6 py-20">
             {/* SEARCH + FILTER WRAPPER */}
             <div className="mt-4 relative max-w-2xl mx-auto">
               {/* SEARCH BAR */}
@@ -264,7 +298,7 @@ export default function CustomerDashboard() {
                 </button>
               </div>
 
-              {/* FILTER DROPDOWN (FLOATING) */}
+              {/* FILTER DROPDOWN */}
               {showFilters && (
                 <div className="absolute left-0 right-0 top-full mt-2 z-50 bg-black/90 backdrop-blur-lg border border-white/20 rounded-xl p-4 shadow-2xl">
                   <div className="flex  flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -315,7 +349,7 @@ export default function CustomerDashboard() {
 
                       <button
                         onClick={() => setShowFilters(false)}
-                        className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+                        className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded"
                       >
                         Apply
                       </button>
@@ -426,7 +460,12 @@ export default function CustomerDashboard() {
                 ].map((c, i) => (
                   <div
                     key={i}
-                    onClick={() => setSelectedCategory(c.name)}
+                    onClick={() => {
+                      setShowTrending(false);
+                      setSelectedCategory((prev) =>
+                        prev === c.name ? null : c.name
+                      );
+                    }}
                     style={{ backgroundImage: `url(${c.image})` }}
                     className="relative bg-cover bg-center h-28 rounded-lg cursor-pointer overflow-hidden group"
                   >
@@ -448,86 +487,84 @@ export default function CustomerDashboard() {
           <h3 className="text-xl font-bold mb-10 mt-20 ml-6">
             {selectedCategory
               ? `${selectedCategory} Dishes`
-              : "Recommended For You"}
+              : "Trending Dishes"}
           </h3>
 
-        
-            <section className="px-6 mt-12 mb-20">
-              <div className="grid grid-cols-8 grid-rows-2 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
-                {paginatedDishes.map((dish) => {
-                  const restaurant = restaurants.find(
-                    (r) => r._id === dish.restaurantId
-                  );
+          <section className="px-6 mt-12 mb-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {paginatedDishes.map((dish) => {
+                const restaurant = restaurants.find(
+                  (r) => r._id === dish.restaurantId
+                );
 
-                  return (
-                    <div
-                      key={dish._id}
-                      className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer flex flex-col justify-between"
-                    >
-                      <img
-                        src={dish.image || "/assets/dishimage.jpg"}
-                        className="h-28 w-full object-cover rounded-lg"
-                        alt={dish.name}
-                      />
-                      <div className="flex justify-between items-center pb-5">
-                        <p className="font-semibold text-xl mt-2">
-                          {dish.name}
-                        </p>
-                        <p className="text-green-500 font-bold">
-                          ₹{dish.price}
-                        </p>
-                      </div>
-                      <p className="text-white">{dish.description}</p>
-
-                      <p className="text-white/70 text-sm italic">
-                        By: {restaurant ? restaurant.name : "Unknown"}
+                return (
+                  <div
+                    key={dish._id}
+                    className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer flex flex-col justify-between"
+                  >
+                    <img
+                      src={dish.image || "/assets/dishimage.jpg"}
+                      className="h-28 w-full object-cover rounded-lg"
+                      alt={dish.name}
+                    />
+                    <div className="flex justify-between items-center pb-5">
+                      <p className="font-semibold text-xl mt-2">{dish.name}</p>
+                      <p className="text-green-500 font-bold">₹{dish.price}</p>
+                      <p className="text-xs text-orange-400">
+                        🔥 {dish.orderCount} orders
                       </p>
-                      <button
-                        onClick={() => addToCart(dish)}
-                        className="bg-blue-600 hover:bg-green-700 px-3 py-1 mt-2 rounded text-white"
-                      >
-                        Add to Cart
-                      </button>
                     </div>
-                  );
-                })}
-              </div>
+                    <p className="text-white">{dish.description}</p>
 
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
-                    className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
-                  >
-                    Prev
-                  </button>
-
-                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <p className="text-white/70 text-sm italic">
+                      By: {restaurant ? restaurant.name : "Unknown"}
+                    </p>
                     <button
-                      key={i}
-                      onClick={() => setCurrentPage(i + 1)}
-                      className={`px-4 py-2 rounded ${
-                        currentPage === i + 1
-                          ? "bg-blue-600"
-                          : "bg-white/20 hover:bg-white/30"
-                      }`}
+                      onClick={() => addToCart(dish)}
+                      className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-3 py-1 mt-2 rounded text-white"
                     >
-                      {i + 1}
+                      Add to Cart
                     </button>
-                  ))}
+                  </div>
+                );
+              })}
+            </div>
 
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded disabled:opacity-40"
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, i) => (
                   <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                    className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`px-4 py-2 rounded ${
+                      currentPage === i + 1
+                        ? "bg-gradient-to-r from-orange-500 to-red-600"
+                        : "bg-white/20 hover:bg-white/30"
+                    }`}
                   >
-                    Next
+                    {i + 1}
                   </button>
-                </div>
-              )}
-            </section>
-     
+                ))}
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </section>
+
           {/* POPULAR RESTAURANTS */}
           <section className="px-6 mt-10 mb-10">
             <h3 className="text-xl font-bold mb-4"> Restaurants</h3>
@@ -559,7 +596,7 @@ export default function CustomerDashboard() {
                 <button
                   disabled={restaurantPage === 1}
                   onClick={() => setRestaurantPage((p) => p - 1)}
-                  className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded disabled:opacity-40"
                 >
                   Prev
                 </button>
@@ -570,7 +607,7 @@ export default function CustomerDashboard() {
                     onClick={() => setRestaurantPage(i + 1)}
                     className={`px-4 py-2 rounded ${
                       restaurantPage === i + 1
-                        ? "bg-blue-600"
+                        ? "bg-gradient-to-r from-orange-500 to-red-600"
                         : "bg-white/20 hover:bg-white/30"
                     }`}
                   >
@@ -581,7 +618,7 @@ export default function CustomerDashboard() {
                 <button
                   disabled={restaurantPage === restaurantTotalPages}
                   onClick={() => setRestaurantPage((p) => p + 1)}
-                  className="px-4 py-2 bg-blue-600 rounded disabled:opacity-40"
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded disabled:opacity-40"
                 >
                   Next
                 </button>
