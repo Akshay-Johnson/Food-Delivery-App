@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate, Link } from "react-router-dom";
-import { Home } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 
 /* 🔁 REUSABLE BUTTON STYLES */
 const headerBtnBase =
@@ -90,7 +90,7 @@ export default function CustomerOrders() {
             </Link>
 
             <button onClick={() => navigate(-1)} className={headerTextBtn}>
-              ← Back
+              <ArrowLeft size={16} className="mr-2" />
             </button>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function CustomerOrders() {
                   >
                     {/* TOP CONTENT */}
                     <div>
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-2 gap-2">
                         <h3 className="text-lg font-semibold line-clamp-2">
                           {order.items.map((i) => i.name).join(", ")}
                         </h3>

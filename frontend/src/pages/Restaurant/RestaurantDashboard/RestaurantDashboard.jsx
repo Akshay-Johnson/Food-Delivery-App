@@ -131,7 +131,7 @@ export default function RestaurantDashboard() {
 
       const topFive = Object.values(dishMap)
         .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+        .slice(0, 8);
 
       setTopDishes(topFive);
     } catch (error) {
@@ -167,13 +167,41 @@ export default function RestaurantDashboard() {
           <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
 
           <nav className="space-y-3">
-            <SidebarLink to="/restaurant/dashboard" icon={LayoutDashboard} label="Dashboard" />
-            <SidebarLink to="/restaurant/dashboard/menu" icon={UtensilsCrossed} label="Menu" />
-            <SidebarLink to="/restaurant/dashboard/menu/add" icon={PlusCircle} label="Add Item" />
-            <SidebarLink to="/restaurant/dashboard/orders" icon={ClipboardList} label="Orders" />
-            <SidebarLink to="/restaurant/dashboard/agents" icon={Bike} label="Agents" />
-            <SidebarLink to="/restaurant/dashboard/profile" icon={User} label="Profile" />
-            <SidebarLink to="/restaurant/dashboard/reviews" icon={MessageSquare} label="Reviews" />
+            <SidebarLink
+              to="/restaurant/dashboard"
+              icon={LayoutDashboard}
+              label="Dashboard"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/menu"
+              icon={UtensilsCrossed}
+              label="Menu"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/menu/add"
+              icon={PlusCircle}
+              label="Add Item"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/orders"
+              icon={ClipboardList}
+              label="Orders"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/agents"
+              icon={Bike}
+              label="Agents"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/profile"
+              icon={User}
+              label="Profile"
+            />
+            <SidebarLink
+              to="/restaurant/dashboard/reviews"
+              icon={MessageSquare}
+              label="Reviews"
+            />
           </nav>
 
           <button
@@ -195,20 +223,46 @@ export default function RestaurantDashboard() {
                 <>
                   {/* STATS */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                    <StatCard label="Total Orders" value={stats.orders} icon={ClipboardList} color="text-blue-400" />
-                    <StatCard label="Revenue" value={formatCurrency(stats.revenue)} icon={IndianRupee} color="text-green-400" />
-                    <StatCard label="Menu Items" value={stats.menuItems} icon={UtensilsCrossed} color="text-yellow-400" />
-                    <StatCard label="Today's Orders" value={stats.todayOrders} icon={Bike} color="text-purple-400" />
-                    <StatCard label="Avg Order Value" value={formatCurrency(stats.avgOrderValue)} icon={BarChart3} color="text-pink-400" />
+                    <StatCard
+                      label="Total Orders"
+                      value={stats.orders}
+                      icon={ClipboardList}
+                      color="text-blue-400"
+                    />
+                    <StatCard
+                      label="Revenue"
+                      value={formatCurrency(stats.revenue)}
+                      icon={IndianRupee}
+                      color="text-green-400"
+                    />
+                    <StatCard
+                      label="Menu Items"
+                      value={stats.menuItems}
+                      icon={UtensilsCrossed}
+                      color="text-yellow-400"
+                    />
+                    <StatCard
+                      label="Today's Orders"
+                      value={stats.todayOrders}
+                      icon={Bike}
+                      color="text-purple-400"
+                    />
+                    <StatCard
+                      label="Avg Order Value"
+                      value={formatCurrency(stats.avgOrderValue)}
+                      icon={BarChart3}
+                      color="text-pink-400"
+                    />
                   </div>
 
                   {/* TOP DISHES */}
                   {topDishes.length > 0 && (
                     <div className="mb-8">
-                      <h3 className="text-lg font-semibold mb-4">🔥 Top Trending Dishes</h3>
+                      <h3 className="text-lg font-semibold mb-4">
+                        🔥 Top Trending Dishes
+                      </h3>
 
-                     <div className="grid grid-flow-col auto-cols-[240px] gap-6 overflow-x-auto  ">
-
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                         {topDishes.map((dish, index) => (
                           <div
                             key={dish.name}
@@ -219,11 +273,12 @@ export default function RestaurantDashboard() {
                             </div>
 
                             <div className="flex-1 ">
-                              <p className="font-semibold truncate">{dish.name}</p>
+                              <p className="font-semibold truncate">
+                                {dish.name}
+                              </p>
                               <p className="text-sm text-green-400">
                                 🍽 {dish.count} orders
                               </p>
-                     
                             </div>
 
                             <img
@@ -239,7 +294,9 @@ export default function RestaurantDashboard() {
 
                   {/* CHART */}
                   <div className="bg-black/70 border border-white/20 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold mb-4">Weekly Orders</h3>
+                    <h3 className="text-lg font-semibold mb-4">
+                      Weekly Orders
+                    </h3>
 
                     <div className="h-72">
                       <ResponsiveContainer width="100%" height="100%">
@@ -247,7 +304,12 @@ export default function RestaurantDashboard() {
                           <XAxis dataKey="day" stroke="#aaa" />
                           <YAxis stroke="#aaa" />
                           <ChartTooltip />
-                          <Line type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={3} />
+                          <Line
+                            type="monotone"
+                            dataKey="orders"
+                            stroke="#3b82f6"
+                            strokeWidth={3}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -273,7 +335,11 @@ function SidebarLink({ to, icon: Icon, label }) {
       end
       className={({ isActive }) =>
         `relative group flex items-center justify-center p-3 rounded-lg transition
-        ${isActive ? "bg-blue-600/30 text-blue-400" : "hover:bg-white/10 text-gray-300"}`
+        ${
+          isActive
+            ? "bg-blue-600/30 text-blue-400"
+            : "hover:bg-white/10 text-gray-300"
+        }`
       }
     >
       <Icon size={18} />

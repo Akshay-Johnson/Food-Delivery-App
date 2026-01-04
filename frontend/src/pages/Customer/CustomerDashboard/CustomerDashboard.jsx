@@ -132,15 +132,6 @@ export default function CustomerDashboard() {
   }, [searchQuery, restaurants]);
 
   let categoryDishes = [...availableDishes];
-  console.log("showTrending:", showTrending);
-  console.log("trendingDishes:", trendingDishes.length);
-  console.log("allDishes:", allDishes.length);
-  console.log("baseDishes:", baseDishes.length);
-
-  console.log("Selected:", selectedCategory);
-  console.log("Available categories:", [
-    ...new Set(availableDishes.map((d) => d.category)),
-  ]);
 
   if (selectedCategory) {
     const normalizedCategory = selectedCategory.trim().toLowerCase();
@@ -380,8 +371,10 @@ export default function CustomerDashboard() {
                       >
                         <img
                           src={r.image || "/assets/restaurant.png"}
-                          className="h-24 w-full object-cover rounded-lg"
+                          className="w-full h-40 object-contain rounded-lg bg-black/20"
+                          alt={r.name}
                         />
+
                         <div className="flex justify-between items-center">
                           <p className="font-bold">{r.name}</p>
                           <p className="mt-1 text-yellow-500 font-semibold">
@@ -403,7 +396,7 @@ export default function CustomerDashboard() {
                     {searchResults.dishes.map((d) => (
                       <div
                         key={d._id}
-                        className="bg-black/70 text-white border-2 border-white/20 p-3 rounded-xl shadow cursor-pointer hover:scale-105 hover:shadow-xl transition"
+                        className="bg-black/70 text-white border-2 border-white/20 p-3 rounded-xl shadow cursor-pointer hover:scale-105 hover:shadow-xl transition flex flex-col justify-between"
                       >
                         <img
                           src={d.image || "/assets/dishimage.jpg"}
@@ -414,6 +407,12 @@ export default function CustomerDashboard() {
                           <p className="text-green-600 text-sm ">₹{d.price}</p>
                         </div>
                         <p className="text-white text-sm">{d.description}</p>
+                        <button
+                          onClick={() => addToCart(d)}
+                          className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-3 py-1 mt-2 rounded text-white"
+                        >
+                          Add to Cart
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -435,7 +434,7 @@ export default function CustomerDashboard() {
             <section className="px-6 mt-10">
               <h3 className="text-xl font-semibold mb-3">Categories</h3>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-5 gap-4 obejct-cover">
                 {[
                   {
                     name: "Pizza",
@@ -456,6 +455,11 @@ export default function CustomerDashboard() {
                     name: "Drinks",
                     icon: Coffee,
                     image: "/assets/categories/drinks.jpg",
+                  },
+                  {
+                    name: "Combo",
+                    icon: Coffee,
+                    image: "/assets/categories/combos.png",
                   },
                 ].map((c, i) => (
                   <div
@@ -507,12 +511,16 @@ export default function CustomerDashboard() {
                       className="h-28 w-full object-cover rounded-lg"
                       alt={dish.name}
                     />
-                    <div className="flex justify-between items-center pb-5">
+                    <div className=" items-center pb-2">
                       <p className="font-semibold text-xl mt-2">{dish.name}</p>
-                      <p className="text-green-500 font-bold">₹{dish.price}</p>
-                      <p className="text-xs text-orange-400">
-                        🔥 {dish.orderCount} orders
-                      </p>
+                      <div className="flex flex-row justify-between gap-4 items-center">
+                        <p className="text-green-500 font-bold">
+                          ₹{dish.price}
+                        </p>
+                        <p className="text-xs text-orange-400">
+                          🔥 {dish.orderCount ?? 0} orders
+                        </p>
+                      </div>
                     </div>
                     <p className="text-white">{dish.description}</p>
 
@@ -576,11 +584,14 @@ export default function CustomerDashboard() {
                   onClick={() => navigate(`/customer/restaurant/${r._id}`)}
                   className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer"
                 >
-                  <img
-                    src={r.image || `/assets/restaurant.png`}
-                    className="h-40 w-full object-cover"
-                    alt={r.name}
-                  />
+                  <div className="w-full aspect-[16/9] bg-black/30 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img
+                      src={r.image || "/assets/restaurant.png"}
+                      alt={r.name}
+                      className="max-w-full max-h-80 object-contain"
+                    />
+                  </div>
+
                   <div className="p-4">
                     <h4 className="font-semibold text-lg">{r.name}</h4>
                     <p className="text-gray-600 text-sm">{r.description}</p>

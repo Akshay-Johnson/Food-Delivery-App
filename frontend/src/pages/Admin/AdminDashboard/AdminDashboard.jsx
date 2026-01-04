@@ -69,7 +69,7 @@ export default function AdminDashboard() {
       /* 🔝 TOP 5 RESTAURANTS */
       const top5 = [...restaurants]
         .sort((a, b) => (b.orderCount || 0) - (a.orderCount || 0))
-        .slice(0, 5);
+        .slice(0, 8);
 
       setTopRestaurants(top5);
 
@@ -211,7 +211,7 @@ export default function AdminDashboard() {
                     🔥 Top Restaurants
                   </h3>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                     {topRestaurants.map((r, index) => (
                       <div
                         key={r._id}
