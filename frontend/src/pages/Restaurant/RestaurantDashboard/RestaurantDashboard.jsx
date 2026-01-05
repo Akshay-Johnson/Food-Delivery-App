@@ -29,7 +29,6 @@ import {
 export default function RestaurantDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const isOverview = location.pathname === "/restaurant/dashboard";
 
   const [stats, setStats] = useState({
@@ -57,9 +56,7 @@ export default function RestaurantDashboard() {
       });
 
       if (token) {
-        await api.post("/api/restaurants/save-fcm-token", {
-          fcmToken: token,
-        });
+        await api.post("/api/restaurants/save-fcm-token", { fcmToken: token });
       }
     } catch (err) {
       console.error("FCM token error:", err);
@@ -112,7 +109,7 @@ export default function RestaurantDashboard() {
         }))
       );
 
-      /* ---------- TOP 5 DISHES ---------- */
+      /* ---------- TOP DISHES ---------- */
       const dishMap = {};
 
       orders.forEach((order) => {
@@ -122,23 +119,19 @@ export default function RestaurantDashboard() {
               name: item.name,
               count: 0,
               image: item.image,
-              price: item.price,
             };
           }
           dishMap[item.name].count += item.quantity;
         });
       });
 
-      const topFive = Object.values(dishMap)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8);
-
-      setTopDishes(topFive);
-    } catch (error) {
-      console.error(
-        "Failed to load dashboard stats:",
-        error.response?.data || error.message
+      setTopDishes(
+        Object.values(dishMap)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 8)
       );
+    } catch (error) {
+      console.error("Dashboard error:", error);
     } finally {
       setLoadingStats(false);
     }
@@ -162,11 +155,20 @@ export default function RestaurantDashboard() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       <div className="relative z-10 flex min-h-screen">
-        {/* SIDEBAR */}
-        <aside className="w-24 bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
+        {/* ================= SIDEBAR ================= */}
+        <aside
+          className="
+            fixed md:static bottom-0 left-0 right-0 md:right-auto z-40
+            bg-black/80 backdrop-blur-lg border-t md:border-t-0 md:border-r border-white/10
+            md:w-24 flex md:flex-col justify-around md:justify-start
+            p-2 md:p-4
+          "
+        >
+          <h1 className="hidden md:block text-2xl font-bold text-blue-500 mb-8 text-center">
+            DX
+          </h1>
 
-          <nav className="space-y-3">
+          <nav className="flex md:flex-col gap-2 md:space-y-3">
             <SidebarLink
               to="/restaurant/dashboard"
               icon={LayoutDashboard}
@@ -180,7 +182,7 @@ export default function RestaurantDashboard() {
             <SidebarLink
               to="/restaurant/dashboard/menu/add"
               icon={PlusCircle}
-              label="Add Item"
+              label="Add"
             />
             <SidebarLink
               to="/restaurant/dashboard/orders"
@@ -202,121 +204,123 @@ export default function RestaurantDashboard() {
               icon={MessageSquare}
               label="Reviews"
             />
+            <button
+              onClick={logout}
+              className="
+    flex md:hidden flex-col items-center justify-center gap-1
+    p-2 rounded-lg transition
+    hover:bg-red-600/20 text-red-400
+  "
+            >
+              <LogOut size={18} />
+              <span className="text-[10px]">Logout</span>
+            </button>
           </nav>
 
           <button
             onClick={logout}
-            className="relative group mt-auto bg-red-600/80 hover:bg-red-600 p-3 rounded-lg"
+            className="hidden md:flex relative group mt-auto bg-red-600/80 hover:bg-red-600 p-3 rounded-lg"
           >
             <LogOut size={18} />
             <Tooltip text="Logout" />
           </button>
         </aside>
 
-        {/* MAIN */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        {/* ================= MAIN ================= */}
+        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto">
           {isOverview ? (
-            <>
-              {loadingStats ? (
-                <p className="text-gray-400">Loading stats…</p>
-              ) : (
-                <>
-                  {/* STATS */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                    <StatCard
-                      label="Total Orders"
-                      value={stats.orders}
-                      icon={ClipboardList}
-                      color="text-blue-400"
-                    />
-                    <StatCard
-                      label="Revenue"
-                      value={formatCurrency(stats.revenue)}
-                      icon={IndianRupee}
-                      color="text-green-400"
-                    />
-                    <StatCard
-                      label="Menu Items"
-                      value={stats.menuItems}
-                      icon={UtensilsCrossed}
-                      color="text-yellow-400"
-                    />
-                    <StatCard
-                      label="Today's Orders"
-                      value={stats.todayOrders}
-                      icon={Bike}
-                      color="text-purple-400"
-                    />
-                    <StatCard
-                      label="Avg Order Value"
-                      value={formatCurrency(stats.avgOrderValue)}
-                      icon={BarChart3}
-                      color="text-pink-400"
-                    />
-                  </div>
+            loadingStats ? (
+              <p className="text-gray-400">Loading stats…</p>
+            ) : (
+              <>
+                {/* STATS */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                  <StatCard
+                    label="Orders"
+                    value={stats.orders}
+                    icon={ClipboardList}
+                    color="text-blue-400"
+                  />
+                  <StatCard
+                    label="Revenue"
+                    value={formatCurrency(stats.revenue)}
+                    icon={IndianRupee}
+                    color="text-green-400"
+                  />
+                  <StatCard
+                    label="Menu Items"
+                    value={stats.menuItems}
+                    icon={UtensilsCrossed}
+                    color="text-yellow-400"
+                  />
+                  <StatCard
+                    label="Today"
+                    value={stats.todayOrders}
+                    icon={Bike}
+                    color="text-purple-400"
+                  />
+                  <StatCard
+                    label="Avg Order"
+                    value={formatCurrency(stats.avgOrderValue)}
+                    icon={BarChart3}
+                    color="text-pink-400"
+                  />
+                </div>
 
-                  {/* TOP DISHES */}
-                  {topDishes.length > 0 && (
-                    <div className="mb-8">
-                      <h3 className="text-lg font-semibold mb-4">
-                        🔥 Top Trending Dishes
-                      </h3>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {topDishes.map((dish, index) => (
-                          <div
-                            key={dish.name}
-                            className="bg-black/70 border border-white/20 rounded-xl p-4 flex items-center gap-4"
-                          >
-                            <div className="text-3xl font-bold text-blue-400 ">
-                              #{index + 1}
-                            </div>
-
-                            <div className="flex-1 ">
-                              <p className="font-semibold truncate">
-                                {dish.name}
-                              </p>
-                              <p className="text-sm text-green-400">
-                                🍽 {dish.count} orders
-                              </p>
-                            </div>
-
-                            <img
-                              src={dish.image || "/assets/restaurant.png"}
-                              alt={dish.name}
-                              className="w-16 h-16 object-cover rounded-md"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* CHART */}
-                  <div className="bg-black/70 border border-white/20 rounded-xl p-6">
+                {/* TOP DISHES */}
+                {topDishes.length > 0 && (
+                  <div className="mb-8">
                     <h3 className="text-lg font-semibold mb-4">
-                      Weekly Orders
+                      🔥 Top Trending Dishes
                     </h3>
-
-                    <div className="h-72">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
-                          <XAxis dataKey="day" stroke="#aaa" />
-                          <YAxis stroke="#aaa" />
-                          <ChartTooltip />
-                          <Line
-                            type="monotone"
-                            dataKey="orders"
-                            stroke="#3b82f6"
-                            strokeWidth={3}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {topDishes.map((dish, i) => (
+                        <div
+                          key={dish.name}
+                          className="bg-black/70 border border-white/20 rounded-xl p-4 flex items-center gap-3"
+                        >
+                          <span className="text-xl font-bold text-blue-400">
+                            #{i + 1}
+                          </span>
+                          <div className="flex-1">
+                            <p className="font-semibold truncate">
+                              {dish.name}
+                            </p>
+                            <p className="text-sm text-green-400">
+                              {dish.count} orders
+                            </p>
+                          </div>
+                          <img
+                            src={dish.image || "/assets/restaurant.png"}
+                            className="w-14 h-14 rounded-md object-cover"
                           />
-                        </LineChart>
-                      </ResponsiveContainer>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </>
-              )}
-            </>
+                )}
+
+                {/* CHART */}
+                <div className="bg-black/70 border border-white/20 rounded-xl p-5">
+                  <h3 className="text-lg font-semibold mb-4">Weekly Orders</h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <XAxis dataKey="day" stroke="#aaa" />
+                        <YAxis stroke="#aaa" />
+                        <ChartTooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="orders"
+                          stroke="#3b82f6"
+                          strokeWidth={3}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </>
+            )
           ) : (
             <Outlet />
           )}
@@ -334,15 +338,17 @@ function SidebarLink({ to, icon: Icon, label }) {
       to={to}
       end
       className={({ isActive }) =>
-        `relative group flex items-center justify-center p-3 rounded-lg transition
-        ${
-          isActive
-            ? "bg-blue-600/30 text-blue-400"
-            : "hover:bg-white/10 text-gray-300"
-        }`
+        `flex flex-col md:flex-row items-center justify-center gap-1
+         p-2 md:p-3 rounded-lg transition
+         ${
+           isActive
+             ? "bg-blue-600/30 text-blue-400"
+             : "hover:bg-white/10 text-gray-300"
+         }`
       }
     >
       <Icon size={18} />
+      <span className="text-[10px] md:hidden">{label}</span>
       <Tooltip text={label} />
     </NavLink>
   );
@@ -350,7 +356,11 @@ function SidebarLink({ to, icon: Icon, label }) {
 
 function Tooltip({ text }) {
   return (
-    <span className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition bg-black text-white text-xs px-3 py-1 rounded whitespace-nowrap z-50">
+    <span
+      className="hidden md:block absolute left-14 top-1/2 -translate-y-1/2
+      opacity-0 group-hover:opacity-100 transition
+      bg-black text-white text-xs px-3 py-1 rounded whitespace-nowrap"
+    >
       {text}
     </span>
   );
@@ -358,15 +368,12 @@ function Tooltip({ text }) {
 
 function StatCard({ label, value, icon: Icon, color }) {
   return (
-    <div className="bg-black/70 border border-white/20 rounded-xl p-5 flex items-center justify-between">
+    <div className="bg-black/70 border border-white/20 rounded-xl p-4 flex items-center justify-between">
       <div>
         <p className="text-gray-400 text-sm">{label}</p>
-        <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
+        <p className={`text-xl md:text-2xl font-bold mt-1 ${color}`}>{value}</p>
       </div>
-
-      <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-white/10">
-        <Icon size={26} className={color} />
-      </div>
+      <Icon size={24} className={color} />
     </div>
   );
 }

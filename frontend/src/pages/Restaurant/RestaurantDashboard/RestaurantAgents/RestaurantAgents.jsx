@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
-import { Bike, Phone, Flag, FlagOff, Check } from "lucide-react";
+import { Bike, Phone, Flag, FlagOff } from "lucide-react";
 import Toast from "../../../../components/toast/toast";
 
 export default function RestaurantAgents() {
@@ -45,7 +45,7 @@ export default function RestaurantAgents() {
     };
 
     loadAll();
-    const interval = setInterval(loadAll, 10000); // auto-refresh
+    const interval = setInterval(loadAll, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -55,7 +55,6 @@ export default function RestaurantAgents() {
     try {
       await api.put(`/api/agents/${agentId}/flag`, { reason: reason || "" });
 
-      // Update UI immediately
       setAgents((prev) =>
         prev.map((a) => (a._id === agentId ? { ...a, isFlagged: true } : a))
       );
@@ -74,7 +73,6 @@ export default function RestaurantAgents() {
     try {
       await api.put(`/api/agents/${agentId}/unflag`);
 
-      // Update UI
       setAgents((prev) =>
         prev.map((a) => (a._id === agentId ? { ...a, isFlagged: false } : a))
       );
@@ -108,10 +106,12 @@ export default function RestaurantAgents() {
 
   useEffect(() => setPage(1), [search]);
 
-  if (loading) return <p className="text-white">Loading agents...</p>;
+  if (loading) {
+    return <p className="text-white p-6">Loading agents...</p>;
+  }
 
   return (
-    <div className="text-white">
+    <div className="p-4 sm:p-6 text-white">
       {toast && (
         <Toast
           type={toast.type}
@@ -120,59 +120,53 @@ export default function RestaurantAgents() {
         />
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-        <div className="flex justify-between gap-4">
-        <h1 className="text-3xl font-bold">Delivery Agents</h1>
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Delivery Agents</h1>
 
-        {/* SEARCH */}
         <input
           type="text"
           placeholder="Search by name, phone, vehicle..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-64 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          className="w-full sm:w-72 px-4 py-2 rounded-2xl bg-black/40 border border-white/20"
         />
-      </div>
       </div>
 
       {/* ================= AVAILABLE AGENTS ================= */}
       {paginatedAgents.length === 0 ? (
         <p className="text-gray-400 mb-10">No available agents found.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
           {paginatedAgents.map((agent) => (
             <div
               key={agent._id}
-              className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col w-64 h-41 relative"
+              className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col gap-3 relative"
             >
-              {/* FLAG + STATUS TOP-RIGHT */}
-              <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+              {/* FLAG BUTTON */}
+              <div className="absolute top-2 right-2">
                 {agent.isFlagged ? (
-                  <span className="flex items-center gap-1 px-2 py-1 rounded bg-red-700 text-sm">
-                    <Flag size={14} />
-                    Flagged
+                  <span className="flex items-center gap-1 px-2 py-1 rounded bg-red-700 text-xs">
+                    <Flag size={12} /> Flagged
                   </span>
                 ) : (
                   <button
                     onClick={() => flagAgent(agent._id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-sm"
+                    className="flex items-center gap-1 px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-xs"
                   >
-                    <Flag size={14} />
-                    Flag
+                    <Flag size={12} /> Flag
                   </button>
                 )}
               </div>
 
               {/* HEADER */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <img
                   src={agent.image?.trim() ? agent.image : "/assets/agent.png"}
-                  className="w-16 h-16 object-cover border border-white/20"
+                  className="w-14 h-14 object-cover border border-white/20 rounded"
                 />
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold truncate">
-                    {agent.name}
-                  </h2>
+                  <h2 className="font-semibold truncate">{agent.name}</h2>
                   <p className="text-sm text-gray-300 truncate">
                     {agent.email}
                   </p>
@@ -180,16 +174,15 @@ export default function RestaurantAgents() {
               </div>
 
               {/* DETAILS */}
-              <div className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between gap-2">
-                  <p className="flex items-center gap-2">
-                    <Phone size={16} />
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="flex items-center gap-2 truncate">
+                    <Phone size={14} />
                     {agent.phone}
                   </p>
 
-                  {/* Available / Status */}
                   <span
-                    className={`flex justify-between items-center w-auto px-3 py-1 rounded text-sm ${
+                    className={`px-2 py-1 rounded text-xs capitalize ${
                       agent.status === "available"
                         ? "bg-green-600"
                         : agent.status === "offline"
@@ -200,9 +193,10 @@ export default function RestaurantAgents() {
                     {agent.status}
                   </span>
                 </div>
-                <p className="flex items-center gap-2">
-                  <Bike size={16} />
-                  {agent.vehicleType} - {agent.vehicleNumber}
+
+                <p className="flex items-center gap-2 truncate">
+                  <Bike size={14} />
+                  {agent.vehicleType} • {agent.vehicleNumber}
                 </p>
               </div>
             </div>
@@ -212,7 +206,7 @@ export default function RestaurantAgents() {
 
       {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-10 mb-12">
+        <div className="flex flex-wrap justify-center gap-2 mt-8 mb-12">
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
@@ -221,7 +215,7 @@ export default function RestaurantAgents() {
             Prev
           </button>
 
-          {[...Array(totalPages)].map((_, i) => (
+          {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
               onClick={() => setPage(i + 1)}
@@ -252,29 +246,33 @@ export default function RestaurantAgents() {
             Flagged Agents
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {flaggedAgents.map((agent) => (
               <div
                 key={agent._id}
-                className="bg-red-900/30 border border-red-500/30 rounded-xl p-4 h-32 flex flex-col relative"
+                className="bg-red-900/30 border border-red-500/30 rounded-xl p-4 flex gap-3 relative"
               >
-                {/* UNFLAG TOP-RIGHT */}
                 <div className="absolute top-2 right-2">
                   <button
                     onClick={() => unflagAgent(agent._id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded bg-gray-600 hover:bg-gray-700 text-sm"
+                    className="flex items-center gap-1 px-2 py-1 rounded bg-gray-600 hover:bg-gray-700 text-xs"
                   >
-                    <FlagOff size={14} />
+                    <FlagOff size={12} />
                     Unflag
                   </button>
                 </div>
+
                 <img
                   src={agent.image?.trim() ? agent.image : "/assets/agent.png"}
-                  className="w-16 h-16 object-cover border border-white/20 "
+                  className="w-12 h-12 object-cover border border-white/20 rounded"
                 />
 
-                <h2 className="text-lg font-semibold">{agent.name}</h2>
-                <p className="text-sm text-gray-300 truncate">{agent.email}</p>
+                <div className="min-w-0">
+                  <h2 className="font-semibold truncate">{agent.name}</h2>
+                  <p className="text-sm text-gray-300 truncate">
+                    {agent.email}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

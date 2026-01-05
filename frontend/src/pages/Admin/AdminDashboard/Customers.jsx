@@ -75,21 +75,22 @@ export default function Customers() {
   return (
     <div className="text-white">
       {/* HEADER */}
-      <div className="flex items-center justify-between gap-6 mb-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold">Customers</h2>
-          {/* SEARCH — SAME POSITION */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        {/* TITLE + SEARCH */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+          <h2 className="text-2xl font-bold whitespace-nowrap">Customers</h2>
+
           <input
             type="text"
             placeholder="Search by name, email, or phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+            className="w-full sm:w-80 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
           />
         </div>
 
         {/* COUNTS */}
-        <div className="flex gap-2 text-sm">
+        <div className="flex flex-wrap gap-2 text-sm">
           <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400">
             Active: {activeCount}
           </span>

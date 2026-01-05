@@ -7,7 +7,14 @@ export default function Navbar() {
   };
 
   return (
-    <div className="fixed top-6 right-6 flex items-center gap-3 z-30">
+    <div
+      className="
+    fixed top-4 right-4 z-30
+    flex flex-col gap-2
+    sm:flex-row sm:gap-3
+    items-end sm:items-center
+  "
+    >
       {/* Home Button */}
       <button
         onClick={() => scrollTo("home")}

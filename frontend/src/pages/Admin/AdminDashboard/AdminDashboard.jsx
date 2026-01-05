@@ -56,7 +56,10 @@ export default function AdminDashboard() {
       const agents = a.data || [];
       const orders = o.data || [];
 
-      const revenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+      const revenue = orders.reduce(
+        (sum, o) => sum + (o.totalPrice || 0),
+        0
+      );
 
       setStats({
         restaurants: restaurants.length,
@@ -66,14 +69,12 @@ export default function AdminDashboard() {
         revenue,
       });
 
-      /* 🔝 TOP 5 RESTAURANTS */
-      const top5 = [...restaurants]
-        .sort((a, b) => (b.orderCount || 0) - (a.orderCount || 0))
-        .slice(0, 8);
+      setTopRestaurants(
+        [...restaurants]
+          .sort((a, b) => (b.orderCount || 0) - (a.orderCount || 0))
+          .slice(0, 8)
+      );
 
-      setTopRestaurants(top5);
-
-      /* 📊 WEEKLY ORDER CHART */
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const grouped = {};
 
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
         }))
       );
     } catch (err) {
-      console.error("Failed to load admin dashboard stats", err);
+      console.error("Admin dashboard error", err);
     } finally {
       setLoadingStats(false);
     }
@@ -101,7 +102,6 @@ export default function AdminDashboard() {
     }
   }, [loading, role, isOverview]);
 
-  /* ================= LOGOUT ================= */
   const logout = () => {
     localStorage.clear();
     navigate("/admin/login", { replace: true });
@@ -114,95 +114,86 @@ export default function AdminDashboard() {
       maximumFractionDigits: 0,
     }).format(value);
 
-  const navItem = ({ isActive }) =>
-    `group relative flex items-center justify-center rounded-lg transition px-4 py-2
-     ${
-       isActive ? "bg-blue-600/20 text-white" : "hover:bg-white/10 text-white"
-     }`;
-
   return (
-    <div className="relative flex min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-0"></div>
+    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
-      {/* SIDEBAR */}
-      <aside className="relative z-20 w-24 bg-black/70 backdrop-blur-lg border-r border-white/10 p-4 flex flex-col items-center">
-        <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
-
-        <nav className="space-y-3">
-          <NavLink to="/admin/dashboard" end className={navItem}>
-            <LayoutDashboard size={20} />
-            <SidebarTooltip text="Dashboard" />
-          </NavLink>
-
-          <NavLink to="/admin/dashboard/restaurants" className={navItem}>
-            <Building2 size={18} />
-            <SidebarTooltip text="Restaurants" />
-          </NavLink>
-
-          <NavLink to="/admin/dashboard/customers" className={navItem}>
-            <Users size={18} />
-            <SidebarTooltip text="Customers" />
-          </NavLink>
-
-          <NavLink to="/admin/dashboard/agents" className={navItem}>
-            <Truck size={18} />
-            <SidebarTooltip text="Agents" />
-          </NavLink>
-
-          <NavLink to="/admin/dashboard/orders" className={navItem}>
-            <ScrollText size={18} />
-            <SidebarTooltip text="Orders" />
-          </NavLink>
-        </nav>
-
-        <button
-          onClick={logout}
-          className="mt-auto p-3 rounded-lg hover:bg-red-800 transition bg-red-600"
+      <div className="relative z-10 flex min-h-screen">
+        {/* ================= SIDEBAR / BOTTOM NAV ================= */}
+        <aside
+          className="
+            fixed md:static bottom-0 left-0 right-0 md:right-auto z-40
+            bg-black/80 backdrop-blur-lg
+            border-t md:border-t-0 md:border-r border-white/10
+            md:w-24 flex md:flex-col justify-around md:justify-start
+            p-2 md:p-4
+          "
         >
-          <LogOut size={20} />
-        </button>
-      </aside>
+          <h1 className="hidden md:block text-2xl font-bold text-blue-500 mb-8 text-center">
+            DX
+          </h1>
 
-      {/* MAIN */}
-      <main className="relative z-10 flex-1 p-6 overflow-y-auto">
-        {isOverview ? (
-          <>
-            {loadingStats ? (
+          <nav className="flex md:flex-col gap-2 md:space-y-3">
+            <SidebarLink
+              to="/admin/dashboard"
+              icon={LayoutDashboard}
+              label="Dashboard"
+            />
+            <SidebarLink
+              to="/admin/dashboard/restaurants"
+              icon={Building2}
+              label="Restaurants"
+            />
+            <SidebarLink
+              to="/admin/dashboard/customers"
+              icon={Users}
+              label="Customers"
+            />
+            <SidebarLink
+              to="/admin/dashboard/agents"
+              icon={Truck}
+              label="Agents"
+            />
+            <SidebarLink
+              to="/admin/dashboard/orders"
+              icon={ScrollText}
+              label="Orders"
+            />
+
+            {/* MOBILE LOGOUT */}
+            <button
+              onClick={logout}
+              className="flex md:hidden flex-col items-center gap-1 p-2 rounded-lg text-red-400 hover:bg-red-600/20"
+            >
+              <LogOut size={18} />
+              <span className="text-[10px]">Logout</span>
+            </button>
+          </nav>
+
+          {/* DESKTOP LOGOUT */}
+          <button
+            onClick={logout}
+            className="hidden md:flex relative group mt-auto bg-red-600/80 hover:bg-red-600 p-3 rounded-lg"
+          >
+            <LogOut size={18} />
+            <TooltipLabel text="Logout" />
+          </button>
+        </aside>
+
+        {/* ================= MAIN ================= */}
+        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto">
+          {isOverview ? (
+            loadingStats ? (
               <p className="text-gray-400">Loading stats…</p>
             ) : (
               <>
-                {/* STATS (MATCH RESTAURANT DASHBOARD) */}
+                {/* STATS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                  <StatCard
-                    label="Restaurants"
-                    value={stats.restaurants}
-                    icon={Building2}
-                    color="text-yellow-400"
-                  />
-                  <StatCard
-                    label="Customers"
-                    value={stats.customers}
-                    icon={Users}
-                    color="text-blue-400"
-                  />
-                  <StatCard
-                    label="Agents"
-                    value={stats.agents}
-                    icon={Truck}
-                    color="text-purple-400"
-                  />
-                  <StatCard
-                    label="Orders"
-                    value={stats.orders}
-                    icon={ScrollText}
-                    color="text-green-400"
-                  />
-                  <StatCard
-                    label="Revenue"
-                    value={formatCurrency(stats.revenue)}
-                    icon={BarChart3}
-                    color="text-pink-400"
-                  />
+                  <StatCard label="Restaurants" value={stats.restaurants} icon={Building2} color="text-yellow-400" />
+                  <StatCard label="Customers" value={stats.customers} icon={Users} color="text-blue-400" />
+                  <StatCard label="Agents" value={stats.agents} icon={Truck} color="text-purple-400" />
+                  <StatCard label="Orders" value={stats.orders} icon={ScrollText} color="text-green-400" />
+                  <StatCard label="Revenue" value={formatCurrency(stats.revenue)} icon={BarChart3} color="text-pink-400" />
                 </div>
 
                 {/* TOP RESTAURANTS */}
@@ -217,9 +208,9 @@ export default function AdminDashboard() {
                         key={r._id}
                         className="bg-black/70 border border-white/20 rounded-xl p-4 flex items-center gap-4"
                       >
-                        <div className="text-3xl font-bold text-blue-400">
+                        <span className="text-xl font-bold text-blue-400">
                           #{index + 1}
-                        </div>
+                        </span>
 
                         <div className="flex-1">
                           <p className="font-semibold truncate">{r.name}</p>
@@ -234,7 +225,7 @@ export default function AdminDashboard() {
                         <img
                           src={r.image || "/assets/restaurant.png"}
                           alt={r.name}
-                          className="w-16 h-16 object-cover rounded-md"
+                          className="w-14 h-14 rounded-md object-cover"
                         />
                       </div>
                     ))}
@@ -242,12 +233,12 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* CHART */}
-                <div className="bg-black/70 border border-white/20 rounded-xl p-6">
+                <div className="bg-black/70 border border-white/20 rounded-xl p-4 sm:p-6">
                   <h3 className="text-lg font-semibold mb-4">
                     Weekly Orders (Platform)
                   </h3>
 
-                  <div className="h-72">
+                  <div className="h-64 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={chartData}>
                         <XAxis dataKey="day" stroke="#aaa" />
@@ -264,21 +255,45 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </>
-            )}
-          </>
-        ) : (
-          <Outlet />
-        )}
-      </main>
+            )
+          ) : (
+            <Outlet />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
 
 /* ================= COMPONENTS ================= */
 
-function SidebarTooltip({ text }) {
+function SidebarLink({ to, icon: Icon, label }) {
   return (
-    <span className="absolute left-24 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-black px-3 py-1 text-sm opacity-0 group-hover:opacity-100 transition border border-white/20">
+    <NavLink
+      to={to}
+      end
+      className={({ isActive }) =>
+        `flex flex-col md:flex-row items-center justify-center gap-1
+         p-2 md:p-3 rounded-lg transition
+         ${
+           isActive
+             ? "bg-blue-600/30 text-blue-400"
+             : "hover:bg-white/10 text-gray-300"
+         }`
+      }
+    >
+      <Icon size={18} />
+      <span className="text-[10px] md:hidden">{label}</span>
+      <TooltipLabel text={label} />
+    </NavLink>
+  );
+}
+
+function TooltipLabel({ text }) {
+  return (
+    <span className="hidden md:block absolute left-14 top-1/2 -translate-y-1/2
+      opacity-0 group-hover:opacity-100 transition
+      bg-black text-white text-xs px-3 py-1 rounded whitespace-nowrap">
       {text}
     </span>
   );
@@ -289,12 +304,12 @@ function StatCard({ label, value, icon: Icon, color }) {
     <div className="bg-black/70 border border-white/20 rounded-xl p-5 flex items-center justify-between">
       <div>
         <p className="text-gray-400 text-sm">{label}</p>
-        <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
+        <p className={`text-xl md:text-2xl font-bold mt-1 ${color}`}>
+          {value}
+        </p>
       </div>
 
-      <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-white/10">
-        <Icon size={26} className={color} />
-      </div>
+      <Icon size={26} className={color} />
     </div>
   );
 }

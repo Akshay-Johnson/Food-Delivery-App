@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
-import { Flag, Star, Search } from "lucide-react";
+import { Flag, Star } from "lucide-react";
 import Toast from "../../../../components/toast/toast";
 
 export default function RestaurantReviews() {
@@ -36,29 +36,26 @@ export default function RestaurantReviews() {
 
     try {
       await api.put(`/api/reviews/restaurant/${id}/report`);
-
       setReviews((prev) =>
         prev.map((r) => (r._id === id ? { ...r, isFlagged: true } : r))
       );
-
       setToast({ type: "success", message: "Review reported to admin" });
     } catch {
       setToast({ type: "error", message: "Failed to report review" });
     }
   };
 
-  /* ================= SEARCH FILTER ================= */
+  /* SEARCH FILTER */
   const filteredReviews = reviews.filter((r) => {
     const name = r.customerId?.name?.toLowerCase() || "";
     const comment = r.comment?.toLowerCase() || "";
-
     return (
       name.includes(search.toLowerCase()) ||
       comment.includes(search.toLowerCase())
     );
   });
 
-  /* ================= PAGINATION ================= */
+  /* PAGINATION */
   const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
   const startIndex = (page - 1) * reviewsPerPage;
   const paginatedReviews = filteredReviews.slice(
@@ -67,7 +64,7 @@ export default function RestaurantReviews() {
   );
 
   useEffect(() => {
-    setPage(1); // reset page on search
+    setPage(1);
   }, [search]);
 
   if (loading) return <p className="text-white">Loading reviews...</p>;
@@ -76,38 +73,41 @@ export default function RestaurantReviews() {
     <div className="text-white">
       {toast && <Toast type={toast.type} message={toast.message} />}
 
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex justify-between gap-4">
-        <h2 className="text-2xl font-bold">Customer Reviews</h2>
+        <h2 className="text-2xl font-bold whitespace-nowrap">
+          Customer Reviews
+        </h2>
 
-        {/* SEARCH */}
-   
-          <input
-            type="text"
-            placeholder="Search by name or comment..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search by name or comment..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full sm:w-72 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+        />
       </div>
 
       {filteredReviews.length === 0 ? (
         <p className="text-gray-400">No matching reviews found.</p>
       ) : (
         <>
-          {/* REVIEWS GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {/* ================= REVIEWS GRID ================= */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {paginatedReviews.map((r) => (
               <div
                 key={r._id}
-                className="bg-black/70 border border-white/20 rounded-lg p-4 flex flex-col justify-between relative"
+                className="
+    bg-black/70 border border-white/20 rounded-lg
+    p-3 sm:p-4
+    flex flex-col justify-between relative
+    min-h-[180px] sm:min-h-[200px]
+  "
               >
                 {/* USER INFO */}
-                <div className="flex items-center mb-3">
+                <div className="flex items-start gap-3 mb-3">
                   <img
-                    className="w-14 h-14 object-cover rounded-full border border-white/30 mr-3"
+                    className="w-12 h-12 object-cover rounded-full border border-white/30"
                     src={
                       r.customerId?.profileImage?.trim()
                         ? r.customerId.profileImage
@@ -116,7 +116,7 @@ export default function RestaurantReviews() {
                     alt="Customer"
                   />
 
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">
                       {r.customerId?.name || "Anonymous"}
                     </p>
@@ -126,20 +126,18 @@ export default function RestaurantReviews() {
                   </div>
 
                   {/* REPORT */}
-                  <div className="absolute top-2 right-2">
-                    {r.isFlagged ? (
-                      <span className="flex items-center gap-1 text-xs text-red-400">
-                        <Flag size={14} /> Reported
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => report(r._id)}
-                        className="flex items-center gap-1 text-xs text-green-400 hover:text-red-500"
-                      >
-                        <Flag size={14} /> Report
-                      </button>
-                    )}
-                  </div>
+                  {r.isFlagged ? (
+                    <span className="flex items-center gap-1 text-xs text-red-400">
+                      <Flag size={14} /> Reported
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => report(r._id)}
+                      className="flex items-center gap-1 text-xs text-green-400 hover:text-red-500"
+                    >
+                      <Flag size={14} /> Report
+                    </button>
+                  )}
                 </div>
 
                 {/* STARS */}
@@ -163,9 +161,9 @@ export default function RestaurantReviews() {
             ))}
           </div>
 
-          {/* PAGINATION */}
+          {/* ================= PAGINATION ================= */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
+            <div className="flex flex-wrap justify-center items-center gap-2 mt-8">
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}

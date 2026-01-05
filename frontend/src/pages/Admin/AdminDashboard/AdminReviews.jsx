@@ -80,28 +80,32 @@ export default function AdminReviews() {
     <div className="text-white max-w-7xl mx-auto px-4">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
-        <div className="flex items-center gap-2">
+        {/* LEFT: BACK + TITLE + COUNT */}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => window.history.back()}
             className="px-4 py-2 bg-black/70 hover:bg-gray-600 rounded-md shadow-md transition border border-white/20"
           >
             <ArrowLeft size={16} />
           </button>
-          <h2 className="text-2xl font-bold">
-            Reviews - {restaurant?.name || "Restaurant"}
+
+          <h2 className="text-2xl font-bold truncate max-w-[70vw] sm:max-w-none">
+            Reviews – {restaurant?.name || "Restaurant"}
           </h2>
-          <p className="text-sm text-gray-400">
-            <MessageSquare className="inline-block w-4 h-4 mr-1" />{" "}
+
+          <p className="text-sm text-gray-400 whitespace-nowrap">
+            <MessageSquare className="inline-block w-4 h-4 mr-1" />
             {reviews.length}
           </p>
         </div>
 
+        {/* RIGHT: SEARCH */}
         <input
           type="text"
           placeholder="Search by customer or comment..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="sm:ml-auto w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          className="w-full sm:w-80 sm:ml-auto px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
         />
       </div>
 

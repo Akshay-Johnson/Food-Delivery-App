@@ -100,16 +100,19 @@ export default function AdminAgents() {
   return (
     <div className="text-white relative">
       {/* HEADER */}
-      <div className="flex items-center justify-between gap-6 mb-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold">Delivery Agents</h2>
-          {/* SEARCH — SAME POSITION AS YOUR FIRST CODE */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+          <h2 className="text-2xl font-bold whitespace-nowrap">
+            Delivery Agents
+          </h2>
+
+          {/* SEARCH */}
           <input
             type="text"
             placeholder="Search by name, email, or status..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+            className="w-full sm:w-80 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
           />
         </div>
 

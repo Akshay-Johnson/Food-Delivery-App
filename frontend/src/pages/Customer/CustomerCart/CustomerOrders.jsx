@@ -5,7 +5,7 @@ import { ArrowLeft, Home } from "lucide-react";
 
 /* 🔁 REUSABLE BUTTON STYLES */
 const headerBtnBase =
-  "h-11 flex items-center justify-center  rounded bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition";
+  "h-11 flex items-center justify-center rounded bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition";
 
 const headerIconBtn = `${headerBtnBase} w-11`;
 const headerTextBtn = `${headerBtnBase} px-5`;
@@ -40,7 +40,7 @@ export default function CustomerOrders() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
-  const limit = 10; // 2 rows × 5 columns
+  const limit = 10;
   const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
@@ -74,15 +74,15 @@ export default function CustomerOrders() {
   return (
     <div className="relative min-h-screen text-white">
       {/* BACKGROUND */}
-      <div className="fixed inset-0 bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center -z-10" />
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-md -z-10" />
+      <div className="fixed inset-0 bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center -z-20 pointer-events-none" />
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md -z-10 pointer-events-none" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-6 pt-4">
-          <h1 className="text-3xl font-bold">My Orders</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pt-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Orders</h1>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-auto">
             <Link to="/customer/dashboard">
               <button className={headerIconBtn}>
                 <Home size={18} />
@@ -91,18 +91,30 @@ export default function CustomerOrders() {
 
             <button onClick={() => navigate(-1)} className={headerTextBtn}>
               <ArrowLeft size={16} className="mr-2" />
+              <span className="hidden sm:inline">Back</span>
             </button>
           </div>
         </div>
 
+        {/* STATES */}
         {loading ? (
           <p className="text-center text-gray-300 py-20">Loading orders...</p>
         ) : orders.length === 0 ? (
           <p className="text-gray-300">You have not placed any orders yet.</p>
         ) : (
           <>
-            {/* ORDERS GRID — 2 ROWS × 5 COLUMNS */}
-            <div className="grid grid-cols-5 grid-rows-2 gap-6 pb-6">
+            {/* ORDERS GRID (RESPONSIVE) */}
+            <div
+              className="
+                grid
+                grid-cols-1
+                sm:grid-cols-2
+                lg:grid-cols-3
+                xl:grid-cols-5
+                gap-4 sm:gap-6
+                pb-6
+              "
+            >
               {orders.map((order) => {
                 const itemsTotal = Number(order.totalPrice) || 0;
                 const deliveryCharge = Number(order.deliveryCharge) || 0;
@@ -111,14 +123,15 @@ export default function CustomerOrders() {
                 return (
                   <div
                     key={order._id}
-                    className="bg-black/70 border border-white/30
-                               rounded-xl p-5 shadow-lg
-                               flex flex-col h-68"
+                    className="
+                      bg-black/70 border border-white/30
+                      rounded-xl p-4 sm:p-5 shadow-lg
+                      flex flex-col min-h-[16rem]
+                    "
                   >
-                    {/* TOP CONTENT */}
                     <div>
-                      <div className="flex justify-between items-start mb-2 gap-2">
-                        <h3 className="text-lg font-semibold line-clamp-2">
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold line-clamp-2">
                           {order.items.map((i) => i.name).join(", ")}
                         </h3>
 
@@ -131,15 +144,15 @@ export default function CustomerOrders() {
                         </span>
                       </div>
 
-                      <p className="text-sm text-gray-300 mb-1">
+                      <p className="text-sm text-gray-300">
                         {new Date(order.createdAt).toLocaleString()}
                       </p>
 
-                      <p className="text-sm text-gray-300 mb-2">
+                      <p className="text-sm text-gray-300">
                         From: {order.restaurantId?.name || "Restaurant"}
                       </p>
 
-                      <p className="text-sm text-gray-300">
+                      <p className="text-sm text-gray-300 mt-1">
                         Items: ₹{itemsTotal}
                       </p>
 
@@ -152,7 +165,6 @@ export default function CustomerOrders() {
                       </p>
                     </div>
 
-                    {/* ACTION BUTTON */}
                     <button
                       onClick={() => navigate(`/customer/orders/${order._id}`)}
                       className={`${cardActionBtn} mt-auto`}
@@ -166,7 +178,7 @@ export default function CustomerOrders() {
 
             {/* PAGINATION */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 pb-12">
+              <div className="flex flex-wrap justify-center items-center gap-2 pb-12">
                 <button
                   disabled={page === 1 || loading}
                   onClick={() => setPage((p) => p - 1)}
@@ -180,7 +192,7 @@ export default function CustomerOrders() {
                     key={i}
                     onClick={() => setPage(i + 1)}
                     disabled={loading}
-                    className={`h-11 px-4 rounded ${
+                    className={`h-10 sm:h-11 px-3 sm:px-4 rounded ${
                       page === i + 1
                         ? "bg-orange-600 hover:bg-orange-700 font-bold"
                         : "bg-white/20 hover:bg-white/30"

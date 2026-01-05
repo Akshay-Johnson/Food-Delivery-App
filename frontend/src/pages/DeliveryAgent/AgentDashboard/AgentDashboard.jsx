@@ -21,9 +21,7 @@ export default function AgentDashboard() {
 
   const isOverview = location.pathname === "/agent/dashboard";
 
-  /* =======================
-     DASHBOARD STATE
-  ======================= */
+  /* ================= DASHBOARD STATE ================= */
   const [stats, setStats] = useState({
     assignedOrders: 0,
     completedOrders: 0,
@@ -37,32 +35,24 @@ export default function AgentDashboard() {
 
   const isOnline = stats.status === "available";
 
-  /* =======================
-     TOGGLE ONLINE / OFFLINE
-  ======================= */
+  /* ================= TOGGLE STATUS ================= */
   const toggleOnlineStatus = async () => {
     try {
       setUpdatingStatus(true);
-
       const res = await api.put("/api/agents/status");
 
       setStats((prev) => ({
         ...prev,
         status: res.data.status,
       }));
-    } catch (err) {
-      setToast({
-        type: "error",
-        message: "Failed to update status",
-      });
+    } catch {
+      setToast({ type: "error", message: "Failed to update status" });
     } finally {
       setUpdatingStatus(false);
     }
   };
 
-  /* =======================
-     LOAD DASHBOARD DATA
-  ======================= */
+  /* ================= LOAD DATA ================= */
   const loadDashboardStats = async () => {
     try {
       setLoadingStats(true);
@@ -78,9 +68,7 @@ export default function AgentDashboard() {
         ["ready", "picked"].includes(o.status)
       );
 
-      const completedOrders = orders.filter(
-        (o) => o.status === "delivered"
-      );
+      const completedOrders = orders.filter((o) => o.status === "delivered");
 
       const revenue = completedOrders.reduce(
         (sum, o) => sum + (o.deliveryCharge || 0),
@@ -109,7 +97,7 @@ export default function AgentDashboard() {
         status: dashboardRes.data.status,
       });
     } catch (err) {
-      console.error("Failed to load agent dashboard", err);
+      console.error("Agent dashboard error", err);
     } finally {
       setLoadingStats(false);
     }
@@ -129,39 +117,72 @@ export default function AgentDashboard() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       <div className="relative z-10 flex min-h-screen">
-        {/* SIDEBAR */}
-        <aside className="w-24 bg-black/70 border-r border-white/10 p-4 flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-blue-500 mb-8">DX</h1>
+        {/* ================= SIDEBAR ================= */}
+        <aside
+          className="
+            fixed md:static bottom-0 left-0 right-0 md:right-auto z-40
+            bg-black/80 backdrop-blur-lg
+            border-t md:border-t-0 md:border-r border-white/10
+            md:w-24 flex md:flex-col justify-around md:justify-start
+            p-2 md:p-4
+          "
+        >
+          <h1 className="hidden md:block text-2xl font-bold text-blue-500 mb-8 text-center">
+            DX
+          </h1>
 
-          <nav className="space-y-3">
-            <SidebarLink to="/agent/dashboard" icon={LayoutDashboard} label="Dashboard" />
-            <SidebarLink to="/agent/dashboard/orders" icon={ClipboardList} label="Orders" />
-            <SidebarLink to="/agent/dashboard/profile" icon={User} label="Profile" />
+          <nav className="flex md:flex-col gap-2 md:space-y-3">
+            <SidebarLink
+              to="/agent/dashboard"
+              icon={LayoutDashboard}
+              label="Dashboard"
+            />
+            <SidebarLink
+              to="/agent/dashboard/orders"
+              icon={ClipboardList}
+              label="Orders"
+            />
+            <SidebarLink
+              to="/agent/dashboard/profile"
+              icon={User}
+              label="Profile"
+            />
+            <button
+              onClick={logout}
+              className="
+    flex md:hidden flex-col items-center justify-center gap-1
+    p-2 rounded-lg transition
+    hover:bg-red-600/20 text-red-400
+  "
+            >
+              <LogOut size={18} />
+              <span className="text-[10px]">Logout</span>
+            </button>
           </nav>
 
           <button
             onClick={logout}
-            className="relative group mt-auto bg-red-600/80 hover:bg-red-600 p-3 rounded-lg"
+            className="hidden md:flex relative group mt-auto bg-red-600/80 hover:bg-red-600 p-3 rounded-lg"
           >
             <LogOut size={18} />
             <Tooltip text="Logout" />
           </button>
         </aside>
 
-        {/* MAIN */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        {/* ================= MAIN ================= */}
+        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto">
           {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
           {isOverview ? (
             <>
-              <h2 className="text-2xl font-bold mb-6">
+              <h2 className="text-xl md:text-2xl font-bold mb-6">
                 Delivery Agent Dashboard
               </h2>
 
               {loadingStats ? (
                 <p className="text-gray-400">Loading stats…</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                   <StatCard
                     label="Assigned Orders"
                     value={stats.assignedOrders}
@@ -178,10 +199,10 @@ export default function AgentDashboard() {
                     color="text-yellow-400"
                   />
 
-                  {/* STATUS CARD */}
-                  <div className="bg-black/70 border border-white/20 rounded-xl p-6">
+                  {/* STATUS */}
+                  <div className="bg-black/70 border border-white/20 rounded-xl p-4 md:p-6">
                     <p className="text-gray-400 text-sm">Status</p>
-                    <p className="text-3xl font-bold mt-2">
+                    <p className="text-2xl md:text-3xl font-bold mt-2">
                       {stats.status === "available"
                         ? "Online"
                         : stats.status === "offline"
@@ -191,7 +212,9 @@ export default function AgentDashboard() {
 
                     <button
                       onClick={toggleOnlineStatus}
-                      disabled={updatingStatus || stats.status === "on-delivery"}
+                      disabled={
+                        updatingStatus || stats.status === "on-delivery"
+                      }
                       className={`mt-4 w-full py-2 rounded-lg text-sm font-medium ${
                         isOnline
                           ? "bg-red-600 hover:bg-red-700"
@@ -209,12 +232,12 @@ export default function AgentDashboard() {
               )}
 
               {!loadingStats && (
-                <div className="bg-black/70 border border-white/20 rounded-xl p-6">
+                <div className="bg-black/70 border border-white/20 rounded-xl p-4 md:p-6">
                   <h3 className="text-lg font-semibold mb-4">
                     Weekly Deliveries
                   </h3>
 
-                  <div className="h-72">
+                  <div className="h-64 md:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={chartData}>
                         <XAxis dataKey="day" stroke="#aaa" />
@@ -241,9 +264,7 @@ export default function AgentDashboard() {
   );
 }
 
-/* =======================
-   COMPONENTS
-======================= */
+/* ================= COMPONENTS ================= */
 
 function SidebarLink({ to, icon: Icon, label }) {
   return (
@@ -251,12 +272,17 @@ function SidebarLink({ to, icon: Icon, label }) {
       to={to}
       end
       className={({ isActive }) =>
-        `relative group flex items-center justify-center p-3 rounded-lg transition ${
-          isActive ? "bg-blue-600/30" : "hover:bg-white/10 text-gray-300"
-        }`
+        `flex flex-col md:flex-row items-center justify-center gap-1
+         p-2 md:p-3 rounded-lg transition
+         ${
+           isActive
+             ? "bg-blue-600/30 text-blue-400"
+             : "hover:bg-white/10 text-gray-300"
+         }`
       }
     >
       <Icon size={18} />
+      <span className="text-[10px] md:hidden">{label}</span>
       <Tooltip text={label} />
     </NavLink>
   );
@@ -264,16 +290,23 @@ function SidebarLink({ to, icon: Icon, label }) {
 
 function StatCard({ label, value, color }) {
   return (
-    <div className="bg-black/70 border border-white/20 rounded-xl p-6">
+    <div className="bg-black/70 border border-white/20 rounded-xl p-4 md:p-6">
       <p className="text-gray-400 text-sm">{label}</p>
-      <p className={`text-3xl font-bold mt-2 ${color}`}>{value}</p>
+      <p className={`text-2xl md:text-3xl font-bold mt-2 ${color}`}>{value}</p>
     </div>
   );
 }
 
 function Tooltip({ text }) {
   return (
-    <span className="absolute left-16 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-black px-3 py-1 text-xs opacity-0 group-hover:opacity-100 transition border border-white/20 z-50">
+    <span
+      className="
+        hidden md:block absolute left-16 top-1/2 -translate-y-1/2
+        whitespace-nowrap rounded-md bg-black px-3 py-1 text-xs
+        opacity-0 group-hover:opacity-100 transition
+        border border-white/20 z-50
+      "
+    >
       {text}
     </span>
   );

@@ -9,7 +9,6 @@ export default function Orders() {
   const [toast, setToast] = useState(null);
 
   const [search, setSearch] = useState("");
-
   const [page, setPage] = useState(1);
   const ordersPerPage = 12;
 
@@ -57,44 +56,53 @@ export default function Orders() {
 
   useEffect(() => setPage(1), [search]);
 
-  if (loading) return <p className="text-white p-6">Loading orders...</p>;
+  if (loading) {
+    return <p className="text-white p-6">Loading orders...</p>;
+  }
 
   return (
-    <div className="p-6 text-white">
+    <div className="p-4 sm:p-6 text-white">
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
-      <div className="flex gap-4 mb-4">
-        <h2 className="text-2xl font-bold">Restaurant Orders</h2>
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold">Restaurant Orders</h2>
+
         <input
           type="text"
           placeholder="Search order, customer, phone or status"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20"
+          className="w-full md:w-96 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 focus:outline-none"
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {/* ORDERS GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {paginatedOrders.map((order) => {
           const hasAgent = Boolean(order.deliveryAgentId);
 
           return (
             <div
               key={order._id}
-              className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col"
+              className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col gap-2"
             >
-              {/* HEADER */}
-              <p className="text-xs text-gray-400">Order ID</p>
-              <p className="text-blue-400 text-sm break-all">{order._id}</p>
+              {/* ORDER ID */}
+              <div>
+                <p className="text-xs text-gray-400">Order ID</p>
+                <p className="text-blue-400 text-xs break-all">
+                  {order._id}
+                </p>
+              </div>
 
               {/* CUSTOMER */}
-              <p className="text-sm mt-2">
+              <p className="text-sm">
                 <span className="text-gray-400">Customer:</span>{" "}
                 {order.customerId?.name || "N/A"}
               </p>
 
               {/* ITEMS */}
-              <ul className="text-sm list-disc list-inside mt-2 line-clamp-3">
+              <ul className="text-sm list-disc list-inside line-clamp-3">
                 {order.items.map((i, idx) => (
                   <li key={idx}>
                     {i.name} × {i.quantity}
@@ -103,20 +111,20 @@ export default function Orders() {
               </ul>
 
               {/* FOOTER */}
-              <div className="mt-auto flex justify-between items-center pt-3">
+              <div className="mt-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3">
                 <p className="font-bold text-green-400">
                   ₹{order.totalPrice}
                 </p>
 
-                <div className="flex gap-2 items-center">
-                  {/* STATUS DROPDOWN (before agent assignment) */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  {/* STATUS DROPDOWN */}
                   {!hasAgent && (
                     <select
                       value={order.status}
                       onChange={(e) =>
                         updateStatus(order._id, e.target.value)
                       }
-                      className="bg-black border border-white px-2 py-1 rounded text-sm"
+                      className="bg-black border border-white/30 px-2 py-1 rounded text-sm"
                     >
                       <option value="pending">Pending</option>
                       <option value="preparing">Preparing</option>
@@ -165,7 +173,7 @@ export default function Orders() {
 
       {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex flex-wrap justify-center gap-2 mt-6">
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}

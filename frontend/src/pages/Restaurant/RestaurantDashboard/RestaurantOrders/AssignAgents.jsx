@@ -83,12 +83,15 @@ export default function AssignAgent() {
   );
 
   if (loading) {
-    return <p className="text-white">Loading agents...</p>;
+    return <p className="text-white p-6">Loading agents...</p>;
   }
 
   return (
-    <div className="text-white">
-      <h1 className="text-3xl font-bold mb-6">Assign Agent</h1>
+    <div className="p-4 sm:p-6 text-white">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Assign Agent</h1>
+      </div>
 
       {toast && (
         <Toast
@@ -98,12 +101,12 @@ export default function AssignAgent() {
         />
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      {/* AGENTS GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
         {paginatedAgents.map((agent) => {
           const isAssigned = assignedAgentId === agent._id;
           const isAvailable = agent.status === "available" && !assignedAgentId;
 
-          /* STATUS COLORS */
           const statusColor =
             agent.status === "available"
               ? "bg-green-600/20 text-green-400"
@@ -115,30 +118,32 @@ export default function AssignAgent() {
             <div
               key={agent._id}
               className={`bg-black/70 border border-white/20 rounded-xl p-4
-                flex flex-col gap-2 shadow-lg
-                ${isAssigned ? "ring-2 ring-green-500/40" : ""}
-              `}
+                          flex flex-col gap-3 shadow-lg
+                          ${isAssigned ? "ring-2 ring-green-500/40" : ""}`}
             >
               {/* HEADER */}
               <div className="flex items-center gap-3">
                 <Bike
-                  size={36}
+                  size={32}
                   className={
                     agent.status === "available"
                       ? "text-green-400"
-                      : agent.status === "busy"
+                      : agent.status === "on-delivery"
                       ? "text-blue-400"
                       : "text-red-400"
                   }
                 />
-                <div>
+
+                <div className="min-w-0">
                   <h2 className="font-semibold truncate">{agent.name}</h2>
-                  <p className="text-sm text-gray-400">{agent.phone}</p>
+                  <p className="text-sm text-gray-400 truncate">
+                    {agent.phone}
+                  </p>
                 </div>
               </div>
 
               {/* VEHICLE */}
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-300 truncate">
                 {agent.vehicleType} • {agent.vehicleNumber}
               </p>
 
@@ -149,14 +154,15 @@ export default function AssignAgent() {
                 {agent.status}
               </span>
 
-              {/* ACTION — ONLY WHEN AVAILABLE */}
+              {/* ACTION */}
               {isAvailable && (
                 <button
                   onClick={() => assignAgent(agent._id)}
                   disabled={assigning}
                   className="mt-auto w-full py-2 rounded-lg
                              flex items-center justify-center gap-2
-                             bg-green-600 hover:bg-green-700 transition"
+                             bg-green-600 hover:bg-green-700
+                             disabled:opacity-60 transition"
                 >
                   <UserCheck size={18} />
                   Assign Agent
@@ -169,7 +175,7 @@ export default function AssignAgent() {
 
       {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 mt-8">
+        <div className="flex flex-wrap justify-center gap-2 mt-8">
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}

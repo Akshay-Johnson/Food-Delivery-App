@@ -45,20 +45,28 @@ export default function AdminOrdersByRestaurant() {
   return (
     <div className="text-white max-w-7xl mx-auto px-4">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <button onClick={() => window.history.back()} className="px-4 py-2 bg-black/70 hover:bg-gray-600 rounded-md shadow-md transition border border-white/20">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+        {/* LEFT: BACK + TITLE */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.history.back()}
+            className="px-4 py-2 bg-black/70 hover:bg-gray-600 rounded-md shadow-md transition border border-white/20"
+          >
             <ArrowLeft size={16} />
-        </button>
-        <h2 className="text-2xl font-bold">
-          Orders – {restaurant?.name || "Restaurant"}
-        </h2>
+          </button>
 
+          <h2 className="text-2xl font-bold truncate max-w-[70vw] sm:max-w-none">
+            Orders – {restaurant?.name || "Restaurant"}
+          </h2>
+        </div>
+
+        {/* RIGHT: SEARCH */}
         <input
           type="text"
           placeholder="Search orders..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="sm:ml-auto w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          className="w-full sm:w-80 sm:ml-auto px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
         />
       </div>
 

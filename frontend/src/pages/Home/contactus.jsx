@@ -102,7 +102,20 @@ export default function ContactUs() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-sm m-auto flex justify-center items-center bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 py-4 rounded-lg font-bold text-lg shadow-lg transform active:scale-95 transition-all duration-200"
+              className="
+                   w-full sm:w-auto md:w-96
+                   mx-auto
+                  flex justify-center items-center
+                  bg-gradient-to-r from-orange-500 to-red-600
+                  hover:from-orange-600 hover:to-red-700
+                  px-6 py-3 sm:px-8 sm:py-4
+                  rounded-lg
+                  text-base sm:text-lg
+                  font-bold
+                  shadow-lg
+                  transform active:scale-95
+                  transition-all duration-200
+                "
             >
               {status || "Send Message"}
             </button>

@@ -27,10 +27,7 @@ export default function MenuManagement() {
       const res = await api.get("/api/menu/my/menu");
       setItems(res.data || []);
     } catch (error) {
-      console.error(
-        "Failed to load menu:",
-        error.response?.data || error.message
-      );
+      console.error("Failed to load menu:", error);
     } finally {
       setLoading(false);
     }
@@ -42,8 +39,7 @@ export default function MenuManagement() {
     try {
       await api.delete(`/api/menu/${id}`);
       loadMenu();
-    } catch (error) {
-      console.error("Delete failed:", error.response?.data || error.message);
+    } catch {
       setToast({ type: "error", message: "Delete failed" });
     }
   };
@@ -62,8 +58,7 @@ export default function MenuManagement() {
       });
 
       loadMenu();
-    } catch (error) {
-      console.error("Availability update failed:", error);
+    } catch {
       setToast({ type: "error", message: "Update failed" });
     }
   };
@@ -96,26 +91,28 @@ export default function MenuManagement() {
   }
 
   return (
-    <div>
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-4">
-        {toast && <Toast type={toast.type} message={toast.message} />}
-        <div className="flex flex justify-between gap-4">
-        <h2 className="text-2xl font-bold">Manage Menu</h2>
+    <div className="text-white">
+      {toast && <Toast type={toast.type} message={toast.message} />}
 
-        {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search menu items..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-sm mb-4 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white "
-        />
+      {/* ================= HEADER ================= */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+          <h2 className="text-2xl font-bold whitespace-nowrap">
+            Manage Menu
+          </h2>
+
+          <input
+            type="text"
+            placeholder="Search menu items..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-72 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          />
         </div>
 
         <button
           onClick={() => navigate("/restaurant/dashboard/menu/add")}
-          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded w-full sm:w-auto"
         >
           + Add New Item
         </button>
@@ -125,25 +122,24 @@ export default function MenuManagement() {
         <p className="text-gray-400">No matching menu items found.</p>
       ) : (
         <>
-          {/* MENU GRID */}
-          <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {/* ================= MENU GRID ================= */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {paginatedItems.map((item) => (
               <div
                 key={item._id}
-                className="bg-black/70 p-4 rounded-xl border border-white/20
-                           flex flex-col h-70"
+                className="bg-black/70 p-4 rounded-xl border border-white/20 flex flex-col min-h-[360px]"
               >
                 {/* IMAGE */}
                 <img
                   src={
                     (item.image || "/assets/dishimage.jpg") + "?t=" + Date.now()
                   }
-                  className="h-15 w-full object-cover rounded"
+                  className="h-40 w-full object-cover rounded"
                   alt={item.name}
                 />
 
                 {/* CONTENT */}
-                <h3 className="mt-2 font-semibold">{item.name}</h3>
+                <h3 className="mt-3 font-semibold truncate">{item.name}</h3>
 
                 <p className="text-gray-300 text-sm mt-1 line-clamp-2">
                   {item.description}
@@ -155,54 +151,48 @@ export default function MenuManagement() {
                   Category: {item.category}
                 </p>
 
-                {/* ACTIONS (STICK TO BOTTOM) */}
-                <div className="mt-auto">
-                  <div className="flex gap-3 mt-4">
-                    {/* EDIT */}
+                {/* ACTIONS */}
+                <div className="mt-auto pt-4">
+                  <div className="flex gap-3">
                     <button
                       onClick={() =>
-                        navigate(`/restaurant/dashboard/menu/edit/${item._id}`)
+                        navigate(
+                          `/restaurant/dashboard/menu/edit/${item._id}`
+                        )
                       }
-                      className="relative group bg-blue-600 px-3 py-1 rounded flex items-center"
+                      className="bg-blue-600 px-3 py-2 rounded flex items-center"
                     >
                       <Pencil size={16} />
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                        Edit
-                      </span>
                     </button>
 
-                    {/* DELETE */}
                     <button
                       onClick={() => deleteItem(item._id)}
-                      className="relative group bg-red-600 px-3 py-1 rounded flex items-center"
+                      className="bg-red-600 px-3 py-2 rounded flex items-center"
                     >
                       <Trash size={16} />
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                        Delete
-                      </span>
-                    </button>
-                    {/* AVAILABILITY */}
-                    <button
-                      onClick={() =>
-                        toggleAvailability(item._id, item.isAvailable)
-                      }
-                      className={`mt-3 w-full py-1 rounded text-sm font-semibold transition ${
-                        item.isAvailable
-                          ? "bg-green-600 hover:bg-green-700"
-                          : "bg-gray-600 hover:bg-gray-700"
-                      }`}
-                    >
-                      {item.isAvailable ? "Available" : "Not Available"}
                     </button>
                   </div>
+
+                  <button
+                    onClick={() =>
+                      toggleAvailability(item._id, item.isAvailable)
+                    }
+                    className={`mt-3 w-full py-1.5 rounded text-sm font-semibold transition ${
+                      item.isAvailable
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-600 hover:bg-gray-700"
+                    }`}
+                  >
+                    {item.isAvailable ? "Available" : "Not Available"}
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* PAGINATION */}
+          {/* ================= PAGINATION ================= */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
+            <div className="flex flex-wrap justify-center items-center gap-2 mt-8">
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}

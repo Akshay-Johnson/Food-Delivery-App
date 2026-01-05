@@ -24,8 +24,7 @@ export default function AdminRestaurantOrders() {
   const filteredRestaurants = restaurants.filter((r) => {
     const q = search.toLowerCase();
     return (
-      r.name?.toLowerCase().includes(q) ||
-      r.email?.toLowerCase().includes(q)
+      r.name?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
     );
   });
 
@@ -45,8 +44,10 @@ export default function AdminRestaurantOrders() {
   return (
     <div className="text-white max-w-7xl mx-auto px-4">
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Orders by Restaurant</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold whitespace-nowrap">
+          Orders by Restaurant
+        </h2>
 
         {/* SEARCH */}
         <input
@@ -54,7 +55,7 @@ export default function AdminRestaurantOrders() {
           placeholder="Search restaurant name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-sm px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
+          className="w-full sm:w-80 px-4 py-2 rounded-2xl bg-black/40 border border-white/20 text-white"
         />
       </div>
 
@@ -80,9 +81,7 @@ export default function AdminRestaurantOrders() {
             <div className="p-3 flex flex-col gap-1 flex-1">
               <div className="flex items-center justify-between gap-2">
                 {/* NAME */}
-                <p className="font-semibold text-gray-200 truncate">
-                  {r.name}
-                </p>
+                <p className="font-semibold text-gray-200 truncate">{r.name}</p>
 
                 {/* RATING */}
                 <p className="text-sm text-yellow-400 font-semibold">
@@ -126,9 +125,7 @@ export default function AdminRestaurantOrders() {
 
           <button
             disabled={page === totalPages}
-            onClick={() =>
-              setPage((p) => Math.min(totalPages, p + 1))
-            }
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
           >
             Next
