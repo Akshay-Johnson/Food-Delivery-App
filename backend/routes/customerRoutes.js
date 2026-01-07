@@ -35,8 +35,6 @@ router.put(
   editProfile
 );
 
-console.log("✅ REGISTERING PUT /fcm-token");
-
 //save fcm token
 router.put("/fcm-token", protectCustomer, saveFCMToken);
 

@@ -25,7 +25,6 @@ import contactRoutes from "./routes/contactRoutes.js";
 connectDB();
 
 const app = express();
-console.log("Razorpay Key Loaded:", process.env.RAZORPAY_KEY_ID ? "Yes" : "No");
 
 //middleware
 app.use(
