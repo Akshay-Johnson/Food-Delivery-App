@@ -38,7 +38,9 @@ export default function RestaurantDetails() {
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
-  const safeReviews = Array.isArray(reviews) ? reviews : [];
+  const safeReviews = Array.isArray(reviews)
+    ? reviews.filter((r) => !r.isHidden)
+    : [];
 
   /* ======================
      LOAD DATA
@@ -56,7 +58,9 @@ export default function RestaurantDetails() {
     try {
       const res = await api.get(`/api/restaurants/${id}/details`);
       setRestaurant(res.data.restaurant);
-      setDishes((res.data.dishes || []).filter((d) => d.isAvailable));
+
+      // IMPORTANT: keep BOTH available and unavailable dishes
+      setDishes(res.data.dishes || []);
     } catch (err) {
       console.error("Error loading restaurant:", err);
     } finally {
@@ -86,6 +90,14 @@ export default function RestaurantDetails() {
      CART
   ====================== */
   const addToCart = async (dish) => {
+    if (!dish.isAvailable) {
+      setToast({
+        type: "error",
+        message: "This item is currently unavailable.",
+      });
+      return;
+    }
+
     try {
       await api.post("/api/cart/add", {
         itemId: dish._id,
@@ -183,6 +195,7 @@ export default function RestaurantDetails() {
 
   return (
     <div className="relative min-h-screen text-white">
+      {/* BACKGROUND */}
       <div className="fixed inset-0 -z-10">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -272,11 +285,12 @@ export default function RestaurantDetails() {
         </div>
 
         {/* DISH GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6  ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {visibleDishes.map((item) => (
             <div
               key={item._id}
-              className="bg-black/70 border border-white/20 rounded-xl p-3 flex flex-col "
+              className={`relative bg-black/70 border border-white/20 rounded-xl p-3 flex flex-col
+                ${!item.isAvailable ? "opacity-60" : ""}`}
             >
               <img
                 src={item.image || "/assets/dishimage.jpg"}
@@ -284,18 +298,31 @@ export default function RestaurantDetails() {
                 alt=""
               />
 
+              {/* UNAVAILABLE BADGE */}
+              {!item.isAvailable && (
+                <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                  Unavailable
+                </span>
+              )}
+
               <div className="flex justify-between mt-2">
                 <p className="font-semibold">{item.name}</p>
                 <p className="text-green-500">₹{item.price}</p>
               </div>
 
-              <p className="text-gray-400 text-sm ">{item.description}</p>
+              <p className="text-gray-400 text-sm">{item.description}</p>
 
               <button
                 onClick={() => addToCart(item)}
-                className="mt-auto bg-gradient-to-r from-orange-500 to-red-600 px-3 py-1 rounded"
+                disabled={!item.isAvailable}
+                className={`mt-auto px-3 py-1 rounded text-white
+                  ${
+                    item.isAvailable
+                      ? "bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+                      : "bg-gray-600 cursor-not-allowed"
+                  }`}
               >
-                Add to Cart
+                {item.isAvailable ? "Add to Cart" : "Unavailable"}
               </button>
             </div>
           ))}
@@ -363,9 +390,9 @@ export default function RestaurantDetails() {
               <p className="font-semibold">
                 {review.customerId?.name || "User"}
               </p>
+
               {editingReviewId === review._id ? (
                 <>
-                  {/* Rating */}
                   <div className="flex gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Star
@@ -379,14 +406,12 @@ export default function RestaurantDetails() {
                     ))}
                   </div>
 
-                  {/* Comment */}
                   <textarea
                     className="w-full bg-black/40 p-2 rounded text-sm"
                     value={editComment}
                     onChange={(e) => setEditComment(e.target.value)}
                   />
 
-                  {/* Actions */}
                   <div className="flex gap-3 mt-2">
                     <button
                       onClick={() => updateReview(review._id)}
