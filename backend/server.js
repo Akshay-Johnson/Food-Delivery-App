@@ -29,7 +29,7 @@ const app = express();
 //middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", //frontend address
+    origin: ["http://localhost:5173", "https://dinex-frontend.vercel.app"],
     credentials: true,
   })
 );
@@ -92,7 +92,6 @@ app.use("/api/contact", contactRoutes);
 app.get("/", (req, res) => {
   res.send("Food Delivery App Backend is running");
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
