@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
@@ -21,85 +20,89 @@ import searchRoutes from "./routes/searchRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 
-// Connect to the database
+// =====================
+// CONNECT DATABASE
+// =====================
 connectDB();
 
 const app = express();
 
+// =====================
+// 🔥 GLOBAL DEBUG LOGGER
+// =====================
+app.use((req, res, next) => {
+  console.log(
+    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
+  );
+  next();
+});
+
+// =====================
+// ✅ GLOBAL CORS + PREFLIGHT HANDLER
+// (MUST COME BEFORE EVERYTHING ELSE)
+// =====================
 app.use((req, res, next) => {
   res.setHeader(
     "Access-Control-Allow-Origin",
     "https://dinex-frontend.vercel.app"
   );
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
 
   if (req.method === "OPTIONS") {
+    console.log("[CORS] Preflight handled → 204");
     return res.sendStatus(204);
   }
   next();
 });
 
+// =====================
+// BODY PARSERS
+// =====================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-//routes
-
-//customer routes
+// =====================
+// ROUTES
+// =====================
 app.use("/api/customers", customerRoutes);
-
-//upload routes
 app.use("/api/upload", uploadRoutes);
-
-//serve static files from uploads directory
 app.use("/uploads", express.static("uploads"));
-
-//address routes
 app.use("/api/address", addressRoutes);
-
-//cart routes
 app.use("/api/cart", cartRoutes);
-
-//restaurant routes
 app.use("/api/restaurants", restaurantRoutes);
-
-//restaurant order routes
 app.use("/api/restaurants", restaurantOrderRoutes);
-
-//menu routes
 app.use("/api/menu", menuRoutes);
-
-//order routes
 app.use("/api/orders", orderRoutes);
-
-//delivery agent routes
 app.use("/api/agents", deliveryAgentRoutes);
-
-//payment routes
 app.use("/api/payments", paymentRoutes);
-
-//admin routes
 app.use("/api/admins", adminRoutes);
-
-//uploads
-app.use("/api/upload", uploadRoutes);
-app.use("/uploads", express.static("uploads"));
-
-//search routes
 app.use("/api/search", searchRoutes);
-
-//post review customer
 app.use("/api/reviews", reviewRoutes);
-
-//contact routes
 app.use("/api/contact", contactRoutes);
 
+// =====================
+// HEALTH CHECK
+// =====================
 app.get("/", (req, res) => {
   res.send("Food Delivery App Backend is running");
 });
 
+// =====================
+// START SERVER
+// =====================
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}`);
+  console.log("=================================");
+  console.log("🚀 Server started successfully");
+  console.log(`🌐 Listening on port: ${PORT}`);
+  console.log("=================================");
 });
