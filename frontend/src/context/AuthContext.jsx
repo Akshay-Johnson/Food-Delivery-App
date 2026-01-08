@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
         setRole(storedRole);
         setUser(JSON.parse(storedUser));
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+        // api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
       } catch {
         localStorage.clear();
       }
@@ -66,7 +66,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem("role", selectedRole);
     localStorage.setItem("user", JSON.stringify(res.data.user));
 
-    api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+    // api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
 
     setRole(selectedRole);
     setUser(res.data.user);
