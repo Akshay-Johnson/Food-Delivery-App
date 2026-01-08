@@ -1,6 +1,7 @@
 import { sendPushNotification } from "../utils/sendpush.js";
 import Review from "../models/reviewModel.js";
 import Restaurant from "../models/restaurantModel.js";
+import Order from "../models/orderModel.js";
 
 //auto udate restaurant rating
 const updateRestaurantRating = async (restaurantId) => {
@@ -29,6 +30,19 @@ export const postReview = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Rating must be between 1 and 5." });
+    }
+
+    // CHECK: customer must have ordered from this restaurant
+    const hasOrdered = await Order.exists({
+      customerId,
+      restaurantId,
+      status: "delivered", // or "completed"
+    });
+
+    if (!hasOrdered) {
+      return res.status(403).json({
+        message: "You can only review restaurants you have ordered from.",
+      });
     }
 
     //prevent duplicate reviews
@@ -84,7 +98,7 @@ export const getReviews = async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    const reviews = await Review.find({ restaurantId })
+    const reviews = await Review.find({ restaurantId, isHidden: false }) 
       .populate("customerId", "name email profileImage")
       .sort({ createdAt: -1 })
       .skip(skip)

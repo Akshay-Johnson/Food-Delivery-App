@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-//register delivery agent
+// ================= REGISTER DELIVERY AGENT =================
 export const agentRegisterSchema = Joi.object({
   name: Joi.string().min(2).max(50).required().messages({
     "string.empty": "Name is required",
@@ -24,10 +24,16 @@ export const agentRegisterSchema = Joi.object({
       "string.empty": "Phone number is required",
     }),
 
-  password: Joi.string().min(6).required().messages({
-    "string.min": "Password must be at least 6 characters",
-    "string.empty": "Password is required",
-  }),
+  password: Joi.string()
+    .min(6)
+    .pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/)
+    .required()
+    .messages({
+      "string.min": "Password must be at least 6 characters",
+      "string.pattern.base":
+        "Password must contain at least one uppercase letter, one number, and one special character",
+      "string.empty": "Password is required",
+    }),
 
   confirmPassword: Joi.any().valid(Joi.ref("password")).required().messages({
     "any.only": "Passwords do not match",
@@ -39,7 +45,7 @@ export const agentRegisterSchema = Joi.object({
   vehicleNumber: Joi.string().optional(),
 }).with("password", "confirmPassword");
 
-//login delivery agent
+// ================= LOGIN DELIVERY AGENT =================
 export const agentLoginSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Invalid email",
@@ -51,7 +57,7 @@ export const agentLoginSchema = Joi.object({
   }),
 });
 
-//update delivery agent profile
+// ================= UPDATE DELIVERY AGENT PROFILE =================
 export const agentUpdateSchema = Joi.object({
   name: Joi.string().min(2).max(50).optional(),
 
@@ -68,7 +74,14 @@ export const agentUpdateSchema = Joi.object({
 
   vehicleNumber: Joi.string().optional(),
 
-  password: Joi.string().min(6).optional().allow("").messages({
-    "string.min": "Password must be at least 6 characters",
-  }),
+  password: Joi.string()
+    .min(6)
+    .pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/)
+    .optional()
+    .allow("")
+    .messages({
+      "string.min": "Password must be at least 6 characters",
+      "string.pattern.base":
+        "Password must contain at least one uppercase letter, one number, and one special character",
+    }),
 });

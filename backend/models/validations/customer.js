@@ -11,10 +11,16 @@ export const customerRegisterSchema = Joi.object({
     "string.empty": "Email is required",
   }),
 
-  password: Joi.string().min(6).required().messages({
-    "string.min": "Password must be at least 6 characters",
-    "string.empty": "Password is required",
-  }),
+  password: Joi.string()
+    .min(6)
+    .pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/)
+    .required()
+    .messages({
+      "string.min": "Password must be at least 6 characters",
+      "string.pattern.base":
+        "Password must contain at least one uppercase letter, one number, and one special character",
+      "string.empty": "Password is required",
+    }),
 
   confirmPassword: Joi.string()
     .valid(Joi.ref("password"))
@@ -67,9 +73,16 @@ export const customerUpdateSchema = Joi.object({
       "string.pattern.base": "Phone number must be 10 digits",
     }),
 
-  password: Joi.string().min(6).optional().allow("").messages({
-    "string.min": "Password must be at least 6 characters",
-  }),
+  password: Joi.string()
+    .min(6)
+    .pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/)
+    .optional()
+    .allow("")
+    .messages({
+      "string.min": "Password must be at least 6 characters",
+      "string.pattern.base":
+        "Password must contain at least one uppercase letter, one number, and one special character",
+    }),
 
   profileImage: Joi.string().uri().optional(),
 });

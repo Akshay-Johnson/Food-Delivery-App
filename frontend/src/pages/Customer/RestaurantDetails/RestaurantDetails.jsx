@@ -165,11 +165,25 @@ export default function RestaurantDetails() {
     user && reviews.some((r) => r.customerId?._id === user._id);
 
   const submitReview = async () => {
-    if (!rating) return;
-    await api.post(`/api/reviews/${id}`, { rating, comment });
-    setRating(0);
-    setComment("");
-    loadReviews();
+    if (!rating) {
+      setToast({ type: "error", message: "Please select a rating first." });
+      return;
+    }
+
+    try {
+      await api.post(`/api/reviews/${id}`, { rating, comment });
+
+      setToast({ type: "success", message: "Review submitted successfully." });
+      setRating(0);
+      setComment("");
+      loadReviews();
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        "You are not allowed to review this restaurant.";
+
+      setToast({ type: "error", message: msg });
+    }
   };
 
   const updateReview = async (reviewId) => {
@@ -204,7 +218,13 @@ export default function RestaurantDetails() {
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
       </div>
 
-      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       <button
         onClick={() => navigate(-1)}
