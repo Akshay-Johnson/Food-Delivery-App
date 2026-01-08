@@ -136,6 +136,8 @@ export default function App() {
           <Route path="orders" element={<AgentOrders />} />
           <Route path="profile" element={<AgentProfile />} />
         </Route>
+
+        <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );
