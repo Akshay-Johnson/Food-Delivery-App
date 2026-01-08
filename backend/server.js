@@ -27,35 +27,17 @@ connectDB();
 const app = express();
 
 app.use((req, res, next) => {
-  res.header(
+  res.setHeader(
     "Access-Control-Allow-Origin",
     "https://dinex-frontend.vercel.app"
   );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
   }
   next();
-});
-
-//middleware
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://dinex-frontend.vercel.app"],
-  })
-);
-
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.sendStatus(204);
-  } else {
-    next();
-  }
 });
 
 app.use(express.json());
