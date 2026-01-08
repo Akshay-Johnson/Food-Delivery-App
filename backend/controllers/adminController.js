@@ -4,7 +4,7 @@ import Restaurant from "../models/restaurantModel.js";
 import Order from "../models/orderModel.js";
 import DeliveryAgent from "../models/deliveryAgentModel.js";
 import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
-import EmailOtp from "../models/EmailOtp.js";
+import EmailOtp from "../models/emailOtp.js";
 import { generateOtp, sendEmailOtp } from "../utils/emailOtp.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

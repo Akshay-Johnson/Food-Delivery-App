@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Order from "../models/orderModel.js";
 import { emailExistsAnywhere } from "../utils/checkEmailExists.js";
-import EmailOtp from "../models/EmailOtp.js";
+import EmailOtp from "../models/emailOtp.js";
 import { generateOtp, sendEmailOtp } from "../utils/emailOtp.js";
 
 // Generate Token
