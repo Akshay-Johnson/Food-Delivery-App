@@ -33,14 +33,19 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ================= CORS ================= */
+import cors from "cors";
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://YOUR-NETLIFY-APP.netlify.app"],
+    origin: ["http://localhost:5173", "https://dinex-app.netlify.app"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+
+// Explicitly handle preflight
+app.options("*", cors());
 
 /* ================= BODY ================= */
 app.use(express.json());
