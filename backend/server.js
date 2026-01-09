@@ -27,36 +27,41 @@ const app = express();
 
 /* ================= DEBUG ================= */
 app.use((req, res, next) => {
-  console.log(`[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`);
+  console.log(
+    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
+  );
   next();
 });
 
-/* ================= CORS (FINAL) ================= */
+/* ================= CORS (PRODUCTION SAFE) ================= */
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-frontend.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true); // postman / server-to-server
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // Postman / server calls
 
-      if (
-        allowedOrigins.includes(origin) ||
-        (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
-      ) {
-        return cb(null, true);
-      }
+    if (
+      allowedOrigins.includes(origin) ||
+      (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
+    ) {
+      return cb(null, true);
+    }
 
-      return cb(new Error("Not allowed by CORS"));
-    },
-    credentials: false,   // IMPORTANT
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+    return cb(new Error("Not allowed by CORS"));
+  },
+  credentials: false, // you are using JWT, not cookies
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
+/* 🔴 THIS LINE IS THE MISSING PIECE 🔴 */
+app.options("*", cors(corsOptions));
 
 /* ================= BODY ================= */
 app.use(express.json());
