@@ -59,7 +59,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
+app.use(cors(corsOptions));
 /* IMPORTANT: handle preflight BEFORE routes */
 app.options(/.*/, cors(corsOptions));
 
