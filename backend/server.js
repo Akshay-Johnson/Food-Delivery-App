@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import customerRoutes from "./routes/customerRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
@@ -25,6 +26,9 @@ import contactRoutes from "./routes/contactRoutes.js";
 connectDB();
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /* ================= DEBUG ================= */
 app.use((req, res, next) => {
@@ -79,10 +83,8 @@ app.use(cookieParser());
 /* ================= ROUTES ================= */
 app.use("/api/customers", customerRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use(
-  "/uploads",
-  express.static(path.join(process.cwd(), "backend/uploads"))
-);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use("/api/address", addressRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/restaurants", restaurantRoutes);
