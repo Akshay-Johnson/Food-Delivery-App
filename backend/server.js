@@ -4,6 +4,7 @@ dotenv.config();
 import express from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
+import cors from "cors";
 
 import customerRoutes from "./routes/customerRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
@@ -32,37 +33,34 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ================= CORS (FINAL FIX) ================= */
+/* ================= CORS (FINAL, CLEAN) ================= */
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-frontend.vercel.app",
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow Postman, curl, server-to-server
+    if (!origin) return callback(null, true);
 
-  if (
-    origin &&
-    (allowedOrigins.includes(origin) ||
-      (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")))
-  ) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-  }
+    if (
+      allowedOrigins.includes(origin) ||
+      (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
+    ) {
+      return callback(null, true);
+    }
 
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+app.use(cors(corsOptions));
+app.options("/*", cors(corsOptions)); // safe preflight handler
 
 /* ================= BODY PARSERS ================= */
 app.use(express.json());
