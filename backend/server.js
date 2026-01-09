@@ -59,7 +59,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // preflight
+app.options(/.*/, cors(corsOptions));
+
 
 /* ================= BODY PARSERS ================= */
 app.use(express.json());
