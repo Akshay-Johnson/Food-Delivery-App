@@ -60,9 +60,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-/* 🔴 THIS LINE IS THE MISSING PIECE 🔴 */
-app.options("/*", cors(corsOptions));
-
 /* ================= BODY ================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
