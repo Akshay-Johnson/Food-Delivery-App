@@ -4,7 +4,6 @@ dotenv.config();
 import express from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
-import cors from "cors";
 
 import customerRoutes from "./routes/customerRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
@@ -40,41 +39,35 @@ app.use((req, res, next) => {
 
 // =====================
 // ✅ GLOBAL CORS + PREFLIGHT HANDLER
-// (MUST COME BEFORE EVERYTHING ELSE)
 // =====================
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://dinex-frontend.vercel.app",
-];
+  const isAllowed =
+    !origin ||
+    origin === "http://localhost:5173" ||
+    origin === "https://dinex-frontend.vercel.app" ||
+    (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"));
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow server-to-server and tools like curl/postman
-      if (!origin) return callback(null, true);
+  if (isAllowed) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+  }
 
-      // exact matches
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
 
-      // allow all Vercel preview deployments of THIS project
-      if (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")) {
-        return callback(null, true);
-      }
-
-      console.log("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// ensure preflight always works
-app.options("*", cors());
+  next();
+});
 
 // =====================
 // BODY PARSERS
