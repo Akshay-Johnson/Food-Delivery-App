@@ -50,7 +50,9 @@ app.use((req, res, next) => {
     (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"));
 
   if (isAllowed) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
+    if (origin) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+    }
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader(
       "Access-Control-Allow-Headers",
