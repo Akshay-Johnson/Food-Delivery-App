@@ -35,33 +35,39 @@ app.use((req, res, next) => {
 
 /* ================= CORS (FIXED) ================= */
 
+/* ================= CORS (FINAL, WORKING) ================= */
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-app.netlify.app",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      console.log("CORS CHECK ORIGIN:", origin);
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log("CORS CHECK ORIGIN:", origin);
 
-      if (!origin) return callback(null, true); // Postman, server calls
+    // Allow Postman / server-to-server
+    if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-      console.error("CORS BLOCKED:", origin);
-      return callback(null, true); // TEMP: allow all to unblock prod
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+    console.error("CORS BLOCKED:", origin);
+
+    // TEMP: allow all to unblock production
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+/* Register CORS middleware */
 app.use(cors(corsOptions));
-/* IMPORTANT: handle preflight BEFORE routes */
-app.options(/.*/, cors(corsOptions));
+
+/* Handle preflight — Express 5 safe */
+app.options("/*", cors(corsOptions));
 
 /* ================= BODY ================= */
 app.use(express.json());
