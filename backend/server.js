@@ -30,7 +30,9 @@ const app = express();
 ====================================================== */
 app.use((req, res, next) => {
   console.log(
-    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin || "N/A"}`
+    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${
+      req.headers.origin || "N/A"
+    }`
   );
   next();
 });
@@ -46,29 +48,30 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow tools like Postman / server-to-server
+    // Allow Postman / server-to-server
     if (!origin) {
       console.log("[CORS] No origin → allowed");
       return callback(null, true);
     }
 
     if (allowedOrigins.includes(origin)) {
-      console.log("[CORS] Allowed origin:", origin);
+      console.log("[CORS] Allowed:", origin);
       return callback(null, true);
     }
 
-    console.log("[CORS] ❌ Blocked origin:", origin);
-    return callback(new Error("Blocked by CORS"));
+    // DO NOT throw error — just deny by returning false
+    console.log("[CORS] Blocked:", origin);
+    return callback(null, false);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-/* ---- Apply CORS FIRST ---- */
+/* Apply CORS */
 app.use(cors(corsOptions));
 
-/* ---- Handle preflight properly ---- */
+/* Always handle preflight */
 app.options("*", cors(corsOptions));
 
 /* ======================================================
