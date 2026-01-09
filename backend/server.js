@@ -67,7 +67,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 /* Handle preflight — Express 5 safe */
-app.options("/*", cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 /* ================= BODY ================= */
 app.use(express.json());
