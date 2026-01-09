@@ -23,7 +23,9 @@ router.post("/profile", upload.single("profileImage"), (req, res) => {
     return res.status(400).json({ message: "File not uploaded" });
   }
 
-  const fullUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  const fullUrl = `${req.protocol}://${req.get("host")}/uploads/${
+    req.file.filename
+  }`;
 
   res.json({
     message: "Uploaded successfully",
