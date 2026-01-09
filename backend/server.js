@@ -35,6 +35,8 @@ app.use((req, res, next) => {
 
 /* ================= CORS (FINAL, CLEAN) ================= */
 
+/* ================= CORS (FINAL – SAFE) ================= */
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-frontend.vercel.app",
@@ -42,7 +44,7 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // allow Postman, curl, server-to-server
+    // allow Postman / curl / server-to-server
     if (!origin) return callback(null, true);
 
     if (
@@ -59,8 +61,7 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(cors(corsOptions));
-app.options("/*", cors(corsOptions)); // safe preflight handler
+app.use(cors(corsOptions)); // THIS ALONE HANDLES PREFLIGHT
 
 /* ================= BODY PARSERS ================= */
 app.use(express.json());
