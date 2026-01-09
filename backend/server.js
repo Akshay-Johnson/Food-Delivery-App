@@ -21,46 +21,44 @@ import searchRoutes from "./routes/searchRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 
-/* ================= DB ================= */
 connectDB();
 
 const app = express();
 
-/* ================= DEBUG LOGGER ================= */
+/* ================= DEBUG ================= */
 app.use((req, res, next) => {
   console.log(`[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`);
   next();
 });
 
-/* ================= CORS (CORRECT + SAFE) ================= */
+/* ================= CORS (FINAL) ================= */
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-frontend.vercel.app",
 ];
 
-// allow all preview deployments of your vercel project
-function isAllowed(origin) {
-  if (!origin) return true; // server-to-server / render health checks
-  if (allowedOrigins.includes(origin)) return true;
-  if (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")) return true;
-  return false;
-}
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (isAllowed(origin)) return callback(null, true);
-      console.log("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // postman / server-to-server
+
+      if (
+        allowedOrigins.includes(origin) ||
+        (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
+      ) {
+        return cb(null, true);
+      }
+
+      return cb(new Error("Not allowed by CORS"));
     },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: false,   // IMPORTANT
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-/* ================= BODY PARSERS ================= */
+/* ================= BODY ================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
