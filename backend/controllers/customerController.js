@@ -82,10 +82,8 @@ export const loginCustomer = async (req, res) => {
 
   try {
     const { email, password } = req.body;
-
     console.log("📩 Email:", email);
 
-    // 1. Find user
     const user = await Customer.findOne({ email });
     console.log("👤 User found:", !!user);
 
@@ -93,29 +91,36 @@ export const loginCustomer = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 2. Check active status
     if (!user.isActive) {
       return res.status(403).json({
         message: "Your account has been blocked. Contact support.",
       });
     }
 
-    // 3. Compare password
-    const match = await bcrypt.compare(password, user.password);
+    console.log("🔐 Comparing password…");
+
+    // ⏱ Guard bcrypt so it can never hang
+    const match = await Promise.race([
+      bcrypt.compare(password, user.password),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("bcrypt timeout")), 5000)
+      ),
+    ]);
+
     console.log("🔐 Password match:", match);
 
     if (!match) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 4. Generate token
+    console.log("🪙 Generating token…");
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "30d",
     });
 
     console.log("✅ Token generated");
 
-    // 5. Send response (sanitize user)
     return res.status(200).json({
       message: "Login successful",
       token,
