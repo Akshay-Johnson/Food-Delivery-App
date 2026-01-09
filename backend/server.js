@@ -61,7 +61,7 @@ app.use(
 );
 
 /* IMPORTANT: handle preflight BEFORE routes */
-app.options("*", cors());
+app.options(/.*/, cors(corsOptions));
 
 /* ================= BODY ================= */
 app.use(express.json());
