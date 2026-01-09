@@ -35,16 +35,31 @@ app.use((req, res, next) => {
 
 import cors from "cors";
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://dinex-app.netlify.app",
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://dinex-app.netlify.app"],
+    origin: function (origin, callback) {
+      // Allow server-to-server & tools like Postman (no origin)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.log("Blocked by CORS:", origin);
+        return callback(new Error("Blocked by CORS"));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
 
-// Explicitly handle preflight
+// CRITICAL — allow preflight requests
 app.options("*", cors());
 
 /* ================= BODY ================= */
