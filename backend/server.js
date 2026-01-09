@@ -27,7 +27,9 @@ const app = express();
 
 /* ================= DEBUG LOGGER ================= */
 app.use((req, res, next) => {
-  console.log(`[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`);
+  console.log(
+    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
+  );
   next();
 });
 
@@ -38,29 +40,33 @@ const allowedOrigins = [
   "https://dinex-frontend.vercel.app",
 ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // allow server-to-server, Postman, curl
-    if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+  if (
+    origin &&
+    (allowedOrigins.includes(origin) ||
+      (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")))
+  ) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
 
-    // allow ALL vercel preview deployments of this project
-    if (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")) {
-      return callback(null, true);
-    }
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
 
-    console.log("❌ Blocked by CORS:", origin);
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
-
 
 /* ================= BODY PARSERS ================= */
 app.use(express.json());
