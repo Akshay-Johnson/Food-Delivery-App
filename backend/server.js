@@ -40,6 +40,7 @@ app.use((req, res, next) => {
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-app.netlify.app",
+  "https://dinex-frontend.vercel.app",
 ];
 
 const corsOptions = {
