@@ -78,27 +78,56 @@ export const registerCustomer = async (req, res) => {
 
 // Login Customer
 export const loginCustomer = async (req, res) => {
+  console.log("🔑 Customer login hit");
+
   try {
     const { email, password } = req.body;
 
-    const user = await Customer.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    console.log("📩 Email:", email);
 
+    // 1. Find user
+    const user = await Customer.findOne({ email });
+    console.log("👤 User found:", !!user);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 2. Check active status
     if (!user.isActive) {
       return res.status(403).json({
         message: "Your account has been blocked. Contact support.",
       });
     }
 
+    // 3. Compare password
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Invalid credentials" });
+    console.log("🔐 Password match:", match);
 
+    if (!match) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // 4. Generate token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "30d",
     });
-    res.status(200).json({ message: "Login successful", token, user });
+
+    console.log("✅ Token generated");
+
+    // 5. Send response (sanitize user)
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    console.error("🔥 Login error:", error);
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
