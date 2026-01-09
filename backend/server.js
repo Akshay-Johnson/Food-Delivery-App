@@ -43,17 +43,38 @@ app.use((req, res, next) => {
 // (MUST COME BEFORE EVERYTHING ELSE)
 // =====================
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://dinex-frontend.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://dinex-frontend.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      // allow server-to-server and tools like curl/postman
+      if (!origin) return callback(null, true);
+
+      // exact matches
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // allow all Vercel preview deployments of THIS project
+      if (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")) {
+        return callback(null, true);
+      }
+
+      console.log("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
+
+// ensure preflight always works
+app.options("*", cors());
 
 // =====================
 // BODY PARSERS
