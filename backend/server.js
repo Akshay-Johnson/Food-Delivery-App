@@ -5,6 +5,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import cors from "cors";
+import path from "path";
 
 import customerRoutes from "./routes/customerRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
@@ -78,7 +79,10 @@ app.use(cookieParser());
 /* ================= ROUTES ================= */
 app.use("/api/customers", customerRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/uploads", express.static("uploads"));
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "backend/uploads"))
+);
 app.use("/api/address", addressRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/restaurants", restaurantRoutes);
