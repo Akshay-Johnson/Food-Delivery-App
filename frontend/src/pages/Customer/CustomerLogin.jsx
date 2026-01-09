@@ -59,7 +59,7 @@ export default function CustomerLogin() {
       <form onSubmit={submit}>
         {/* EMAIL */}
         <div className="mb-4">
-          <label className="block text-sm text-gray-300 mb-1">Email</label>
+          <label className="block text-sm text-gray-300 mb-1">Emailddasdasddad</label>
           <input
             type="email"
             placeholder="Enter your email"
