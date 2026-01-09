@@ -27,38 +27,37 @@ const app = express();
 
 /* ================= DEBUG ================= */
 app.use((req, res, next) => {
-  console.log(
-    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
-  );
+  console.log(`[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`);
   next();
 });
 
-/* ================= CORS (PRODUCTION SAFE) ================= */
+/* ================= CORS ================= */
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-frontend.vercel.app",
 ];
 
-const corsOptions = {
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // Postman / server calls
+// IMPORTANT: do NOT use "*" or "/*" anywhere
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // Postman / server calls
 
-    if (
-      allowedOrigins.includes(origin) ||
-      (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
-    ) {
-      return cb(null, true);
-    }
+      if (
+        allowedOrigins.includes(origin) ||
+        (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
+      ) {
+        return cb(null, true);
+      }
 
-    return cb(new Error("Not allowed by CORS"));
-  },
-  credentials: false, // you are using JWT, not cookies
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-app.use(cors(corsOptions));
+      return cb(new Error("Blocked by CORS"));
+    },
+    credentials: false, // you are using tokens, not cookies
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 /* ================= BODY ================= */
 app.use(express.json());
