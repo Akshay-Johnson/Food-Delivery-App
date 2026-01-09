@@ -27,35 +27,18 @@ const app = express();
 
 /* ================= DEBUG ================= */
 app.use((req, res, next) => {
-  console.log(`[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`);
+  console.log(
+    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
+  );
   next();
 });
 
 /* ================= CORS ================= */
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://dinex-frontend.vercel.app",
-];
-
-// IMPORTANT: do NOT use "*" or "/*" anywhere
 app.use(
   cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true); // Postman / server calls
-
-      if (
-        allowedOrigins.includes(origin) ||
-        (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"))
-      ) {
-        return cb(null, true);
-      }
-
-      return cb(new Error("Blocked by CORS"));
-    },
-    credentials: false, // you are using tokens, not cookies
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: ["http://localhost:5173", "https://YOUR-NETLIFY-APP.netlify.app"],
+    credentials: true,
   })
 );
 
