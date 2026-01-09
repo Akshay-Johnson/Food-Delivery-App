@@ -42,16 +42,16 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow server-to-server & tools like Postman (no origin)
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, server-to-server)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
-      } else {
-        console.log("Blocked by CORS:", origin);
-        return callback(new Error("Blocked by CORS"));
       }
+
+      console.log("Blocked by CORS:", origin);
+      return callback(new Error("Blocked by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -59,7 +59,8 @@ app.use(
   })
 );
 
-// CRITICAL — allow preflight requests
+// VERY IMPORTANT — handle preflight properly
+app.use(cors());
 app.options("*", cors());
 
 /* ================= BODY ================= */
