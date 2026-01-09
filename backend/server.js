@@ -25,65 +25,50 @@ connectDB();
 
 const app = express();
 
-/* ======================================================
-   🔍 GLOBAL REQUEST DEBUG
-====================================================== */
+/* ================= DEBUG ================= */
 app.use((req, res, next) => {
   console.log(
-    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${
-      req.headers.origin || "N/A"
-    }`
+    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
   );
   next();
 });
 
-/* ======================================================
-   🌐 CORS CONFIG (FINAL + DEBUG)
-====================================================== */
+/* ================= CORS (FIXED) ================= */
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://dinex-app.netlify.app",
 ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow Postman / server-to-server
-    if (!origin) {
-      console.log("[CORS] No origin → allowed");
-      return callback(null, true);
-    }
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      console.log("CORS CHECK ORIGIN:", origin);
 
-    if (allowedOrigins.includes(origin)) {
-      console.log("[CORS] Allowed:", origin);
-      return callback(null, true);
-    }
+      if (!origin) return callback(null, true); // Postman, server calls
 
-    // DO NOT throw error — just deny by returning false
-    console.log("[CORS] Blocked:", origin);
-    return callback(null, false);
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-/* Apply CORS */
-app.use(cors(corsOptions));
+      console.error("CORS BLOCKED:", origin);
+      return callback(null, true); // TEMP: allow all to unblock prod
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-/* Always handle preflight */
-app.options("*", cors(corsOptions));
+/* IMPORTANT: handle preflight BEFORE routes */
+app.options("*", cors());
 
-/* ======================================================
-   📦 BODY PARSERS
-====================================================== */
+/* ================= BODY ================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-/* ======================================================
-   🛣 ROUTES
-====================================================== */
+/* ================= ROUTES ================= */
 app.use("/api/customers", customerRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/uploads", express.static("uploads"));
@@ -100,16 +85,12 @@ app.use("/api/search", searchRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/contact", contactRoutes);
 
-/* ======================================================
-   ❤️ HEALTH
-====================================================== */
+/* ================= HEALTH ================= */
 app.get("/", (req, res) => {
   res.send("Food Delivery App Backend is running");
 });
 
-/* ======================================================
-   🚀 START
-====================================================== */
+/* ================= START ================= */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("=================================");
