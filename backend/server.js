@@ -4,6 +4,7 @@ dotenv.config();
 import express from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
+import cors from "cors";
 
 import customerRoutes from "./routes/customerRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
@@ -20,67 +21,52 @@ import searchRoutes from "./routes/searchRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 
-// =====================
-// CONNECT DATABASE
-// =====================
 connectDB();
 
 const app = express();
 
-// =====================
-// 🔥 GLOBAL DEBUG LOGGER
-// =====================
+/* ================= DEBUG LOGGER ================= */
 app.use((req, res, next) => {
-  console.log(
-    `[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`
-  );
+  console.log(`[REQ] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin}`);
   next();
 });
 
-// =====================
-// ✅ GLOBAL CORS + PREFLIGHT HANDLER
-// =====================
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+/* ================= CORS ================= */
 
-  const isAllowed =
-    !origin ||
-    origin === "http://localhost:5173" ||
-    origin === "https://dinex-frontend.vercel.app" ||
-    (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend"));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://dinex-frontend.vercel.app",
+];
 
-  if (isAllowed) {
-    if (origin) {
-      res.setHeader("Access-Control-Allow-Origin", origin);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow server-to-server, Postman, curl
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // allow ALL vercel preview deployments of this project
+    if (origin.endsWith(".vercel.app") && origin.includes("dinex-frontend")) {
+      return callback(null, true);
     }
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
-    );
-  }
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
+    console.log("❌ Blocked by CORS:", origin);
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-  next();
-});
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // preflight
 
-// =====================
-// BODY PARSERS
-// =====================
+/* ================= BODY PARSERS ================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// =====================
-// ROUTES
-// =====================
+/* ================= ROUTES ================= */
 app.use("/api/customers", customerRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/uploads", express.static("uploads"));
@@ -97,25 +83,13 @@ app.use("/api/search", searchRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/contact", contactRoutes);
 
-app.use((err, req, res, next) => {
-  console.error("🔥 Unhandled error:", err);
-  res.status(500).json({ message: "Internal server error" });
-});
-
-
-// =====================
-// HEALTH CHECK
-// =====================
+/* ================= HEALTH ================= */
 app.get("/", (req, res) => {
   res.send("Food Delivery App Backend is running");
 });
 
-
-// =====================
-// START SERVER
-// =====================
+/* ================= START ================= */
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log("=================================");
   console.log("🚀 Server started successfully");

@@ -78,50 +78,41 @@ export const registerCustomer = async (req, res) => {
 
 // Login Customer
 export const loginCustomer = async (req, res) => {
-  console.log("🔑 Customer login hit");
-
   try {
+    console.log("🔑 Customer login hit");
     const { email, password } = req.body;
-    console.log("📩 Email:", email);
 
     const user = await Customer.findOne({ email });
-    console.log("👤 User found:", !!user);
-
     if (!user) {
+      console.log("❌ User not found");
       return res.status(404).json({ message: "User not found" });
     }
 
     if (!user.isActive) {
+      console.log("⛔ Account blocked");
       return res.status(403).json({
         message: "Your account has been blocked. Contact support.",
       });
     }
 
-    console.log("🔐 Comparing password…");
-
-    // ⏱ Guard bcrypt so it can never hang
-    const match = await Promise.race([
-      bcrypt.compare(password, user.password),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("bcrypt timeout")), 5000)
-      ),
-    ]);
-
-    console.log("🔐 Password match:", match);
+    console.log("🔍 Comparing password...");
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
+      console.log("❌ Invalid password");
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    console.log("🪙 Generating token…");
+    console.log("✅ Password match");
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "30d",
     });
 
-    console.log("✅ Token generated");
+    console.log("🎟 Token generated");
 
     return res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
       user: {
