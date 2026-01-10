@@ -5,6 +5,7 @@ const api = axios.create({
   withCredentials: false,
 });
 
+/* ================= REQUEST INTERCEPTOR ================= */
 api.interceptors.request.use(
   (config) => {
     const role = localStorage.getItem("role");
@@ -34,40 +35,6 @@ api.interceptors.request.use(
   },
   (error) => {
     console.error("Axios request interceptor error:", error);
-    return Promise.reject(error);
-  }
-);
-
-/* ================= FIX IMAGE URLS GLOBALLY ================= */
-api.interceptors.response.use(
-  (response) => {
-    const API_URL = import.meta.env.VITE_API_URL;
-
-    const fixImages = (data) => {
-      if (!data || typeof data !== "object") return;
-
-      if (Array.isArray(data)) {
-        data.forEach(fixImages);
-        return;
-      }
-
-      for (const key in data) {
-        if (key === "image" && typeof data[key] === "string") {
-          // If already a full URL (Cloudinary or any CDN), keep it
-          if (data[key].startsWith("http")) return;
-
-          // Fallback ONLY for old local images (if any still exist)
-          data[key] = `${API_URL}/uploads/${data[key]}`;
-        } else {
-          fixImages(data[key]);
-        }
-      }
-    };
-
-    fixImages(response.data);
-    return response;
-  },
-  (error) => {
     return Promise.reject(error);
   }
 );
