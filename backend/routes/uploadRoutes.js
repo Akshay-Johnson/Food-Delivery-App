@@ -1,21 +1,7 @@
 import express from "express";
-import multer from "multer";
-import path from "path";
+import upload from "../middlewares/upload.js";
 
 const router = express.Router();
-
-// STORAGE CONFIG
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, "uploads/");
-  },
-
-  filename(req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`);
-  },
-});
-
-const upload = multer({ storage });
 
 // POST /api/upload/profile
 router.post("/profile", upload.single("profileImage"), (req, res) => {
@@ -23,13 +9,10 @@ router.post("/profile", upload.single("profileImage"), (req, res) => {
     return res.status(400).json({ message: "File not uploaded" });
   }
 
-  const fullUrl = `${req.protocol}://${req.get("host")}/uploads/${
-    req.file.filename
-  }`;
-
+  // Cloudinary gives a permanent public URL
   res.json({
     message: "Uploaded successfully",
-    imageUrl: req.file.path,
+    imageUrl: req.file.path,   // <-- CLOUDINARY URL
   });
 });
 
