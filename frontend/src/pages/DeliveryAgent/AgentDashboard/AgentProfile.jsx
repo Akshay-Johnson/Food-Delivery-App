@@ -45,23 +45,23 @@ export default function AgentProfile() {
   };
 
   //image upload
-  // const handleImageUpload = async (e) => {
-  //   const file = e.target.files[0];
-  //   if (!file) return;
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  //   const fd = new FormData();
-  //   fd.append("profileImage", file);
+    const fd = new FormData();
+    fd.append("profileImage", file);
 
-  //   try {
-  //     const res = await api.post("/api/upload/profile", fd, {
-  //       headers: { "Content-Type": "multipart/form-data" },
-  //     });
+    try {
+      const res = await api.post("/api/upload/profile", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-  //     setForm({ ...form, image: res.data.imageUrl });
-  //   } catch (error) {
-  //     console.error("Image upload failed:", error);
-  //   }
-  // };
+      setForm({ ...form, image: res.data.imageUrl });
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -107,8 +107,11 @@ export default function AgentProfile() {
           {/* IMAGE */}
           <div className="flex flex-col items-center">
             <img
-              src={form.image || "/assets/agent.png"}
-              onError={(e) => (e.target.src = "/assets/agent.png")}
+              src={
+                form.image && form.image.trim() !== ""
+                  ? form.image
+                  : "/assets/agent.png"
+              }
               alt="Agent Avatar"
               className="w-40 h-40 object-cover border border-white/30"
             />
