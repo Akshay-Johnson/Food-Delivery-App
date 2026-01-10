@@ -151,10 +151,10 @@ export default function AdminAgents() {
               <img
                 src={
                   !a.image || a.image === "null" || a.image.trim() === ""
-                    ? "/assets/agent.png"
+                    ? "/uploads/agent.png"
                     : a.image
                 }
-                onError={(e) => (e.target.src = "/assets/agent.png")}
+                onError={(e) => (e.target.src = "/uploads/agent.png")}
                 alt={a.name}
                 className="w-full h-32 object-cover rounded-md"
               />
