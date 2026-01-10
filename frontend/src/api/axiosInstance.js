@@ -39,4 +39,37 @@ api.interceptors.request.use(
   }
 );
 
+/* ================= RESPONSE INTERCEPTOR (IMAGE FIX) ================= */
+api.interceptors.response.use(
+  (response) => {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const fixImages = (data) => {
+      if (!data || typeof data !== "object") return;
+
+      if (Array.isArray(data)) {
+        data.forEach(fixImages);
+        return;
+      }
+
+      for (const key in data) {
+        if (key === "image" && typeof data[key] === "string") {
+
+          // If already Cloudinary / CDN URL → keep it
+          if (data[key].startsWith("http")) continue;
+
+          // Only for OLD local images
+          data[key] = `${API_URL}/uploads/${data[key]}`;
+        } else {
+          fixImages(data[key]);
+        }
+      }
+    };
+
+    fixImages(response.data);
+    return response;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default api;
