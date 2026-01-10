@@ -29,7 +29,7 @@ router.post("/profile", upload.single("profileImage"), (req, res) => {
 
   res.json({
     message: "Uploaded successfully",
-    imageUrl: fullUrl,
+    imageUrl: req.file.path,
   });
 });
 
