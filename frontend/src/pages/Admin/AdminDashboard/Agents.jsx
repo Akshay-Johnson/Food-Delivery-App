@@ -149,7 +149,12 @@ export default function AdminAgents() {
               className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col h-70"
             >
               <img
-                src={a.image || "/assets/agent.png"}
+                src={
+                  !a.image || a.image === "null" || a.image.trim() === ""
+                    ? "/assets/agent.png"
+                    : a.image
+                }
+                onError={(e) => (e.target.src = "/assets/agent.png")}
                 alt={a.name}
                 className="w-full h-32 object-cover rounded-md"
               />
