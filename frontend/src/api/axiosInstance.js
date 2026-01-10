@@ -52,11 +52,11 @@ api.interceptors.response.use(
       }
 
       for (const key in data) {
-        if (
-          key === "image" &&
-          typeof data[key] === "string" &&
-          !data[key].startsWith("http")
-        ) {
+        if (key === "image" && typeof data[key] === "string") {
+          // If already a full URL (Cloudinary or any CDN), keep it
+          if (data[key].startsWith("http")) return;
+
+          // Fallback ONLY for old local images (if any still exist)
           data[key] = `${API_URL}/uploads/${data[key]}`;
         } else {
           fixImages(data[key]);
@@ -71,6 +71,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 export default api;
