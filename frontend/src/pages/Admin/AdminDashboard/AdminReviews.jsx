@@ -20,7 +20,7 @@ function Stars({ rating }) {
 }
 
 export default function AdminReviews() {
-  const { restaurantId } = useParams(); // ✅ restaurant from URL
+  const { restaurantId } = useParams();
 
   const [reviews, setReviews] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
@@ -33,7 +33,6 @@ export default function AdminReviews() {
   /* LOAD REVIEWS FOR ONE RESTAURANT */
   const load = async () => {
     const res = await api.get(`/api/reviews/admin/restaurant/${restaurantId}`);
-
     setReviews(res.data.reviews || []);
     setRestaurant(res.data.restaurant || null);
     setPage(1);
@@ -42,6 +41,18 @@ export default function AdminReviews() {
   useEffect(() => {
     load();
   }, [restaurantId]);
+
+  /* ======================
+     AVATAR HELPER
+  ====================== */
+  const getAvatar = (customer) => {
+    if (!customer) return "/assets/defaultprofile.png";
+    return (
+      customer.profileImage ||
+      customer.avatar ||
+      "/assets/defaultprofile.png"
+    );
+  };
 
   /* ACTIONS */
   const toggleHide = async (id, isHidden) => {
@@ -56,7 +67,7 @@ export default function AdminReviews() {
     load();
   };
 
-  /* SEARCH FILTER (within this restaurant) */
+  /* SEARCH FILTER */
   const filteredReviews = reviews.filter((r) => {
     const q = search.toLowerCase();
     return (
@@ -80,7 +91,7 @@ export default function AdminReviews() {
     <div className="text-white max-w-7xl mx-auto px-4">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
-        {/* LEFT: BACK + TITLE + COUNT */}
+        {/* LEFT */}
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => window.history.back()}
@@ -99,7 +110,7 @@ export default function AdminReviews() {
           </p>
         </div>
 
-        {/* RIGHT: SEARCH */}
+        {/* SEARCH */}
         <input
           type="text"
           placeholder="Search by customer or comment..."
@@ -110,13 +121,13 @@ export default function AdminReviews() {
       </div>
 
       {paginatedReviews.length === 0 ? (
-        <p className="text-center text-gray-400 py-2  ">No reviews found.</p>
+        <p className="text-center text-gray-400 py-2">No reviews found.</p>
       ) : (
         <>
           {/* REVIEWS GRID */}
           <div
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5
-                       gap-4  p-4 rounded-xl"
+                       gap-4 p-4 rounded-xl"
             style={{
               backgroundImage: "url('/assets/review-bg.png')",
               backgroundSize: "cover",
@@ -130,19 +141,33 @@ export default function AdminReviews() {
                 flex flex-col gap-2 shadow-lg
                 ${r.isHidden ? "opacity-50" : ""}`}
               >
+                {/* FLAG */}
                 {r.isFlagged && (
                   <span className="text-xs text-red-400 font-semibold">
                     🚩 Reported
                   </span>
                 )}
 
-                <p className="font-semibold text-gray-300 truncate">
-                  {r.customerId?.name || "Unknown"}
-                </p>
+                {/* USER HEADER */}
+                <div className="flex items-center gap-2">
+                  <img
+                    src={getAvatar(r.customerId)}
+                    alt="reviewer"
+                    className="w-9 h-9 rounded-full object-cover border border-white/30"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/assets/defaultprofile.png";
+                    }}
+                  />
+
+                  <p className="font-semibold text-gray-300 truncate">
+                    {r.customerId?.name || "Unknown"}
+                  </p>
+                </div>
 
                 <Stars rating={r.rating} />
 
-                {/* COMMENT — compact */}
+                {/* COMMENT */}
                 <p className="text-gray-200 text-sm line-clamp-3">
                   {r.comment}
                 </p>
