@@ -263,8 +263,17 @@ export default function RestaurantAgents() {
                 </div>
 
                 <img
-                  src={agent.image?.trim() ? agent.image : "/assets/agent.png"}
-                  className="w-12 h-12 object-cover border border-white/20 rounded"
+                  src={
+                    agent.image && agent.image.startsWith("http")
+                      ? agent.image
+                      : "/assets/agent.png"
+                  }
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/assets/agent.png";
+                  }}
+                  alt={agent.name}
+                  className="w-full h-32 object-cover rounded-md"
                 />
 
                 <div className="min-w-0">
