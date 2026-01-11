@@ -56,13 +56,14 @@ export default function CustomerPayment() {
     }
 
     try {
+      console.log("Razorpay key from backend:", data.key);
       // 1️⃣ Create Razorpay order (DO NOT multiply by 100 here)
       const { data } = await api.post("/api/payments/create-order", {
         amount: cart.totalPrice,
       });
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: data.key,
         amount: data.amount,
         currency: data.currency,
         order_id: data.id,

@@ -16,22 +16,25 @@ export const createPaymentOrder = async (req, res) => {
     const { amount } = req.body;
 
     const options = {
-      amount: amount * 100,
+      amount: amount * 100, // Razorpay uses paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
 
     const order = await razorpay.orders.create(options);
 
-    res.json({
+    res.status(200).json({
       id: order.id,
       currency: order.currency,
       amount: order.amount,
+      key: process.env.RAZORPAY_KEY_ID, 
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error creating payment order", error: error.message });
+    console.error("Create order error:", error);
+    res.status(500).json({
+      message: "Error creating payment order",
+      error: error.message,
+    });
   }
 };
 
