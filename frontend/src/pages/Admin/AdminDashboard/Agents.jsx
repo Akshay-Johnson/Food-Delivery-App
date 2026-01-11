@@ -8,8 +8,7 @@ export default function AdminAgents() {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
 
-  // Always use FRONTEND asset for fallback
-  const FRONTEND_ASSET = `${window.location.origin}/assets/agent.png`;
+  const FRONTEND_ORIGIN = window.location.origin; // https://dinex-frontend.vercel.app
 
   // Modal
   const [activeAgent, setActiveAgent] = useState(null);
@@ -21,11 +20,8 @@ export default function AdminAgents() {
   /* ================= LOAD AGENTS ================= */
   const load = async () => {
     try {
-      console.log("DEBUG → Fetching agents...");
       const res = await api.get("/api/admins/agents");
-
-      console.log("DEBUG → Raw agents response:", res.data);
-
+      console.log("[DEBUG] Agents API response:", res.data);
       setList(res.data || []);
     } catch (err) {
       console.error("Failed to load agents", err);
@@ -40,12 +36,6 @@ export default function AdminAgents() {
   const toggleStatus = async (id, approvalStatus) => {
     try {
       const nextStatus = approvalStatus === "approved" ? "blocked" : "approved";
-
-      console.log("DEBUG → Toggling status:", {
-        id,
-        from: approvalStatus,
-        to: nextStatus,
-      });
 
       await api.put(`/api/admins/agent/status/${id}`, {
         approvalStatus: nextStatus,
@@ -62,8 +52,6 @@ export default function AdminAgents() {
 
   const unflagAgent = async (agentId, restaurantId) => {
     try {
-      console.log("DEBUG → Unflagging:", { agentId, restaurantId });
-
       await api.put(`/api/admins/agents/${agentId}/unflag/${restaurantId}`);
 
       setToast({
@@ -112,6 +100,20 @@ export default function AdminAgents() {
     (a) => a.approvalStatus === "blocked"
   ).length;
 
+  /* ================= IMAGE RESOLVER ================= */
+  const resolveImage = (img) => {
+    console.log("[DEBUG] Resolving image:", img);
+
+    // 1. Cloudinary / CDN
+    if (img && img.startsWith("http")) {
+      return img;
+    }
+
+    // 2. DB has /assets/agent.png or empty or null
+    // Always load from FRONTEND public folder
+    return `${FRONTEND_ORIGIN}/assets/agent.png`;
+  };
+
   return (
     <div className="text-white relative">
       {/* HEADER */}
@@ -157,18 +159,14 @@ export default function AdminAgents() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {paginatedAgents.map((a) => {
           const flagCount = a.flaggedByRestaurants?.length || 0;
+          const finalImage = resolveImage(a.image);
 
-          // DEBUG IMAGE SOURCE DECISION
-          const finalImage =
-            a.image && a.image.startsWith("http")
-              ? a.image
-              : FRONTEND_ASSET;
-
-          console.log("DEBUG → Agent image decision:", {
-            agent: a.name,
-            rawImage: a.image,
-            finalImage,
-          });
+          console.log(
+            `[DEBUG] Agent ${a.name} | raw image:`,
+            a.image,
+            "| final src:",
+            finalImage
+          );
 
           return (
             <div
@@ -178,12 +176,12 @@ export default function AdminAgents() {
               <img
                 src={finalImage}
                 onError={(e) => {
-                  console.error("IMAGE LOAD FAILED:", {
-                    agent: a.name,
-                    attempted: e.target.src,
-                  });
+                  console.error(
+                    "[DEBUG] Image load failed, forcing fallback:",
+                    e.target.src
+                  );
                   e.target.onerror = null;
-                  e.target.src = FRONTEND_ASSET;
+                  e.target.src = `${FRONTEND_ORIGIN}/assets/agent.png`;
                 }}
                 alt={a.name}
                 className="w-full h-32 object-cover rounded-md"

@@ -55,13 +55,14 @@ api.interceptors.response.use(
 
       for (const key in data) {
         if (key === "image" && typeof data[key] === "string") {
-          // If already Cloudinary / CDN URL → keep it
+          // Cloudinary or full URL → keep
           if (data[key].startsWith("http")) continue;
 
-          // Only for OLD local images
+          // Frontend asset → keep
+          if (data[key].startsWith("/assets/")) continue;
+
+          // OLD backend uploads only
           data[key] = `${API_URL}/uploads/${data[key]}`;
-        } else {
-          fixImages(data[key]);
         }
       }
     };
