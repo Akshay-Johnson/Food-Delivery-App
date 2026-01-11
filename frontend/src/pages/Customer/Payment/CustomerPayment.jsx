@@ -9,6 +9,8 @@ export default function CustomerPayment() {
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
+  console.log("Using Razorpay key:", options.key);
+
   /* ================= LOAD CART ================= */
   useEffect(() => {
     loadCart();
@@ -72,35 +74,17 @@ export default function CustomerPayment() {
 
     try {
       /* ================= 1️⃣ CREATE RAZORPAY ORDER ================= */
-      const { data } = await api.post("/api/payments/create-order", {
+      const { data: rpOrder } = await api.post("/api/payments/create-order", {
         amount: cart.totalPrice,
       });
 
-      if (!data?.key || !data?.id) {
-        console.error("❌ Invalid Razorpay response:", data);
-        setToast({ type: "error", message: "Payment configuration error" });
-        return;
-      }
-
-      console.log("✅ Razorpay key:", data.key);
-
-      console.log("🔴 FULL RAZORPAY OPTIONS PREVIEW:", {
-        key: data.key,
-        amount: data.amount,
-        currency: data.currency,
-        order_id: data.id,
-      });
-
-      /* ================= 2️⃣ RAZORPAY OPTIONS ================= */
       const options = {
-        key: String(data.key), // force string
-        amount: Number(data.amount),
-        currency: data.currency,
-        order_id: data.id,
-
+        key: rpOrder.key, // ✅ FIXED
+        amount: rpOrder.amount,
+        currency: rpOrder.currency,
         name: "DineX",
         description: "Order Payment",
-
+        order_id: rpOrder.id,
         handler: async (response) => {
           try {
             await api.post("/api/payments/verify", {
@@ -120,15 +104,15 @@ export default function CustomerPayment() {
               type: "success",
               message: "Order placed successfully!",
             });
-            setTimeout(() => navigate("/customer/orders"), 1500);
+            setTimeout(() => navigate("/customer/orders"), 3000);
           } catch (err) {
-            console.error("Order save failed:", err);
             setToast({
               type: "error",
-              message: "Payment success, order failed",
+              message: "Payment verification failed.",
             });
           }
         },
+        theme: { color: "#22c55e" },
       };
 
       console.log("🟡 Final Razorpay options:", options);

@@ -10,6 +10,7 @@ export default function CustomerCheckout() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [toast, setToast] = useState(null);
+  console.log("Using Razorpay key:", options.key);
 
   const navigate = useNavigate();
 
@@ -94,7 +95,7 @@ export default function CustomerCheckout() {
         });
 
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          key: rpOrder.key,
           amount: rpOrder.amount,
           currency: rpOrder.currency,
           name: "DineX",
