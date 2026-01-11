@@ -9,7 +9,7 @@ export default function CustomerPayment() {
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
-  //load cart
+  /* ================= LOAD CART ================= */
   useEffect(() => {
     loadCart();
   }, []);
@@ -25,7 +25,7 @@ export default function CustomerPayment() {
     }
   };
 
-  //load razorpay script
+  /* ================= LOAD RAZORPAY SCRIPT ================= */
   const loadRazorpay = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -42,10 +42,26 @@ export default function CustomerPayment() {
     });
   };
 
-  //start payment
+  /* ================= START PAYMENT ================= */
   const handlePayment = async () => {
-    if (!cart || !cart.items.length) {
+    if (!cart || !cart.items?.length) {
       setToast({ type: "error", message: "Your cart is empty!" });
+      return;
+    }
+
+    if (!cart.addressId) {
+      setToast({ type: "error", message: "Please select a delivery address" });
+      return;
+    }
+
+    const restaurantId =
+      cart.restaurantId ||
+      cart.restaurant?._id ||
+      cart.items?.[0]?.restaurantId;
+
+    if (!restaurantId) {
+      console.error("Cart object:", cart);
+      setToast({ type: "error", message: "Restaurant not found in cart" });
       return;
     }
 
@@ -56,12 +72,20 @@ export default function CustomerPayment() {
     }
 
     try {
-      console.log("Razorpay key from backend:", data.key);
-      // 1️⃣ Create Razorpay order (DO NOT multiply by 100 here)
+      /* 1️⃣ CREATE RAZORPAY ORDER */
       const { data } = await api.post("/api/payments/create-order", {
-        amount: cart.totalPrice,
+        amount: cart.totalPrice, // backend will convert to paise
       });
 
+      if (!data?.key) {
+        console.error("Backend did not send Razorpay key:", data);
+        setToast({ type: "error", message: "Payment config error" });
+        return;
+      }
+
+      console.log("Razorpay key from backend:", data.key);
+
+      /* 2️⃣ RAZORPAY OPTIONS */
       const options = {
         key: data.key,
         amount: data.amount,
@@ -73,18 +97,17 @@ export default function CustomerPayment() {
 
         handler: async (response) => {
           try {
-            // 1. Verify Payment
+            /* 3️⃣ VERIFY PAYMENT */
             await api.post("/api/payments/verify", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
 
-            // 2. Create the actual order
+            /* 4️⃣ CREATE FINAL ORDER */
             await api.post("/api/orders/create", {
-              restaurantId: cart.restaurantId, // Using cart data
-              addressId:
-                cart.addressId || "PASTE_A_VALID_ADDRESS_ID_HERE_FOR_TESTING",
+              restaurantId,
+              addressId: cart.addressId,
               paymentMethod: "ONLINE",
               paymentId: response.razorpay_payment_id,
             });
@@ -93,17 +116,18 @@ export default function CustomerPayment() {
               type: "success",
               message: "Order placed successfully!",
             });
+
             setTimeout(() => {
               setToast(null);
               navigate("/customer/orders");
-            }, 3000);
+            }, 2500);
           } catch (error) {
-            console.error("Final Order Error:", error.response?.data);
+            console.error("Final Order Error:", error.response?.data || error);
             setToast({
               type: "error",
               message:
                 error.response?.data?.message ||
-                "Payment worked, but order failed to save.",
+                "Payment succeeded, but order failed to save.",
             });
           }
         },
@@ -111,6 +135,7 @@ export default function CustomerPayment() {
         theme: { color: "#22c55e" },
       };
 
+      /* 5️⃣ OPEN RAZORPAY */
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
@@ -131,6 +156,7 @@ export default function CustomerPayment() {
           onClose={() => setToast(null)}
         />
       )}
+
       <h1 className="text-3xl font-bold mb-6">Checkout & Payment</h1>
 
       <div className="bg-white/10 p-6 rounded-xl border border-white/20 backdrop-blur-lg max-w-lg mx-auto">
