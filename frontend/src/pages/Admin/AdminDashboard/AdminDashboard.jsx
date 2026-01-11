@@ -31,7 +31,7 @@ import {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, loading } = useAuth();
+  // const { role, loading } = useAuth();
 
   const token = localStorage.getItem("adminToken");
 
@@ -40,9 +40,9 @@ export default function AdminDashboard() {
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (!loading && role !== "admin") {
-    return <Navigate to="/admin/login" replace />;
-  }
+  // if (!loading && role !== "admin") {
+  //   return <Navigate to="/admin/login" replace />;
+  // }
 
   const isOverview = location.pathname === "/admin/dashboard";
 
@@ -73,10 +73,7 @@ export default function AdminDashboard() {
       const agents = a.data || [];
       const orders = o.data || [];
 
-      const revenue = orders.reduce(
-        (sum, o) => sum + (o.totalPrice || 0),
-        0
-      );
+      const revenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
 
       setStats({
         restaurants: restaurants.length,
@@ -123,7 +120,7 @@ export default function AdminDashboard() {
   const logout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("role");
-    window.location.href = "/admin/login";
+    window.location.replace("/admin/login");
   };
 
   const formatCurrency = (value) =>
@@ -208,11 +205,36 @@ export default function AdminDashboard() {
               <>
                 {/* STATS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                  <StatCard label="Restaurants" value={stats.restaurants} icon={Building2} color="text-yellow-400" />
-                  <StatCard label="Customers" value={stats.customers} icon={Users} color="text-blue-400" />
-                  <StatCard label="Agents" value={stats.agents} icon={Truck} color="text-purple-400" />
-                  <StatCard label="Orders" value={stats.orders} icon={ScrollText} color="text-green-400" />
-                  <StatCard label="Revenue" value={formatCurrency(stats.revenue)} icon={BarChart3} color="text-pink-400" />
+                  <StatCard
+                    label="Restaurants"
+                    value={stats.restaurants}
+                    icon={Building2}
+                    color="text-yellow-400"
+                  />
+                  <StatCard
+                    label="Customers"
+                    value={stats.customers}
+                    icon={Users}
+                    color="text-blue-400"
+                  />
+                  <StatCard
+                    label="Agents"
+                    value={stats.agents}
+                    icon={Truck}
+                    color="text-purple-400"
+                  />
+                  <StatCard
+                    label="Orders"
+                    value={stats.orders}
+                    icon={ScrollText}
+                    color="text-green-400"
+                  />
+                  <StatCard
+                    label="Revenue"
+                    value={formatCurrency(stats.revenue)}
+                    icon={BarChart3}
+                    color="text-pink-400"
+                  />
                 </div>
 
                 {/* TOP RESTAURANTS */}
@@ -324,9 +346,7 @@ function StatCard({ label, value, icon: Icon, color }) {
     <div className="bg-black/70 border border-white/20 rounded-xl p-5 flex items-center justify-between">
       <div>
         <p className="text-gray-400 text-sm">{label}</p>
-        <p className={`text-xl md:text-2xl font-bold mt-1 ${color}`}>
-          {value}
-        </p>
+        <p className={`text-xl md:text-2xl font-bold mt-1 ${color}`}>{value}</p>
       </div>
 
       <Icon size={26} className={color} />
