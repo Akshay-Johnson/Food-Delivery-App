@@ -55,6 +55,9 @@ import Home from "./pages/Home/Home.jsx";
 
 // ================= ROUTE GUARD =================
 import ProtectedCustomerRoute from "./routes/ProtectedCustomerRoute";
+import ProtectedAdminRoute from "./routes/ProtectedAdminRoute";
+import ProtectedRestaurantRoute from "./routes/ProtectedRestaurantRoute";
+import ProtectedAgentRoute from "./routes/ProtectedAgentRoute";
 
 export default function App() {
   useEffect(() => {
@@ -186,7 +189,14 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
 
-        <Route path="/admin/dashboard" element={<AdminDashboard />}>
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <AdminDashboard />
+            </ProtectedAdminRoute>
+          }
+        >
           <Route path="restaurants" element={<Restaurants />} />
           <Route path="customers" element={<Customers />} />
           <Route path="agents" element={<AdminAgents />} />
@@ -202,7 +212,14 @@ export default function App() {
         <Route path="/restaurant/login" element={<RestaurantLogin />} />
         <Route path="/restaurant/register" element={<RestaurantRegister />} />
 
-        <Route path="/restaurant/dashboard" element={<RestaurantDashboard />}>
+        <Route
+          path="/restaurant/dashboard"
+          element={
+            <ProtectedRestaurantRoute>
+              <RestaurantDashboard />
+            </ProtectedRestaurantRoute>
+          }
+        >
           <Route path="menu" element={<MenuManagement />} />
           <Route path="menu/add" element={<AddMenuItem />} />
           <Route path="menu/edit/:id" element={<EditMenuItem />} />
@@ -217,7 +234,14 @@ export default function App() {
         <Route path="/agent/login" element={<AgentLogin />} />
         <Route path="/agent/register" element={<AgentRegister />} />
 
-        <Route path="/agent/dashboard" element={<AgentDashboard />}>
+        <Route
+          path="/agent/dashboard"
+          element={
+            <ProtectedAgentRoute>
+              <AgentDashboard />
+            </ProtectedAgentRoute>
+          }
+        >
           <Route path="orders" element={<AgentOrders />} />
           <Route path="profile" element={<AgentProfile />} />
         </Route>
