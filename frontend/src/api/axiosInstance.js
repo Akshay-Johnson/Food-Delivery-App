@@ -39,8 +39,7 @@ api.interceptors.request.use(
   }
 );
 
-/* ================= RESPONSE INTERCEPTOR (IMAGE FIX) ================= */
-/* ================= RESPONSE INTERCEPTOR (IMAGE FIX) ================= */
+/* ================= RESPONSE INTERCEPTOR ================= */
 api.interceptors.response.use(
   (response) => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -61,7 +60,7 @@ api.interceptors.response.use(
           // Frontend asset → keep
           if (data[key].startsWith("/assets/")) continue;
 
-          // OLD backend uploads only
+          // Backend uploads
           data[key] = `${API_URL}/uploads/${data[key]}`;
         }
       }
@@ -70,7 +69,33 @@ api.interceptors.response.use(
     fixImages(response.data);
     return response;
   },
-  (error) => Promise.reject(error)
+
+  // 🔴 THIS IS THE IMPORTANT PART YOU ADD
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired / invalid → force logout
+      localStorage.removeItem("customerToken");
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("restaurantToken");
+      localStorage.removeItem("agentToken");
+      localStorage.removeItem("role");
+
+      // Redirect to correct login page
+      const path = window.location.pathname;
+
+      if (path.startsWith("/admin")) {
+        window.location.href = "/admin/login";
+      } else if (path.startsWith("/restaurant")) {
+        window.location.href = "/restaurant/login";
+      } else if (path.startsWith("/agent")) {
+        window.location.href = "/agent/login";
+      } else {
+        window.location.href = "/customer/login";
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export default api;
