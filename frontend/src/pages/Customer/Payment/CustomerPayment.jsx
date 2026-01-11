@@ -20,6 +20,7 @@ export default function CustomerPayment() {
       setCart(res.data);
     } catch (e) {
       console.error("Failed to load cart:", e);
+      setToast({ type: "error", message: "Failed to load cart" });
     } finally {
       setLoading(false);
     }
@@ -28,10 +29,7 @@ export default function CustomerPayment() {
   /* ================= LOAD RAZORPAY SCRIPT ================= */
   const loadRazorpay = () => {
     return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
+      if (window.Razorpay) return resolve(true);
 
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -44,6 +42,7 @@ export default function CustomerPayment() {
 
   /* ================= START PAYMENT ================= */
   const handlePayment = async () => {
+    /* ---- BASIC VALIDATIONS ---- */
     if (!cart || !cart.items?.length) {
       setToast({ type: "error", message: "Your cart is empty!" });
       return;
@@ -60,7 +59,7 @@ export default function CustomerPayment() {
       cart.items?.[0]?.restaurantId;
 
     if (!restaurantId) {
-      console.error("Cart object:", cart);
+      console.error("❌ Restaurant missing in cart:", cart);
       setToast({ type: "error", message: "Restaurant not found in cart" });
       return;
     }
@@ -72,20 +71,20 @@ export default function CustomerPayment() {
     }
 
     try {
-      /* 1️⃣ CREATE RAZORPAY ORDER */
+      /* ================= 1️⃣ CREATE RAZORPAY ORDER ================= */
       const { data } = await api.post("/api/payments/create-order", {
-        amount: cart.totalPrice, // backend will convert to paise
+        amount: cart.totalPrice,
       });
 
-      if (!data?.key) {
-        console.error("Backend did not send Razorpay key:", data);
-        setToast({ type: "error", message: "Payment config error" });
+      if (!data?.key || !data?.id) {
+        console.error("❌ Invalid Razorpay response:", data);
+        setToast({ type: "error", message: "Payment configuration error" });
         return;
       }
 
-      console.log("Razorpay key from backend:", data.key);
+      console.log("✅ Razorpay key:", data.key);
 
-      /* 2️⃣ RAZORPAY OPTIONS */
+      /* ================= 2️⃣ RAZORPAY OPTIONS ================= */
       const options = {
         key: data.key,
         amount: data.amount,
@@ -97,14 +96,14 @@ export default function CustomerPayment() {
 
         handler: async (response) => {
           try {
-            /* 3️⃣ VERIFY PAYMENT */
+            /* ================= 3️⃣ VERIFY PAYMENT ================= */
             await api.post("/api/payments/verify", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
 
-            /* 4️⃣ CREATE FINAL ORDER */
+            /* ================= 4️⃣ CREATE FINAL ORDER ================= */
             await api.post("/api/orders/create", {
               restaurantId,
               addressId: cart.addressId,
@@ -120,9 +119,9 @@ export default function CustomerPayment() {
             setTimeout(() => {
               setToast(null);
               navigate("/customer/orders");
-            }, 2500);
+            }, 2000);
           } catch (error) {
-            console.error("Final Order Error:", error.response?.data || error);
+            console.error("❌ Final Order Error:", error.response?.data || error);
             setToast({
               type: "error",
               message:
@@ -135,17 +134,18 @@ export default function CustomerPayment() {
         theme: { color: "#22c55e" },
       };
 
-      /* 5️⃣ OPEN RAZORPAY */
+      /* ================= 5️⃣ OPEN RAZORPAY ================= */
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
-      console.error("Payment error:", error);
+      console.error("❌ Payment error:", error);
       setToast({ type: "error", message: "Payment failed" });
     }
   };
 
-  if (loading || !cart)
+  if (loading || !cart) {
     return <p className="text-white p-6">Loading Payment...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-black/90 text-white p-6">
