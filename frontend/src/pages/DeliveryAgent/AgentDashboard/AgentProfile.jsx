@@ -106,6 +106,7 @@ export default function AgentProfile() {
         <form onSubmit={submit} className="space-y-4">
           {/* IMAGE */}
           <div className="flex flex-col items-center">
+            
             <img
               src={
                 form.image && form.image.startsWith("http")

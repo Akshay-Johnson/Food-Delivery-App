@@ -192,11 +192,7 @@ export const updateAgentProfile = async (req, res) => {
 
     console.log("Incoming image:", req.body.image);
 
-    if (
-      req.body.image &&
-      req.body.image !== "null" &&
-      req.body.image.trim() !== ""
-    ) {
+    if (req.body.image && req.body.image.startsWith("http")) {
       agent.image = req.body.image;
     }
 

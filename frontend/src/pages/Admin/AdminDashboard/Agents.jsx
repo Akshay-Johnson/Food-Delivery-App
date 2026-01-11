@@ -152,10 +152,11 @@ export default function AdminAgents() {
               <img
                 src={
                   a.image && a.image.startsWith("http")
-                    ? a.image
-                    : "/assets/agent.png"
+                    ? a.image // Cloudinary
+                    : "/assets/agent.png" // frontend fallback
                 }
                 onError={(e) => {
+                  e.target.onerror = null;
                   e.target.src = "/assets/agent.png";
                 }}
                 alt={a.name}
