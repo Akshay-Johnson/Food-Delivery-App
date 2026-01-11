@@ -7,13 +7,7 @@ export default function AdminAgents() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
-
-  // IMPORTANT: frontend asset base
-  const FRONTEND_BASE = window.location.origin;
-  const DEFAULT_AGENT_IMG = `${FRONTEND_BASE}/assets/agent.png`;
-
-  console.log("[DEBUG] Frontend base:", FRONTEND_BASE);
-  console.log("[DEBUG] Default agent image:", DEFAULT_AGENT_IMG);
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   // Modal
   const [activeAgent, setActiveAgent] = useState(null);
@@ -26,10 +20,9 @@ export default function AdminAgents() {
   const load = async () => {
     try {
       const res = await api.get("/api/admins/agents");
-      console.log("[DEBUG] Agents API response:", res.data);
       setList(res.data || []);
     } catch (err) {
-      console.error("[ERROR] Failed to load agents:", err);
+      console.error("Failed to load agents", err);
     }
   };
 
@@ -37,33 +30,15 @@ export default function AdminAgents() {
     load();
   }, []);
 
-  /* ================= IMAGE RESOLVER ================= */
-  const resolveImage = (img) => {
-    console.log("[DEBUG] Resolving image:", img);
-
-    if (!img) {
-      console.log("[DEBUG] No image → using default");
-      return DEFAULT_AGENT_IMG;
-    }
-
-    // Cloudinary or CDN image
-    if (img.startsWith("http")) {
-      console.log("[DEBUG] Using remote image:", img);
-      return img;
-    }
-
-    // Any old / broken backend path → force frontend asset
-    console.warn("[WARN] Invalid image path, forcing default:", img);
-    return DEFAULT_AGENT_IMG;
-  };
-
   /* ================= ACTIONS ================= */
   const toggleStatus = async (id, approvalStatus) => {
     try {
       const nextStatus = approvalStatus === "approved" ? "blocked" : "approved";
+
       await api.put(`/api/admins/agent/status/${id}`, {
         approvalStatus: nextStatus,
       });
+
       load();
     } catch (err) {
       setToast({
@@ -76,11 +51,19 @@ export default function AdminAgents() {
   const unflagAgent = async (agentId, restaurantId) => {
     try {
       await api.put(`/api/admins/agents/${agentId}/unflag/${restaurantId}`);
-      setToast({ type: "success", message: "Flag removed successfully" });
+
+      setToast({
+        type: "success",
+        message: "Flag removed successfully",
+      });
+
       load();
       setActiveAgent(null);
     } catch {
-      setToast({ type: "error", message: "Failed to remove flag" });
+      setToast({
+        type: "error",
+        message: "Failed to remove flag",
+      });
     }
   };
 
@@ -124,6 +107,7 @@ export default function AdminAgents() {
             Delivery Agents
           </h2>
 
+          {/* SEARCH */}
           <input
             type="text"
             placeholder="Search by name, email, or status..."
@@ -133,6 +117,7 @@ export default function AdminAgents() {
           />
         </div>
 
+        {/* COUNTS */}
         <div className="flex gap-2 text-sm">
           <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400">
             Approved: {approvedCount}
@@ -158,7 +143,6 @@ export default function AdminAgents() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {paginatedAgents.map((a) => {
           const flagCount = a.flaggedByRestaurants?.length || 0;
-          const imgSrc = resolveImage(a.image);
 
           return (
             <div
@@ -166,21 +150,21 @@ export default function AdminAgents() {
               className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col h-70"
             >
               <img
-                src={imgSrc}
-                alt={a.name}
-                className="w-full h-32 object-cover rounded-md"
-                onLoad={() =>
-                  console.log("[DEBUG] Image loaded:", imgSrc)
+                src={
+                  a.image && a.image.startsWith("http")
+                    ? a.image // Cloudinary image
+                    : "/assets/agent.png" // Frontend fallback
                 }
                 onError={(e) => {
-                  console.error("[ERROR] Image failed:", imgSrc);
                   e.target.onerror = null;
-                  e.target.src = DEFAULT_AGENT_IMG;
+                  e.target.src = "/assets/agent.png";
                 }}
+                alt={a.name}
               />
 
               <div className="mt-2 flex justify-between items-center">
                 <h3 className="text-lg font-semibold truncate">{a.name}</h3>
+
                 <span
                   className={`px-3 py-1 text-xs rounded-full capitalize ${
                     a.approvalStatus === "approved"
@@ -223,7 +207,42 @@ export default function AdminAgents() {
         })}
       </div>
 
-      {/* FLAG MODAL */}
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-10">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded ${
+                page === i + 1
+                  ? "bg-green-600"
+                  : "bg-white/20 hover:bg-white/30"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1 rounded bg-blue-600 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* FLAG REASON MODAL */}
       {activeAgent && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-black border border-white/20 rounded-xl p-6 w-full max-w-lg">
