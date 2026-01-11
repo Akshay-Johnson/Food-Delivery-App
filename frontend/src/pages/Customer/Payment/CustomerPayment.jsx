@@ -84,6 +84,13 @@ export default function CustomerPayment() {
 
       console.log("✅ Razorpay key:", data.key);
 
+      console.log("🔴 FULL RAZORPAY OPTIONS PREVIEW:", {
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.id,
+      });
+
       /* ================= 2️⃣ RAZORPAY OPTIONS ================= */
       const options = {
         key: data.key,
@@ -121,7 +128,10 @@ export default function CustomerPayment() {
               navigate("/customer/orders");
             }, 2000);
           } catch (error) {
-            console.error("❌ Final Order Error:", error.response?.data || error);
+            console.error(
+              "❌ Final Order Error:",
+              error.response?.data || error
+            );
             setToast({
               type: "error",
               message:
@@ -135,7 +145,14 @@ export default function CustomerPayment() {
       };
 
       /* ================= 5️⃣ OPEN RAZORPAY ================= */
+      if (!options.key) {
+        console.error("❌ Razorpay init blocked — key missing", options);
+        setToast({ type: "error", message: "Payment configuration error" });
+        return;
+      }
+
       const razorpay = new window.Razorpay(options);
+
       razorpay.open();
     } catch (error) {
       console.error("❌ Payment error:", error);
