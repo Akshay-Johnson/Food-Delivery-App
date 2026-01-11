@@ -20,6 +20,10 @@ const razorpay = new Razorpay({
 export const createPaymentOrder = async (req, res) => {
   console.log("➡️  [PAYMENT] createPaymentOrder called");
   console.log("📦 Request body:", req.body);
+  console.log(
+    "🔴 RAZORPAY_KEY_ID sent to frontend:",
+    process.env.RAZORPAY_KEY_ID
+  );
 
   try {
     const { amount } = req.body;
