@@ -13,8 +13,16 @@ import { sendPushNotification } from "../utils/sendpush.js";
 // create new order
 export const createOrder = async (req, res) => {
   try {
+    console.log("➡️ [ORDER] createOrder called");
+    console.log("User:", req.user);
+    console.log("Body:", req.body);
+
     const customerId = req.user.id;
     const { addressId, paymentMethod = "COD", paymentId } = req.body;
+
+    if (!addressId) {
+      return res.status(400).json({ message: "Delivery address required" });
+    }
 
     const cart = await Cart.findOne({ customerId });
 
@@ -84,23 +92,35 @@ export const createOrder = async (req, res) => {
     ======================= */
     const customer = await Customer.findById(customerId);
 
-    await sendOrderPlacedEmail({
-      to: customer.email,
-      customerName: customer.name,
-      orderId: order._id,
-      totalAmount: totalPayable,
-    });
+    // EMAIL (non-blocking)
+    if (customer?.email) {
+      try {
+        await sendOrderPlacedEmail({
+          to: customer.email,
+          customerName: customer.name,
+          orderId: order._id,
+          totalAmount: totalPayable,
+        });
+      } catch (err) {
+        console.error("⚠️ Email failed (ignored):", err.message);
+      }
+    }
 
-    if (customer.fcmToken) {
-      await sendPushNotification({
-        token: customer.fcmToken,
-        title: "Order Placed",
-        body: `Your order has been placed. Total ₹${totalPayable}`,
-        data: {
-          orderId: order._id.toString(),
-          status: "pending",
-        },
-      });
+    // PUSH (non-blocking)
+    if (customer?.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Placed",
+          body: `Your order has been placed. Total ₹${totalPayable}`,
+          data: {
+            orderId: order._id.toString(),
+            status: "pending",
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
     }
 
     res.status(201).json({
@@ -108,8 +128,14 @@ export const createOrder = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("CREATE ORDER ERROR:", error);
-    res.status(500).json({ message: "Error creating order", error });
+    console.error("🔥 CREATE ORDER FAILED");
+    console.error("Message:", error.message);
+    console.error("Full error:", error);
+
+    res.status(500).json({
+      message: "Error creating order",
+      error: error.message,
+    });
   }
 };
 
@@ -233,27 +259,36 @@ export const acceptOrder = async (req, res) => {
     order.status = "accepted";
     await order.save();
 
-    //send order accepted email
     const customer = await Customer.findById(order.customerId);
-    await sendOrderStatusUpdateEmail({
-      to: customer.email,
-      customerName: customer.name,
-      orderId: order._id,
-      status: order.status,
-    });
 
-    //send push notification
-    if (customer.fcmToken) {
-      await sendPushNotification({
-        token: customer.fcmToken,
-        title: "Order Accepted",
-        body: `Your order ${order._id} has been accepted by the restaurant.`,
-        data: {
-          orderId: order._id.toString(),
-          status: "accepted",
-          restaurantId: restaurantId.toString(),
-        },
+    // EMAIL (SAFE)
+    try {
+      await sendOrderStatusUpdateEmail({
+        to: customer.email,
+        customerName: customer.name,
+        orderId: order._id,
+        status: order.status,
       });
+    } catch (err) {
+      console.error("⚠️ Email failed (ignored):", err.message);
+    }
+
+    // PUSH (SAFE)
+    if (customer.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Accepted",
+          body: `Your order ${order._id} has been accepted by the restaurant.`,
+          data: {
+            orderId: order._id.toString(),
+            status: "accepted",
+            restaurantId: restaurantId.toString(),
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
     }
 
     res.status(200).json({
@@ -263,12 +298,13 @@ export const acceptOrder = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error accepting order",
-      error,
+      error: error.message,
     });
   }
 };
 
-//reject order (for restaurant owners)
+/* ================= REJECT ORDER ================= */
+
 export const rejectOrder = async (req, res) => {
   try {
     const restaurantId = req.user.id;
@@ -283,33 +319,47 @@ export const rejectOrder = async (req, res) => {
     order.status = "rejected";
     await order.save();
 
-    //send order accepted email
     const customer = await Customer.findById(order.customerId);
 
-    await sendPushNotification({
-      token: customer.fcmToken,
-      title: "Order Rejected",
-      body: `Your order ${order._id} has been rejected by the restaurant.`,
-      data: {
-        orderId: order._id.toString(),
-        status: "rejected",
-      },
-    });
+    // PUSH (SAFE)
+    if (customer.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Rejected",
+          body: `Your order ${order._id} has been rejected by the restaurant.`,
+          data: {
+            orderId: order._id.toString(),
+            status: "rejected",
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
+    }
 
-    await sendOrderStatusUpdateEmail({
-      to: customer.email,
-      customerName: customer.name,
-      orderId: order._id,
-      status: order.status,
-    });
+    // EMAIL (SAFE)
+    try {
+      await sendOrderStatusUpdateEmail({
+        to: customer.email,
+        customerName: customer.name,
+        orderId: order._id,
+        status: order.status,
+      });
+    } catch (err) {
+      console.error("⚠️ Email failed (ignored):", err.message);
+    }
 
     res.status(200).json({ message: "Order rejected", order });
   } catch (error) {
-    res.status(500).json({ message: "Error rejecting order", error });
+    res
+      .status(500)
+      .json({ message: "Error rejecting order", error: error.message });
   }
 };
 
-//mark as preparing (for restaurant owners)
+/* ================= MARK PREPARING ================= */
+
 export const markPreparing = async (req, res) => {
   try {
     const restaurantId = req.user.id;
@@ -324,34 +374,47 @@ export const markPreparing = async (req, res) => {
     order.status = "preparing";
     await order.save();
 
-    //send order accepted email
     const customer = await Customer.findById(order.customerId);
 
-    //push notification
-    await sendPushNotification({
-      token: customer.fcmToken,
-      title: "Order Preparing",
-      body: `Your order ${order._id} is being prepared by the restaurant.`,
-      data: {
-        orderId: order._id.toString(),
-        status: "preparing",
-      },
-    });
+    // PUSH (SAFE)
+    if (customer.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Preparing",
+          body: `Your order ${order._id} is being prepared by the restaurant.`,
+          data: {
+            orderId: order._id.toString(),
+            status: "preparing",
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
+    }
 
-    await sendOrderStatusUpdateEmail({
-      to: customer.email,
-      customerName: customer.name,
-      orderId: order._id,
-      status: order.status,
-    });
+    // EMAIL (SAFE)
+    try {
+      await sendOrderStatusUpdateEmail({
+        to: customer.email,
+        customerName: customer.name,
+        orderId: order._id,
+        status: order.status,
+      });
+    } catch (err) {
+      console.error("⚠️ Email failed (ignored):", err.message);
+    }
 
     res.status(200).json({ message: "Order is being prepared", order });
   } catch (error) {
-    res.status(500).json({ message: "Error updating order status", error });
+    res
+      .status(500)
+      .json({ message: "Error updating order status", error: error.message });
   }
 };
 
-//mark as ready for pickup (for restaurant owners)
+/* ================= MARK READY ================= */
+
 export const markReady = async (req, res) => {
   try {
     const restaurantId = req.user.id;
@@ -362,48 +425,57 @@ export const markReady = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
+
     order.status = "ready";
     await order.save();
 
-    //send order accepted email
     const customer = await Customer.findById(order.customerId);
 
-    //push notification
-    await sendPushNotification({
-      token: customer.fcmToken,
-      title: "Order Ready for Pickup",
-      body: `Your order ${order._id} is ready for pickup at the restaurant.`,
-      data: {
-        orderId: order._id.toString(),
-        status: "ready",
-      },
-    });
+    // PUSH (SAFE)
+    if (customer.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Ready for Pickup",
+          body: `Your order ${order._id} is ready for pickup at the restaurant.`,
+          data: {
+            orderId: order._id.toString(),
+            status: "ready",
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
+    }
 
-    await sendOrderStatusUpdateEmail({
-      to: customer.email,
-      customerName: customer.name,
-      orderId: order._id,
-      status: order.status,
-    });
+    // EMAIL (SAFE)
+    try {
+      await sendOrderStatusUpdateEmail({
+        to: customer.email,
+        customerName: customer.name,
+        orderId: order._id,
+        status: order.status,
+      });
+    } catch (err) {
+      console.error("⚠️ Email failed (ignored):", err.message);
+    }
 
     res.status(200).json({ message: "Order is ready for pickup", order });
   } catch (error) {
-    res.status(500).json({ message: "Error updating order status", error });
+    res
+      .status(500)
+      .json({ message: "Error updating order status", error: error.message });
   }
 };
 
-//assign order to delivery agent (for restaurant owners)
+/* ================= ASSIGN AGENT ================= */
+
 export const assignOrderToAgent = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { agentId } = req.body;
 
     const restaurantId = req.user._id || req.user.id;
-
-    console.log("ASSIGN AGENT");
-    console.log("Restaurant:", restaurantId);
-    console.log("Order:", orderId);
-    console.log("Agent:", agentId);
 
     if (!agentId) {
       return res.status(400).json({ message: "agentId is required" });
@@ -430,7 +502,7 @@ export const assignOrderToAgent = async (req, res) => {
     agent.status = "on-delivery";
     await agent.save();
 
-    // 🔔 Push notification (SAFE)
+    // PUSH (SAFE)
     if (agent.fcmToken && agent.fcmToken.length > 50) {
       try {
         await sendPushNotification({
@@ -440,7 +512,7 @@ export const assignOrderToAgent = async (req, res) => {
           data: { orderId: order._id.toString() },
         });
       } catch (err) {
-        console.error("FCM failed:", err.message);
+        console.error("⚠️ FCM failed (ignored):", err.message);
       }
     }
 
@@ -454,30 +526,8 @@ export const assignOrderToAgent = async (req, res) => {
   }
 };
 
-////////////////////////////////// Delivery Agent Controllers ////////////////////////////
+/* ================= AGENT – PICKED UP ================= */
 
-//get assigned orders for delivery agent
-export const getAssignedOrders = async (req, res) => {
-  try {
-    const agentId = req.user.id;
-
-    const orders = await Order.find({ deliveryAgentId: agentId })
-      .populate("customerId", "name phone")
-      .populate("restaurantId", "name address")
-      .populate("address")
-      .sort({
-        createdAt: -1,
-      });
-
-    res.status(200).json({ orders });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching assigned orders", error });
-  }
-};
-
-//
-
-//mark order as picked up (for delivery agents)
 export const markOrderPickedUp = async (req, res) => {
   try {
     const agentId = req.user.id;
@@ -494,24 +544,33 @@ export const markOrderPickedUp = async (req, res) => {
 
     const customer = await Customer.findById(order.customerId);
 
-    //push notification
-    await sendPushNotification({
-      token: customer.fcmToken,
-      title: "Order Picked Up",
-      body: `Your order ${order._id} has been picked up by the delivery agent.`,
-      data: {
-        orderId: order._id.toString(),
-        status: "picked",
-      },
-    });
+    // PUSH (SAFE)
+    if (customer.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Picked Up",
+          body: `Your order ${order._id} has been picked up by the delivery agent.`,
+          data: {
+            orderId: order._id.toString(),
+            status: "picked",
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
+    }
 
     res.status(200).json({ message: "Order picked up", order });
   } catch (error) {
-    res.status(500).json({ message: "Error updating order status", error });
+    res
+      .status(500)
+      .json({ message: "Error updating order status", error: error.message });
   }
 };
 
-//mark order as delivered (for delivery agents)
+/* ================= AGENT – DELIVERED ================= */
+
 export const markOrderDelivered = async (req, res) => {
   try {
     const agentId = req.user.id;
@@ -532,19 +591,27 @@ export const markOrderDelivered = async (req, res) => {
 
     const customer = await Customer.findById(order.customerId);
 
-    //push notification
-    await sendPushNotification({
-      token: customer.fcmToken,
-      title: "Order Delivered",
-      body: `Your order ${order._id} has been delivered by the delivery agent.`,
-      data: {
-        orderId: order._id.toString(),
-        status: "delivered",
-      },
-    });
+    // PUSH (SAFE)
+    if (customer.fcmToken && customer.fcmToken.length > 50) {
+      try {
+        await sendPushNotification({
+          token: customer.fcmToken,
+          title: "Order Delivered",
+          body: `Your order ${order._id} has been delivered by the delivery agent.`,
+          data: {
+            orderId: order._id.toString(),
+            status: "delivered",
+          },
+        });
+      } catch (err) {
+        console.error("⚠️ Push failed (ignored):", err.message);
+      }
+    }
 
     res.status(200).json({ message: "Order delivered successfully", order });
   } catch (error) {
-    res.status(500).json({ message: "Error updating order status", error });
+    res
+      .status(500)
+      .json({ message: "Error updating order status", error: error.message });
   }
 };
