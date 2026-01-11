@@ -108,10 +108,14 @@ export default function AgentProfile() {
           <div className="flex flex-col items-center">
             <img
               src={
-                form.image && form.image.trim() !== ""
+                form.image && form.image.startsWith("http")
                   ? form.image
                   : "/assets/agent.png"
               }
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/assets/agent.png";
+              }}
               alt="Agent Avatar"
               className="w-40 h-40 object-cover border border-white/30"
             />

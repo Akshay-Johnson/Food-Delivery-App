@@ -7,6 +7,7 @@ export default function AdminAgents() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
 
   // Modal
   const [activeAgent, setActiveAgent] = useState(null);
@@ -150,11 +151,13 @@ export default function AdminAgents() {
             >
               <img
                 src={
-                  !a.image || a.image === "null" || a.image.trim() === ""
-                    ? "/uploads/agent.png"
-                    : a.image
+                  a.image && a.image.startsWith("http")
+                    ? a.image
+                    : "/assets/agent.png"
                 }
-                onError={(e) => (e.target.src = "/uploads/agent.png")}
+                onError={(e) => {
+                  e.target.src = "/assets/agent.png";
+                }}
                 alt={a.name}
                 className="w-full h-32 object-cover rounded-md"
               />
