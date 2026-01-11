@@ -31,7 +31,7 @@ import {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  // const { role, loading } = useAuth();
+  const { role, loading } = useAuth();
 
   const token = localStorage.getItem("adminToken");
 
@@ -40,9 +40,9 @@ export default function AdminDashboard() {
     return <Navigate to="/admin/login" replace />;
   }
 
-  // if (!loading && role !== "admin") {
-  //   return <Navigate to="/admin/login" replace />;
-  // }
+  if (!loading && role !== "admin") {
+    return <Navigate to="/admin/login" replace />;
+  }
 
   const isOverview = location.pathname === "/admin/dashboard";
 
