@@ -93,8 +93,8 @@ export default function CustomerPayment() {
 
       /* ================= 2️⃣ RAZORPAY OPTIONS ================= */
       const options = {
-        key: data.key,
-        amount: data.amount,
+        key: String(data.key), // force string
+        amount: Number(data.amount),
         currency: data.currency,
         order_id: data.id,
 
@@ -103,14 +103,12 @@ export default function CustomerPayment() {
 
         handler: async (response) => {
           try {
-            /* ================= 3️⃣ VERIFY PAYMENT ================= */
             await api.post("/api/payments/verify", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
 
-            /* ================= 4️⃣ CREATE FINAL ORDER ================= */
             await api.post("/api/orders/create", {
               restaurantId,
               addressId: cart.addressId,
@@ -122,38 +120,28 @@ export default function CustomerPayment() {
               type: "success",
               message: "Order placed successfully!",
             });
-
-            setTimeout(() => {
-              setToast(null);
-              navigate("/customer/orders");
-            }, 2000);
-          } catch (error) {
-            console.error(
-              "❌ Final Order Error:",
-              error.response?.data || error
-            );
+            setTimeout(() => navigate("/customer/orders"), 1500);
+          } catch (err) {
+            console.error("Order save failed:", err);
             setToast({
               type: "error",
-              message:
-                error.response?.data?.message ||
-                "Payment succeeded, but order failed to save.",
+              message: "Payment success, order failed",
             });
           }
         },
-
-        theme: { color: "#22c55e" },
       };
+
+      console.log("🟡 Final Razorpay options:", options);
 
       /* ================= 5️⃣ OPEN RAZORPAY ================= */
       if (!options.key) {
-        console.error("❌ Razorpay init blocked — key missing", options);
+        console.error("❌ Razorpay key missing in options");
         setToast({ type: "error", message: "Payment configuration error" });
         return;
       }
 
-      const razorpay = new window.Razorpay(options);
-
-      razorpay.open();
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error) {
       console.error("❌ Payment error:", error);
       setToast({ type: "error", message: "Payment failed" });

@@ -11,6 +11,10 @@ console.log("🔐 Razorpay Secret exists:", !!process.env.RAZORPAY_KEY_SECRET);
 
 console.log("RAZORPAY_KEY_ID VALUE:", process.env.RAZORPAY_KEY_ID);
 
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.error("❌ Razorpay env vars missing");
+}
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -56,7 +60,7 @@ export const createPaymentOrder = async (req, res) => {
       id: order.id,
       currency: order.currency,
       amount: order.amount,
-      key: process.env.RAZORPAY_KEY_ID,
+      key: String(process.env.RAZORPAY_KEY_ID),
     });
   } catch (error) {
     console.error("🔥 CREATE ORDER FAILED");
