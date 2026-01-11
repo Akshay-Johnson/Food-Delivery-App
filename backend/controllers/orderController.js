@@ -18,7 +18,16 @@ export const createOrder = async (req, res) => {
     console.log("Body:", req.body);
 
     const customerId = req.user.id;
-    const { addressId, paymentMethod = "COD", paymentId } = req.body;
+    const {
+      addressId,
+      paymentMethod = "COD",
+      paymentId,
+      restaurantId,
+    } = req.body;
+
+    if (!restaurantId) {
+      return res.status(400).json({ message: "restaurantId is required" });
+    }
 
     if (!addressId) {
       return res.status(400).json({ message: "Delivery address required" });
@@ -29,8 +38,6 @@ export const createOrder = async (req, res) => {
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
-
-    const restaurantId = cart.restaurantId;
 
     // Prevent duplicate order spam
     const existingPendingOrder = await Order.findOne({
