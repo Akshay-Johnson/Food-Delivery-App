@@ -16,12 +16,13 @@ import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../components/toast/toast";
+import { useRef } from "react";
+import { useMemo } from "react";
 
 export default function CustomerDashboard() {
   const [restaurants, setRestaurants] = useState([]);
   const [trendingDishes, setTrendingDishes] = useState([]);
   const [allDishes, setAllDishes] = useState([]);
-
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
     restaurants: [],
@@ -33,6 +34,7 @@ export default function CustomerDashboard() {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("");
+  const searchTimeout = useRef(null);
 
   const [showTrending, setShowTrending] = useState(true);
 
@@ -53,8 +55,13 @@ export default function CustomerDashboard() {
   useEffect(() => {
     fetchRestaurants();
     fetchTrendingDishes();
-    fetchAllDishes();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchAllDishes();
+    }
+  }, [selectedCategory]);
 
   const fetchRestaurants = async () => {
     try {
@@ -85,29 +92,33 @@ export default function CustomerDashboard() {
     }
   };
 
-  const performSearch = async (text) => {
+  const performSearch = (text) => {
     setSearchQuery(text);
 
-    if (!text.trim()) {
-      setIsSearching(false);
-      setSearchResults({ restaurants: [], dishes: [] });
-      return;
-    }
+    clearTimeout(searchTimeout.current);
 
-    try {
-      const { data } = await api.get(`/api/search?q=${text}`);
+    searchTimeout.current = setTimeout(async () => {
+      if (!text.trim()) {
+        setIsSearching(false);
+        setSearchResults({ restaurants: [], dishes: [] });
+        return;
+      }
 
-      setSearchResults({
-        restaurants: data.restaurants || [],
-        dishes: (data.dishes || []).filter((d) => d.isAvailable),
-      });
+      try {
+        const { data } = await api.get(`/api/search?q=${text}`);
 
-      setIsSearching(true);
-    } catch (err) {
-      console.error("Search failed:", err);
-      setSearchResults({ restaurants: [], dishes: [] });
-      setIsSearching(true);
-    }
+        setSearchResults({
+          restaurants: data.restaurants || [],
+          dishes: (data.dishes || []).filter((d) => d.isAvailable),
+        });
+
+        setIsSearching(true);
+      } catch (err) {
+        console.error("Search failed:", err);
+        setSearchResults({ restaurants: [], dishes: [] });
+        setIsSearching(true);
+      }
+    }, 400); // ⏳ debounce delay
   };
 
   const filteredRestaurants = (
@@ -131,32 +142,28 @@ export default function CustomerDashboard() {
     setRestaurantPage(1);
   }, [searchQuery, restaurants]);
 
-  let categoryDishes = [...availableDishes];
+  const categoryDishes = useMemo(() => {
+    let list = [...availableDishes];
 
-  if (selectedCategory) {
-    const normalizedCategory = selectedCategory.trim().toLowerCase();
+    if (selectedCategory) {
+      const cat = selectedCategory.trim().toLowerCase();
+      list = list.filter((d) => d.category?.trim().toLowerCase() === cat);
+    }
 
-    categoryDishes = categoryDishes.filter(
-      (d) => d.category?.trim().toLowerCase() === normalizedCategory
-    );
-  }
+    if (priceRange !== "all") {
+      list = list.filter((d) => {
+        if (priceRange === "low") return d.price < 200;
+        if (priceRange === "mid") return d.price >= 200 && d.price <= 400;
+        if (priceRange === "high") return d.price > 400;
+        return true;
+      });
+    }
 
-  if (priceRange !== "all") {
-    categoryDishes = categoryDishes.filter((d) => {
-      if (priceRange === "low") return d.price < 200;
-      if (priceRange === "mid") return d.price >= 200 && d.price <= 400;
-      if (priceRange === "high") return d.price > 400;
-      return true;
-    });
-  }
+    if (sortBy === "priceLow") list.sort((a, b) => a.price - b.price);
+    if (sortBy === "priceHigh") list.sort((a, b) => b.price - a.price);
 
-  if (sortBy === "priceLow") {
-    categoryDishes.sort((a, b) => a.price - b.price);
-  }
-
-  if (sortBy === "priceHigh") {
-    categoryDishes.sort((a, b) => b.price - a.price);
-  }
+    return list;
+  }, [availableDishes, selectedCategory, priceRange, sortBy]);
 
   const totalPages = Math.ceil(categoryDishes.length / itemsPerPage);
 
@@ -197,6 +204,7 @@ export default function CustomerDashboard() {
         {/* BACKGROUND IMAGE (GUARANTEED) */}
         <img
           src="/assets/restaurant/bg.jpg"
+          loading="lazy"
           alt="background"
           className="fixed inset-0 w-full h-full object-cover -z-20 pointer-events-none"
         />
@@ -387,6 +395,7 @@ export default function CustomerDashboard() {
                         >
                           <img
                             src={r.image || "/assets/restaurant.png"}
+                            loading="lazy"
                             className="w-full h-40 object-contain rounded-lg bg-black/20"
                             alt={r.name}
                           />
@@ -418,6 +427,7 @@ export default function CustomerDashboard() {
                         >
                           <img
                             src={d.image || "/assets/dishimage.jpg"}
+                            loading="lazy"
                             className="h-24 w-full object-cover rounded-lg"
                           />
                           <div className="flex justify-between items-center">
@@ -528,6 +538,7 @@ export default function CustomerDashboard() {
                     >
                       <img
                         src={dish.image || "/assets/dishimage.jpg"}
+                        loading="lazy"
                         className="h-28 w-full object-cover rounded-lg"
                         alt={dish.name}
                       />
@@ -619,6 +630,7 @@ export default function CustomerDashboard() {
                     <div className="w-full aspect-[16/9] bg-black/30 rounded-lg overflow-hidden">
                       <img
                         src={r.image || "/assets/restaurant.png"}
+                        loading="lazy"
                         alt={r.name}
                         className="w-full h-full object-cover"
                       />
