@@ -1,4 +1,10 @@
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { useAuth } from "../../../context/AuthContext";
@@ -26,6 +32,17 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { role, loading } = useAuth();
+
+  const token = localStorage.getItem("adminToken");
+
+  /* ================= HARD SECURITY GUARD ================= */
+  if (!token || token === "undefined" || token === "null") {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  if (!loading && role !== "admin") {
+    return <Navigate to="/admin/login" replace />;
+  }
 
   const isOverview = location.pathname === "/admin/dashboard";
 
@@ -102,9 +119,11 @@ export default function AdminDashboard() {
     }
   }, [loading, role, isOverview]);
 
+  /* ================= LOGOUT ================= */
   const logout = () => {
-    localStorage.clear();
-    navigate("/admin/login", { replace: true });
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("role");
+    window.location.href = "/admin/login";
   };
 
   const formatCurrency = (value) =>
@@ -199,7 +218,7 @@ export default function AdminDashboard() {
                 {/* TOP RESTAURANTS */}
                 <div className="mb-8">
                   <h3 className="text-lg font-semibold mb-4">
-                    🔥 Top Restaurants
+                    Top Restaurants
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -241,13 +260,12 @@ export default function AdminDashboard() {
                   <div className="h-64 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={chartData}>
-                        <XAxis dataKey="day" stroke="#aaa" />
-                        <YAxis stroke="#aaa" />
+                        <XAxis dataKey="day" />
+                        <YAxis />
                         <Tooltip />
                         <Line
                           type="monotone"
                           dataKey="orders"
-                          stroke="#3b82f6"
                           strokeWidth={3}
                         />
                       </LineChart>
@@ -291,9 +309,11 @@ function SidebarLink({ to, icon: Icon, label }) {
 
 function TooltipLabel({ text }) {
   return (
-    <span className="hidden md:block absolute left-14 top-1/2 -translate-y-1/2
+    <span
+      className="hidden md:block absolute left-14 top-1/2 -translate-y-1/2
       opacity-0 group-hover:opacity-100 transition
-      bg-black text-white text-xs px-3 py-1 rounded whitespace-nowrap">
+      bg-black text-white text-xs px-3 py-1 rounded whitespace-nowrap"
+    >
       {text}
     </span>
   );
