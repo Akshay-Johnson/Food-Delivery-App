@@ -9,8 +9,6 @@ export default function CustomerPayment() {
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
-  console.log("Using Razorpay key:", options.key);
-
   /* ================= LOAD CART ================= */
   useEffect(() => {
     loadCart();
@@ -115,6 +113,7 @@ export default function CustomerPayment() {
         theme: { color: "#22c55e" },
       };
 
+      console.log("🟢 Razorpay key used in frontend:", options.key);
       console.log("🟡 Final Razorpay options:", options);
 
       /* ================= 5️⃣ OPEN RAZORPAY ================= */

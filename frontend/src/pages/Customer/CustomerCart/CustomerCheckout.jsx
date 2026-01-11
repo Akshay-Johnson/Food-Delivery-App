@@ -10,7 +10,7 @@ export default function CustomerCheckout() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [toast, setToast] = useState(null);
-  console.log("Using Razorpay key:", options.key);
+
 
   const navigate = useNavigate();
 
@@ -136,6 +136,7 @@ export default function CustomerCheckout() {
           },
           theme: { color: "#22c55e" },
         };
+        console.log("🟢 Razorpay key used in frontend:", options.key);
 
         const rzp = new window.Razorpay(options);
         rzp.open();
