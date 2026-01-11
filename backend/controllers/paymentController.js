@@ -9,6 +9,8 @@ dotenv.config();
 console.log("🔑 Razorpay Key ID exists:", !!process.env.RAZORPAY_KEY_ID);
 console.log("🔐 Razorpay Secret exists:", !!process.env.RAZORPAY_KEY_SECRET);
 
+console.log("RAZORPAY_KEY_ID VALUE:", process.env.RAZORPAY_KEY_ID);
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -39,11 +41,18 @@ export const createPaymentOrder = async (req, res) => {
 
     console.log("✅ Razorpay order created:", order.id);
 
+    if (!process.env.RAZORPAY_KEY_ID) {
+      console.error("❌ Razorpay key missing in backend env");
+      return res.status(500).json({
+        message: "Payment configuration error",
+      });
+    }
+
     return res.status(200).json({
       id: order.id,
       currency: order.currency,
       amount: order.amount,
-      key: process.env.RAZORPAY_KEY_ID, // public key for frontend
+      key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     console.error("🔥 CREATE ORDER FAILED");
