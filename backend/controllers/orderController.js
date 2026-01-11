@@ -244,7 +244,6 @@ export const getRestaurantOrderById = async (req, res) => {
   }
 };
 
-//accept order (for restaurant owners)
 export const acceptOrder = async (req, res) => {
   try {
     const restaurantId = req.user.id;
@@ -526,6 +525,27 @@ export const assignOrderToAgent = async (req, res) => {
   }
 };
 
+////////////////////////////////// Delivery Agent Controllers ////////////////////////////
+
+//get assigned orders for delivery agent
+export const getAssignedOrders = async (req, res) => {
+  try {
+    const agentId = req.user.id;
+
+    const orders = await Order.find({ deliveryAgentId: agentId })
+      .populate("customerId", "name phone")
+      .populate("restaurantId", "name address")
+      .populate("address")
+      .sort({
+        createdAt: -1,
+      });
+
+    res.status(200).json({ orders });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assigned orders", error });
+  }
+};
+
 /* ================= AGENT – PICKED UP ================= */
 
 export const markOrderPickedUp = async (req, res) => {
@@ -569,8 +589,7 @@ export const markOrderPickedUp = async (req, res) => {
   }
 };
 
-/* ================= AGENT – DELIVERED ================= */
-
+//mark order as delivered (for delivery agents)
 export const markOrderDelivered = async (req, res) => {
   try {
     const agentId = req.user.id;
