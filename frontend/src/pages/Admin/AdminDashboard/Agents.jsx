@@ -152,8 +152,8 @@ export default function AdminAgents() {
               <img
                 src={
                   a.image && a.image.startsWith("http")
-                    ? a.image // Cloudinary
-                    : "/assets/agent.png" // frontend fallback
+                    ? a.image // Cloudinary image
+                    : "/assets/agent.png" // Frontend fallback
                 }
                 onError={(e) => {
                   e.target.onerror = null;
