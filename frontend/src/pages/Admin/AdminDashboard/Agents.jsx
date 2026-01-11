@@ -7,7 +7,9 @@ export default function AdminAgents() {
   const [list, setList] = useState([]);
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
-  const BACKEND_URL = import.meta.env.VITE_API_URL;
+
+  // Always use FRONTEND asset for fallback
+  const FRONTEND_ASSET = `${window.location.origin}/assets/agent.png`;
 
   // Modal
   const [activeAgent, setActiveAgent] = useState(null);
@@ -19,7 +21,11 @@ export default function AdminAgents() {
   /* ================= LOAD AGENTS ================= */
   const load = async () => {
     try {
+      console.log("DEBUG → Fetching agents...");
       const res = await api.get("/api/admins/agents");
+
+      console.log("DEBUG → Raw agents response:", res.data);
+
       setList(res.data || []);
     } catch (err) {
       console.error("Failed to load agents", err);
@@ -34,6 +40,12 @@ export default function AdminAgents() {
   const toggleStatus = async (id, approvalStatus) => {
     try {
       const nextStatus = approvalStatus === "approved" ? "blocked" : "approved";
+
+      console.log("DEBUG → Toggling status:", {
+        id,
+        from: approvalStatus,
+        to: nextStatus,
+      });
 
       await api.put(`/api/admins/agent/status/${id}`, {
         approvalStatus: nextStatus,
@@ -50,6 +62,8 @@ export default function AdminAgents() {
 
   const unflagAgent = async (agentId, restaurantId) => {
     try {
+      console.log("DEBUG → Unflagging:", { agentId, restaurantId });
+
       await api.put(`/api/admins/agents/${agentId}/unflag/${restaurantId}`);
 
       setToast({
@@ -144,20 +158,32 @@ export default function AdminAgents() {
         {paginatedAgents.map((a) => {
           const flagCount = a.flaggedByRestaurants?.length || 0;
 
+          // DEBUG IMAGE SOURCE DECISION
+          const finalImage =
+            a.image && a.image.startsWith("http")
+              ? a.image
+              : FRONTEND_ASSET;
+
+          console.log("DEBUG → Agent image decision:", {
+            agent: a.name,
+            rawImage: a.image,
+            finalImage,
+          });
+
           return (
             <div
               key={a._id}
               className="bg-black/70 border border-white/20 rounded-xl p-4 flex flex-col h-70"
             >
               <img
-                src={
-                  a.image && a.image.startsWith("http")
-                    ? a.image // Cloudinary image
-                    : "/assets/agent.png" // Frontend fallback
-                }
+                src={finalImage}
                 onError={(e) => {
+                  console.error("IMAGE LOAD FAILED:", {
+                    agent: a.name,
+                    attempted: e.target.src,
+                  });
                   e.target.onerror = null;
-                  e.target.src = "/assets/agent.png";
+                  e.target.src = FRONTEND_ASSET;
                 }}
                 alt={a.name}
                 className="w-full h-32 object-cover rounded-md"
