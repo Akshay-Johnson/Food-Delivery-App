@@ -74,6 +74,11 @@ export default function RestaurantDashboard() {
       const orders = ordersRes.data.orders || [];
       const menuItems = menuRes.data || [];
 
+      const menuImageMap = {};
+      menuItems.forEach((m) => {
+        menuImageMap[m.name] = m.image;
+      });
+
       const revenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
 
       const todayOrders = orders.filter((o) => {
@@ -106,21 +111,26 @@ export default function RestaurantDashboard() {
         days.map((d) => ({
           day: d,
           orders: grouped[d] || 0,
-        }))
+        })),
       );
 
       /* ---------- TOP DISHES ---------- */
+      /* ---------- TOP DISHES (FILTERED BY MENU) ---------- */
       const dishMap = {};
 
       orders.forEach((order) => {
         order.items.forEach((item) => {
+          // 🚫 Ignore dishes not in current menu
+          if (!menuImageMap[item.name]) return;
+
           if (!dishMap[item.name]) {
             dishMap[item.name] = {
               name: item.name,
               count: 0,
-              image: item.image,
+              image: menuImageMap[item.name],
             };
           }
+
           dishMap[item.name].count += item.quantity;
         });
       });
@@ -128,7 +138,7 @@ export default function RestaurantDashboard() {
       setTopDishes(
         Object.values(dishMap)
           .sort((a, b) => b.count - a.count)
-          .slice(0, 8)
+          .slice(0, 8),
       );
     } catch (error) {
       console.error("Dashboard error:", error);
@@ -291,7 +301,7 @@ export default function RestaurantDashboard() {
                             </p>
                           </div>
                           <img
-                            src={dish.image || "/assets/restaurant.png"}
+                            src={dish.image || "/assets/dishimage.jpg"}
                             className="w-14 h-14 rounded-md object-cover"
                           />
                         </div>
