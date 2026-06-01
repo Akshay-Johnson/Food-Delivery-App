@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../components/toast/toast";
+import ResponsiveImage from "../../../components/ResponsiveImage";
 import { useRef } from "react";
 import { useMemo } from "react";
 
@@ -29,14 +30,11 @@ export default function CustomerDashboard() {
     dishes: [],
   });
   const [isSearching, setIsSearching] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("");
   const searchTimeout = useRef(null);
-
-  const [showTrending, setShowTrending] = useState(true);
 
   const baseDishes = selectedCategory ? allDishes : trendingDishes;
 
@@ -63,34 +61,32 @@ export default function CustomerDashboard() {
     }
   }, [selectedCategory]);
 
-  const fetchRestaurants = async () => {
+  async function fetchRestaurants() {
     try {
       const response = await api.get("/api/restaurants");
       setRestaurants(response.data);
     } catch (error) {
       console.error("Error fetching restaurants:", error);
     }
-  };
+  }
 
-  const fetchTrendingDishes = async () => {
+  async function fetchTrendingDishes() {
     try {
       const response = await api.get("/api/menu/trending/global");
       setTrendingDishes(response.data);
     } catch (error) {
       console.error("Error fetching trending dishes:", error);
     }
-  };
+  }
 
-  const fetchAllDishes = async () => {
+  async function fetchAllDishes() {
     try {
       const response = await api.get("/api/menu/all"); // OR /api/menu/all
       setAllDishes(response.data.filter((d) => d.isAvailable));
     } catch (error) {
       console.error("Error fetching all dishes:", error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }
 
   const performSearch = (text) => {
     setSearchQuery(text);
@@ -192,104 +188,86 @@ export default function CustomerDashboard() {
     }
   };
 
-  useEffect(() => {
-    if (!selectedCategory) {
-      setShowTrending(true);
-    }
-  }, [selectedCategory]);
-
   return (
-    <div className="pt-32 sm:pt-36">
-      <div className="relative min-h-screen overflow-x-hidden">
-        {/* BACKGROUND IMAGE (GUARANTEED) */}
-        <img
-          src="/assets/restaurant/bg.jpg"
-          loading="lazy"
-          alt="background"
-          className="fixed inset-0 w-full h-full object-cover -z-20 pointer-events-none"
+    <div className="relative min-h-screen overflow-x-hidden text-white">
+      <ResponsiveImage
+        src="/assets/restaurant/bg.jpg"
+        alt="background"
+        className="fixed inset-0 -z-20 h-full w-full object-cover pointer-events-none"
+        priority
+      />
+
+      <div className="fixed inset-0 -z-10 bg-black/70 backdrop-blur-sm pointer-events-none"></div>
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
         />
+      )}
 
-        {/* DARK OVERLAY */}
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm -z-10 pointer-events-none"></div>
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/55 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-3 sm:items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 text-lg font-black shadow-lg shadow-orange-500/30">
+                D
+              </div>
 
-        {/* CONTENT */}
-        <div className="relative z-10 text-white">
-          {toast && (
-            <Toast
-              type={toast.type}
-              message={toast.message}
-              onClose={() => setToast(null)}
-            />
-          )}
-
-          {/* PAGE CONTENT */}
-          <div className="relative z-10">
-            {/* NAVBAR */}
-            <header
-              className="
-    fixed top-0 z-50 w-full
-    bg-black/50 backdrop-blur-md
-    border-b border-white/30 shadow-md
-    p-4 sm:p-5
-    flex flex-col sm:flex-row
-    gap-3 sm:gap-4
-    pointer-events-auto
-  "
-            >
-              <div className="flex flex-col gap-1">
-                <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
                   DineX
                 </h1>
-
-                <h2 className="text-lg sm:text-2xl font-bold">
-                  Welcome back 👋
-                </h2>
-
-                <p className="text-sm sm:text-base text-gray-300 hidden sm:block">
-                  What would you like to eat today?
+                <p className="text-sm text-gray-300 sm:text-base">
+                  Welcome back, discover your next meal.
                 </p>
               </div>
+            </div>
 
-              <div className="flex items-center gap-2 sm:gap-4 ml-0 sm:ml-auto flex-wrap">
-                <button
-                  onClick={() => navigate("/customer/profile")}
-                  className="p-2 sm:px-4 sm:py-2 rounded-md bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700"
-                >
-                  <User size={18} />
-                </button>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+              <DashboardAction
+                icon={User}
+                label="Profile"
+                onClick={() => navigate("/customer/profile")}
+              />
+              <DashboardAction
+                icon={Home}
+                label="Address"
+                onClick={() => navigate("/customer/address")}
+              />
+              <DashboardAction
+                icon={ShoppingCart}
+                label="Cart"
+                onClick={() => navigate("/customer/cart")}
+              />
+              <DashboardAction
+                icon={Truck}
+                label="Orders"
+                onClick={() => navigate("/customer/orders")}
+              />
+              <button
+                className="inline-flex shrink-0 items-center gap-2 rounded-full border border-red-500/20 bg-red-600/90 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500"
+                onClick={() => {
+                  localStorage.removeItem("customerToken");
+                  navigate("/customer/login");
+                }}
+              >
+                <LogOut size={16} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
+          </div>
 
-                <button
-                  onClick={() => navigate("/customer/address")}
-                  className="p-2 sm:px-4 sm:py-2 rounded-md bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700"
-                >
-                  <Home size={18} />
-                </button>
+          <p className="text-xs text-gray-400 sm:hidden">
+            Tip: swipe the action row to access profile, cart, and orders.
+          </p>
+        </div>
+      </header>
 
-                <button
-                  onClick={() => navigate("/customer/cart")}
-                  className="p-2 sm:px-4 sm:py-2 rounded-md bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700"
-                >
-                  <ShoppingCart size={18} />
-                </button>
-
-                <button
-                  onClick={() => navigate("/customer/orders")}
-                  className="p-2 sm:px-4 sm:py-2 rounded-md bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700"
-                >
-                  <Truck size={18} />
-                </button>
-
-                <button
-                  className="p-2 sm:px-4 sm:py-2 rounded-md bg-red-600 text-white hover:bg-red-400"
-                  onClick={() => {
-                    localStorage.removeItem("customerToken");
-                    navigate("/customer/login");
-                  }}
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
-            </header>
+      <div className="relative z-10">
+        <div className="pt-6 sm:pt-8">
+          <div className="relative z-10">
 
             {/* WELCOME SECTION */}
             <section className="px-4 sm:px-6 py-16 sm:py-20">
@@ -393,11 +371,11 @@ export default function CustomerDashboard() {
                           }
                           className="bg-black/70 text-white border-2 border-white/20 shadow rounded-xl p-4 cursor-pointer hover:scale-105 hover:shadow-xl transition"
                         >
-                          <img
+                          <ResponsiveImage
                             src={r.image || "/assets/restaurant.png"}
                             loading="lazy"
-                            className="w-full h-40 object-contain rounded-lg bg-black/20"
                             alt={r.name}
+                            className="w-full h-40 object-contain rounded-lg bg-black/20"
                           />
 
                           <div className="flex justify-between items-center">
@@ -425,10 +403,11 @@ export default function CustomerDashboard() {
                           key={d._id}
                           className="bg-black/70 text-white border-2 border-white/20 p-3 rounded-xl shadow cursor-pointer hover:scale-105 hover:shadow-xl transition flex flex-col justify-between"
                         >
-                          <img
+                          <ResponsiveImage
                             src={d.image || "/assets/dishimage.jpg"}
                             loading="lazy"
                             className="h-24 w-full object-cover rounded-lg"
+                            alt={d.name}
                           />
                           <div className="flex justify-between items-center">
                             <p className="font-semibold mt-2">{d.name}</p>
@@ -464,7 +443,7 @@ export default function CustomerDashboard() {
               <section className="px-6 mt-10">
                 <h3 className="text-xl font-semibold mb-3">Categories</h3>
 
-                <div className="grid grid-cols-5 gap-4 obejct-cover">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                   {[
                     {
                       name: "Pizza",
@@ -495,16 +474,20 @@ export default function CustomerDashboard() {
                     <div
                       key={i}
                       onClick={() => {
-                        setShowTrending(false);
                         setSelectedCategory((prev) =>
                           prev === c.name ? null : c.name
                         );
                       }}
-                      style={{ backgroundImage: `url(${c.image})` }}
-                      className="relative bg-cover bg-center h-28 rounded-lg cursor-pointer overflow-hidden group"
+                      className="group relative h-28 cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg"
                     >
-                      {/* BLUR LAYER */}
-                      <div className="absolute inset-0 bg-black/60 group-hover:bg-black/10 transition"></div>
+                      <ResponsiveImage
+                        src={c.image}
+                        alt={c.name}
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      />
+
+                      <div className="absolute inset-0 bg-black/60 transition group-hover:bg-black/35"></div>
 
                       {/* Content */}
                       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
@@ -518,14 +501,14 @@ export default function CustomerDashboard() {
             )}
 
             {/* CATEGORY / RECOMMENDED DISHES */}
-            <h3 className="text-xl font-bold mb-10 mt-20 ml-6">
+            <h3 className="px-4 text-xl font-bold mt-16 mb-8 sm:mt-20 sm:px-6">
               {selectedCategory
                 ? `${selectedCategory} Dishes`
                 : "Trending Dishes"}
             </h3>
 
-            <section className="px-6 mt-12 mb-20">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <section className="px-4 sm:px-6 mt-6 mb-20">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {paginatedDishes.map((dish) => {
                   const restaurant = restaurants.find(
                     (r) => r._id === dish.restaurantId
@@ -534,13 +517,13 @@ export default function CustomerDashboard() {
                   return (
                     <div
                       key={dish._id}
-                      className="bg-black/70 border border-white/30 text-white rounded-xl shadow hover:scale-105 hover:shadow-xl transition p-3 cursor-pointer flex flex-col justify-between"
+                      className="flex cursor-pointer flex-col justify-between rounded-2xl border border-white/10 bg-black/70 p-3 text-white shadow transition hover:-translate-y-1 hover:shadow-xl"
                     >
-                      <img
+                      <ResponsiveImage
                         src={dish.image || "/assets/dishimage.jpg"}
                         loading="lazy"
-                        className="h-28 w-full object-cover rounded-lg"
                         alt={dish.name}
+                        className="h-28 w-full object-cover rounded-lg"
                       />
                       <div className=" items-center pb-2">
                         <p className="font-semibold text-xl mt-2">
@@ -612,14 +595,14 @@ export default function CustomerDashboard() {
                 Restaurants
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
                 {paginatedRestaurants.map((r) => (
                   <div
                     key={r._id}
                     onClick={() => navigate(`/customer/restaurant/${r._id}`)}
                     className="
-          bg-black/70 border border-white/30 text-white
-          rounded-xl shadow
+          bg-black/70 border border-white/10 text-white
+          rounded-2xl shadow
           transition
           p-3
           cursor-pointer
@@ -628,7 +611,7 @@ export default function CustomerDashboard() {
         "
                   >
                     <div className="w-full aspect-[16/9] bg-black/30 rounded-lg overflow-hidden">
-                      <img
+                      <ResponsiveImage
                         src={r.image || "/assets/restaurant.png"}
                         loading="lazy"
                         alt={r.name}
@@ -691,5 +674,19 @@ export default function CustomerDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function DashboardAction({ icon, label, onClick }) {
+  const Icon = icon;
+
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+    >
+      <Icon size={16} />
+      <span>{label}</span>
+    </button>
   );
 }
