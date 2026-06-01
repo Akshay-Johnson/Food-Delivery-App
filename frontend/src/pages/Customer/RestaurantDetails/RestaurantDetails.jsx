@@ -2,13 +2,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { ArrowLeft, Star, ShoppingCart } from "lucide-react";
-import { useAuth } from "../../../context/AuthContext";
 import Toast from "../../../components/toast/toast";
+import ResponsiveImage from "../../../components/ResponsiveImage";
 
 export default function RestaurantDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [toast, setToast] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
@@ -33,11 +32,6 @@ export default function RestaurantDetails() {
   /* ======================
      REVIEW STATE
   ====================== */
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [editingReviewId, setEditingReviewId] = useState(null);
-  const [editRating, setEditRating] = useState(0);
-  const [editComment, setEditComment] = useState("");
 
   const safeReviews = Array.isArray(reviews)
     ? reviews.filter((r) => !r.isHidden)
@@ -206,10 +200,11 @@ export default function RestaurantDetails() {
       </button>
 
       {/* HERO IMAGE */}
-      <img
+      <ResponsiveImage
         src={restaurant.image || "/assets/restaurant.png"}
         className="w-full h-48 sm:h-64 object-cover rounded-b-xl"
-        alt="restaurant"
+        alt={restaurant.name || "restaurant"}
+        priority
       />
 
       {/* HEADER */}
@@ -290,10 +285,11 @@ export default function RestaurantDetails() {
                 !item.isAvailable ? "opacity-60" : ""
               }`}
             >
-              <img
+              <ResponsiveImage
                 src={item.image || "/assets/dishimage.jpg"}
                 className="w-full h-32 object-cover rounded"
                 alt={item.name}
+                loading="lazy"
               />
 
               {!item.isAvailable && (
@@ -356,14 +352,11 @@ export default function RestaurantDetails() {
             className="bg-black/70 p-4 rounded border border-white/20"
           >
             <div className="flex items-center gap-3 mb-2">
-              <img
+              <ResponsiveImage
                 src={getAvatar(review.customerId)}
                 alt="user"
                 className="w-9 h-9 rounded-full object-cover border border-white/30"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/assets/defaultprofile.png";
-                }}
+                fallbackSrc="/assets/defaultprofile.png"
               />
 
               <div>
@@ -390,27 +383,6 @@ export default function RestaurantDetails() {
               {review.comment}
             </p>
 
-            {user && review.customerId?._id === user._id && (
-              <div className="flex gap-4 mt-3 text-sm">
-                <button
-                  onClick={() => {
-                    setEditingReviewId(review._id);
-                    setEditRating(review.rating);
-                    setEditComment(review.comment);
-                  }}
-                  className="text-blue-400"
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => deleteReview(review._id)}
-                  className="text-red-400"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
           </div>
         ))}
       </div>

@@ -4,21 +4,23 @@ export default function About() {
   return (
     <section
       id="about"
-      className="relative flex flex-col items-center text-center px-10 py-24 min-h-[900px] bg-[url('/assets/loginimage.jpg')] bg-cover bg-center"
+      className="relative flex flex-col items-center text-center py-20 sm:py-24 min-h-[unset] bg-[url('/assets/loginimage.jpg')] bg-cover bg-center"
     >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-md"></div>
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-md"></div>
 
-      <div className="relative z-10 max-w-3xl">
-        <h2 className="text-6xl font-bold mb-10">About DineX</h2>
+      <div className="relative z-10 section-shell max-w-4xl">
+        <h2 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl mb-6 sm:mb-8">
+          About DineX
+        </h2>
 
-        <p className="text-gray-300 text-2xl font-bold leading-relaxed drop-shadow-lg text-justify">
-          "FoodExpress is a modern food delivery platform that connects hungry
-          customers with their favorite restaurants. With fast delivery,
-          real-time tracking, and a seamless ordering experience, we ensure your
-          meals arrive hot and fresh..."
+        <p className="mx-auto max-w-3xl text-base sm:text-lg lg:text-2xl font-medium leading-relaxed text-gray-200 drop-shadow-lg text-balance">
+          DineX is a modern food delivery platform that connects hungry
+          customers with favorite restaurants. Fast delivery, real-time
+          tracking, and a cleaner ordering flow keep the experience useful on
+          mobile, tablet, and desktop.
         </p>
       </div>
-      <div className="w-full mt-10">
+      <div className="w-full mt-12 sm:mt-16">
         <HowItWorks />
       </div>
     </section>

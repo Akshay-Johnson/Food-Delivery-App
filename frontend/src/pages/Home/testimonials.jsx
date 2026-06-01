@@ -1,3 +1,5 @@
+import ResponsiveImage from "../../components/ResponsiveImage";
+
 export default function Testimonials() {
   const reviews = [
     {
@@ -30,28 +32,29 @@ export default function Testimonials() {
   return (
     <section
       id="review"
-      className="relative py-24 px-10 bg-[url('/assets/review.jpg')] bg-cover bg-center text-white "
+      className="relative py-20 sm:py-24 bg-[url('/assets/review.jpg')] bg-cover bg-center text-white"
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm  "></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-      <div className="relative z-10 max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent">
+      <div className="relative z-10 section-shell">
+        <h2 className="text-4xl sm:text-5xl font-black text-center mb-10 sm:mb-16 bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent">
           What Our Customers Say
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 text-center">
           {reviews.map((r, i) => (
             <div
               key={i}
-              className="p-6 card hover:scale-105 transition-transform duration-300 "
+              className="glass-card p-6 hover:-translate-y-1 transition-transform duration-300"
             >
-              <img
+              <ResponsiveImage
                 src={r.img}
-                className="w-20 h-20 object-cover mx-auto rounded-full mb-4 border-2 border-white/30"
+                alt={r.name}
+                className="mx-auto mb-4 h-20 w-20 rounded-full border-2 border-white/30 object-cover"
               />
               <h3 className="text-xl font-semibold mb-2">{r.name}</h3>
-              <p className="text-gray-300 italic">{r.text}</p>
-              <p className="text-yellow-400 mt-2 text-lg animate-bounce">
+              <p className="text-gray-300 italic leading-relaxed">{r.text}</p>
+              <p className="mt-2 text-lg text-yellow-400 animate-bounce">
                 ★★★★★
               </p>
             </div>

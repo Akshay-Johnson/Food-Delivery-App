@@ -21,18 +21,20 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="relative py-24 text-center ">
-      <h2 className="text-6xl font-bold mb-16">How It Works</h2>
+    <section className="relative py-16 sm:py-20 text-center">
+      <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-10 sm:mb-14">
+        How It Works
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 px-10 max-w-6xl mx-auto">
+      <div className="section-shell grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {steps.map((step, i) => (
           <div
             key={i}
-            className="p-6 bg-black/90  rounded-xl border border-white/20 "
+            className="glass-card p-6 sm:p-8"
           >
-            <step.icon size={50} className="mx-auto mb-4" />
+            <step.icon size={40} className="mx-auto mb-4 text-orange-300" />
             <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-            <p className="text-gray-300">{step.text}</p>
+            <p className="text-gray-300 leading-relaxed">{step.text}</p>
           </div>
         ))}
       </div>

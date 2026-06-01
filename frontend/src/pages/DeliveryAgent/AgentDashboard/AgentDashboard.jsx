@@ -1,9 +1,10 @@
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import Toast from "../../../components/toast/toast";
+import DashboardNav from "../../../components/DashboardNav";
 
-import { LayoutDashboard, ClipboardList, User, LogOut } from "lucide-react";
+import { LayoutDashboard, ClipboardList, User } from "lucide-react";
 
 import {
   LineChart,
@@ -116,61 +117,21 @@ export default function AgentDashboard() {
     <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
-      <div className="relative z-10 flex min-h-screen">
-        {/* ================= SIDEBAR ================= */}
-        <aside
-          className="
-            fixed md:static bottom-0 left-0 right-0 md:right-auto z-40
-            bg-black/80 backdrop-blur-lg
-            border-t md:border-t-0 md:border-r border-white/10
-            md:w-24 flex md:flex-col justify-around md:justify-start
-            p-2 md:p-4
-          "
-        >
-          <h1 className="hidden md:block text-2xl font-bold text-blue-500 mb-8 text-center">
-            DX
-          </h1>
-
-          <nav className="flex md:flex-col gap-2 md:space-y-3">
-            <SidebarLink
-              to="/agent/dashboard"
-              icon={LayoutDashboard}
-              label="Dashboard"
-            />
-            <SidebarLink
-              to="/agent/dashboard/orders"
-              icon={ClipboardList}
-              label="Orders"
-            />
-            <SidebarLink
-              to="/agent/dashboard/profile"
-              icon={User}
-              label="Profile"
-            />
-            <button
-              onClick={logout}
-              className="
-    flex md:hidden flex-col items-center justify-center gap-1
-    p-2 rounded-lg transition
-    hover:bg-red-600/20 text-red-400
-  "
-            >
-              <LogOut size={18} />
-              <span className="text-[10px]">Logout</span>
-            </button>
-          </nav>
-
-          <button
-            onClick={logout}
-            className="hidden md:flex relative group mt-auto bg-red-600/80 hover:bg-red-600 p-3 rounded-lg"
-          >
-            <LogOut size={18} />
-            <Tooltip text="Logout" />
-          </button>
-        </aside>
+      <div className="relative z-10 flex min-h-screen flex-col md:flex-row">
+        <DashboardNav
+          brand="DX"
+          title="Agent"
+          onLogout={logout}
+          logoutLabel="Logout"
+          items={[
+            { to: "/agent/dashboard", icon: LayoutDashboard, label: "Dashboard", end: true },
+            { to: "/agent/dashboard/orders", icon: ClipboardList, label: "Orders" },
+            { to: "/agent/dashboard/profile", icon: User, label: "Profile" },
+          ]}
+        />
 
         {/* ================= MAIN ================= */}
-        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
           {isOverview ? (
@@ -263,51 +224,11 @@ export default function AgentDashboard() {
     </div>
   );
 }
-
-/* ================= COMPONENTS ================= */
-
-function SidebarLink({ to, icon: Icon, label }) {
-  return (
-    <NavLink
-      to={to}
-      end
-      className={({ isActive }) =>
-        `flex flex-col md:flex-row items-center justify-center gap-1
-         p-2 md:p-3 rounded-lg transition
-         ${
-           isActive
-             ? "bg-blue-600/30 text-blue-400"
-             : "hover:bg-white/10 text-gray-300"
-         }`
-      }
-    >
-      <Icon size={18} />
-      <span className="text-[10px] md:hidden">{label}</span>
-      <Tooltip text={label} />
-    </NavLink>
-  );
-}
-
 function StatCard({ label, value, color }) {
   return (
     <div className="bg-black/70 border border-white/20 rounded-xl p-4 md:p-6">
       <p className="text-gray-400 text-sm">{label}</p>
       <p className={`text-2xl md:text-3xl font-bold mt-2 ${color}`}>{value}</p>
     </div>
-  );
-}
-
-function Tooltip({ text }) {
-  return (
-    <span
-      className="
-        hidden md:block absolute left-16 top-1/2 -translate-y-1/2
-        whitespace-nowrap rounded-md bg-black px-3 py-1 text-xs
-        opacity-0 group-hover:opacity-100 transition
-        border border-white/20 z-50
-      "
-    >
-      {text}
-    </span>
   );
 }
