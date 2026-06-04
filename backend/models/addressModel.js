@@ -48,6 +48,10 @@ const addressSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    location: {
+      lat: { type: Number, default: 9.9312 },
+      lng: { type: Number, default: 76.2673 },
+    },
   },
   { timestamps: true }
 );

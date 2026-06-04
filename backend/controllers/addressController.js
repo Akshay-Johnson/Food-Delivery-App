@@ -16,6 +16,7 @@ export const addAddress = async (req, res) => {
       pincode,
       landmark,
       type,
+      location,
     } = req.body;
 
     const newAddress = await Address.create({
@@ -29,6 +30,7 @@ export const addAddress = async (req, res) => {
       pincode,
       landmark,
       type,
+      location,
     });
 
     res.status(201).json({

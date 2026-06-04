@@ -5,7 +5,7 @@ export default function AuthLayout({ title, children }) {
         className="
                     absolute inset-0
                     bg-cover bg-center bg-no-repeat 
-                    bg-[url('/assets/loginimage.jpg')]
+                    bg-[url('/assets/loginimage.webp')]
                     blur-md
                     scale-105
 

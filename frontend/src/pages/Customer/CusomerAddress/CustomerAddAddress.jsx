@@ -18,6 +18,7 @@ export default function CustomerAddAddress() {
     pincode: "",
     landmark: "",
     type: "Home",
+    location: { lat: 9.9312, lng: 76.2673 },
   });
 
   const submit = async (e) => {

@@ -1,4 +1,5 @@
 import "./index.css";
+import "leaflet/dist/leaflet.css";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ReactDOM from "react-dom/client";

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import api from "../../../../api/axiosInstance";
 import { Upload, Save } from "lucide-react";
 import Toast from "../../../../components/toast/toast";
+import ResponsiveImage from "../../../../components/ResponsiveImage";
 
 export default function EditMenuItem() {
   const { id } = useParams();
@@ -92,8 +93,8 @@ export default function EditMenuItem() {
         <form onSubmit={submit} className="space-y-4">
           {/* IMAGE */}
           <div className="flex flex-col items-center">
-            <img
-              src={(form.image || "/assets/dishimage.jpg") + "?t=" + Date.now()}
+            <ResponsiveImage
+              src={form.image || "/assets/dishimage.jpg"}
               className="w-full max-w-sm h-40 sm:h-44 rounded-xl object-cover border border-white/30"
               alt="Dish"
             />

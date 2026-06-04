@@ -45,7 +45,7 @@ export default function AgentLogin() {
       await Login("agent", form);
       await saveAgentToken();
 
-      setToast({ type: "success", message: "Login successful 🎉" });
+      setToast({ type: "success", message: "Login successful " });
 
       setTimeout(() => {
         setToast(null);

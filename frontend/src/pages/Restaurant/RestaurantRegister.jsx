@@ -43,7 +43,7 @@ export default function RestaurantRegister() {
       setOtpSent(true);
       setToast({
         type: "success",
-        message: "OTP sent to your email 📩",
+        message: "OTP sent to your email ",
       });
     } catch (error) {
       setToast({
@@ -79,7 +79,7 @@ export default function RestaurantRegister() {
 
       setToast({
         type: "success",
-        message: "Registration successful 🎉, Wait for admin approval.",
+        message: "Registration successful , Wait for admin approval.",
       });
 
       setTimeout(() => {

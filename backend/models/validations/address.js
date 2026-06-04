@@ -48,6 +48,11 @@ export const addressSchema = Joi.object({
     }),
 
   isDefault: Joi.boolean().optional(),
+
+  location: Joi.object({
+    lat: Joi.number().required(),
+    lng: Joi.number().required(),
+  }).optional(),
 });
 
 export const addressUpdateSchema = Joi.object({
@@ -82,4 +87,9 @@ export const addressUpdateSchema = Joi.object({
     .optional(),
 
   isDefault: Joi.boolean().optional(),
+
+  location: Joi.object({
+    lat: Joi.number().required(),
+    lng: Joi.number().required(),
+  }).optional(),
 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
-import { Upload, Save } from "lucide-react";
+import { Upload, Save, User, Phone, Lock, Truck, CreditCard, ShieldAlert } from "lucide-react";
 import Toast from "../../../components/toast/toast";
 
 export default function AgentProfile() {
@@ -44,7 +44,6 @@ export default function AgentProfile() {
     }
   };
 
-  //image upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -58,8 +57,10 @@ export default function AgentProfile() {
       });
 
       setForm({ ...form, image: res.data.imageUrl });
+      setToast({ type: "success", message: "Profile image uploaded!" });
     } catch (error) {
       console.error("Image upload failed:", error);
+      setToast({ type: "error", message: "Image upload failed" });
     }
   };
 
@@ -83,7 +84,7 @@ export default function AgentProfile() {
 
     try {
       await api.put("/api/agents/profile", payload);
-      setToast({ type: "success", message: "Profile updated successfully" });
+      setToast({ type: "success", message: "Profile updated successfully!" });
       await loadProfile();
     } catch (error) {
       console.error("Profile update failed:", error);
@@ -91,11 +92,20 @@ export default function AgentProfile() {
     }
   };
 
-  if (loading) return <p className="text-white p-6">Loading profile...</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+        <div className="h-10 w-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 text-white flex items-center m-auto justify-center mt-15">
-      <div className="bg-black/70 p-6 rounded-xl border border-white/20 w-full max-w-xl">
+    <div className="min-h-screen text-white flex items-center justify-center py-12 px-4">
+      {/* Background layer */}
+      <div className="fixed inset-0 bg-gradient-to-b from-zinc-950 via-zinc-950/90 to-zinc-950 -z-10" />
+
+      <div className="w-full max-w-xl relative z-10 space-y-6">
         {toast && (
           <Toast
             type={toast.type}
@@ -103,93 +113,154 @@ export default function AgentProfile() {
             onClose={() => setToast(null)}
           />
         )}
-        <form onSubmit={submit} className="space-y-4">
-          {/* IMAGE */}
-          <div className="flex flex-col items-center">
-            
-            <img
-              src={
-                form.image && form.image.startsWith("http")
-                  ? form.image
-                  : "/assets/agent.png"
-              }
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "/assets/agent.png";
-              }}
-              alt="Agent Avatar"
-              className="w-40 h-40 object-cover border border-white/30"
-            />
 
-            <label className="mt-3 cursor-pointer bg-blue-600 px-4 py-2 rounded flex items-center gap-2">
-              <Upload size={16} />
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-            </label>
+        <div className="bg-black/70 p-6 sm:p-8 rounded-3xl border border-white/15 shadow-2xl backdrop-blur-md space-y-6">
+          <div className="text-center border-b border-white/10 pb-4">
+            <h1 className="text-2xl font-black tracking-tight">Agent Profile Settings</h1>
+            <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">Manage your driver information</p>
           </div>
 
-          {/* NAME */}
-          <div className="flex items-end gap-2">
-            <input
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.name}
-              placeholder="Name"
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
+          <form onSubmit={submit} className="space-y-5">
+            {/* Image Upload */}
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-rose-600 rounded-full blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+                <img
+                  src={
+                    form.image && form.image.startsWith("http")
+                      ? form.image
+                      : "/assets/agent.png"
+                  }
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/assets/agent.png";
+                  }}
+                  alt="Agent Avatar"
+                  className="relative w-28 h-28 rounded-full object-cover border-4 border-white/20 shadow-lg"
+                />
+              </div>
 
-            <input
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.phone}
-              placeholder="Phone"
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            />
-          </div>
+              <label className="inline-flex items-center gap-2 cursor-pointer bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-4 py-2 rounded-xl text-xs font-bold text-gray-300 transition active:scale-95">
+                <Upload size={14} className="text-orange-400" />
+                Change Image
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </label>
+            </div>
 
-          {/* PASSWORD */}
-          <div>
-            <input
-              type="password"
-              autoComplete="current-password"
-              placeholder="New Password"
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
+            {/* Status / Active Info Banner */}
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Current Status:</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                form.status === "active" || form.status === "available" || form.status === "on-delivery"
+                  ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
+                  : "bg-amber-500/20 border border-amber-500/30 text-amber-400"
+              }`}>
+                {form.status || "offline"}
+              </span>
+            </div>
 
-          {/* VEHICLE TYPE */}
-          <div>
-            <input
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.vehicleType}
-              placeholder="Vehicle Type (e.g., Bike, Car)"
-              onChange={(e) =>
-                setForm({ ...form, vehicleType: e.target.value })
-              }
-            />
-          </div>
+            {/* Name & Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Full Name</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                    <User size={16} />
+                  </span>
+                  <input
+                    required
+                    className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition text-sm shadow-inner"
+                    value={form.name}
+                    placeholder="Name"
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+              </div>
 
-          {/* VEHICLE NUMBER */}
-          <div>
-            <input
-              className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/20 rounded"
-              value={form.vehicleNumber}
-              placeholder="Vehicle Number (e.g., ABC-1234)"
-              onChange={(e) =>
-                setForm({ ...form, vehicleNumber: e.target.value })
-              }
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Phone Number</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                    <Phone size={16} />
+                  </span>
+                  <input
+                    required
+                    className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition text-sm shadow-inner"
+                    value={form.phone}
+                    placeholder="Phone"
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
 
-          {/* SUBMIT */}
-          <button className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded flex items-center gap-2 m-auto">
-            <Save size={18} />
-            Save Changes
-          </button>
-        </form>
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">New Password (leave empty to keep current)</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                  <Lock size={16} />
+                </span>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="New Password"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition text-sm shadow-inner"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Vehicle Details Section */}
+            <div className="border-t border-white/10 pt-4 space-y-4">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 pl-1">Vehicle Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Vehicle Type</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Truck size={16} />
+                    </span>
+                    <input
+                      required
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition text-sm shadow-inner"
+                      value={form.vehicleType}
+                      placeholder="e.g. Motorcycle, Bicycle"
+                      onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Vehicle Number</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                      <CreditCard size={16} />
+                    </span>
+                    <input
+                      required
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition text-sm shadow-inner"
+                      value={form.vehicleNumber}
+                      placeholder="e.g. KL-07-CD-1234"
+                      onChange={(e) => setForm({ ...form, vehicleNumber: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Submit */}
+            <button className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-600 hover:to-rose-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-orange-500/10 active:scale-[0.98] transition cursor-pointer pt-4">
+              <Save size={16} />
+              Save Settings
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

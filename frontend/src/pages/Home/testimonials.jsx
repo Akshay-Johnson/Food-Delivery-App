@@ -32,7 +32,7 @@ export default function Testimonials() {
   return (
     <section
       id="review"
-      className="relative py-20 sm:py-24 bg-[url('/assets/review.jpg')] bg-cover bg-center text-white"
+      className="relative py-20 sm:py-24 bg-[url('/assets/review.webp')] bg-cover bg-center text-white"
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 

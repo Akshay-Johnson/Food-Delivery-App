@@ -24,7 +24,7 @@ export default function RestaurantLogin() {
 
     try {
       await Login("restaurant", form);
-      setToast({ type: "success", message: "Login Successful 🎉" });
+      setToast({ type: "success", message: "Login Successful " });
 
       setTimeout(() => {
         setToast(null);

@@ -4,12 +4,12 @@ import api from "../../../api/axiosInstance";
 
 export default function AdminRestaurantOrders() {
   const [restaurants, setRestaurants] = useState([]);
-  const [search, setSearch] = useState(""); // ✅ FIX
+  const [search, setSearch] = useState(""); //  FIX
   const [page, setPage] = useState(1);
 
   const navigate = useNavigate();
 
-  // 🔢 Pagination config (3 rows × 5 cols)
+  //  Pagination config (3 rows × 5 cols)
   const perPage = 15;
 
   /* ================= LOAD DATA ================= */
@@ -85,13 +85,13 @@ export default function AdminRestaurantOrders() {
 
                 {/* RATING */}
                 <p className="text-sm text-yellow-400 font-semibold">
-                  ⭐ {r.averageRating?.toFixed(1) || "0.0"}
+                   {r.averageRating?.toFixed(1) || "0.0"}
                 </p>
               </div>
 
               {/* ORDER COUNT */}
               <p className="text-sm text-blue-400 mt-auto">
-                🧾 {r.orderCount || 0} orders
+                 {r.orderCount || 0} orders
               </p>
             </div>
           </button>

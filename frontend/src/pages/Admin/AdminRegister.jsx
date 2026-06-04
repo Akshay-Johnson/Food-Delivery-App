@@ -40,7 +40,7 @@ export default function AdminRegister() {
       setOtpSent(true);
       setToast({
         type: "success",
-        message: "OTP sent to your email 📩",
+        message: "OTP sent to your email ",
       });
     } catch (error) {
       setToast({
@@ -76,7 +76,7 @@ export default function AdminRegister() {
 
       setToast({
         type: "success",
-        message: "Admin Registered Successfully 🎉",
+        message: "Admin Registered Successfully ",
       });
 
       setTimeout(() => {

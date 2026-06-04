@@ -175,6 +175,12 @@ export const updateRestaurantProfile = async (req, res) => {
     restaurant.cuisineType = req.body.cuisineType || restaurant.cuisineType;
     restaurant.openingTime = req.body.openingTime || restaurant.openingTime;
     restaurant.closingTime = req.body.closingTime || restaurant.closingTime;
+    if (req.body.location) {
+      restaurant.location = {
+        lat: req.body.location.lat,
+        lng: req.body.location.lng,
+      };
+    }
 
     await restaurant.save();
 

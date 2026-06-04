@@ -21,11 +21,11 @@ export default function AssignAgent() {
   /* ================= LOAD AGENTS ================= */
   const loadAgents = async () => {
     try {
-      const res = await api.get("/api/agents/available");
+      const res = await api.get("/api/restaurants/agents/nearby");
       setAgents(res.data || []);
     } catch (err) {
       console.error(err);
-      setToast({ type: "error", message: "Failed to load agents" });
+      setToast({ type: "error", message: "Failed to load nearby agents" });
     }
   };
 
@@ -147,12 +147,20 @@ export default function AssignAgent() {
                 {agent.vehicleType} • {agent.vehicleNumber}
               </p>
 
-              {/* STATUS */}
-              <span
-                className={`text-xs px-3 py-1 rounded-full w-fit capitalize ${statusColor}`}
-              >
-                {agent.status}
-              </span>
+              {/* STATUS & DISTANCE */}
+              <div className="flex items-center justify-between gap-2 mt-1">
+                <span
+                  className={`text-xs px-3 py-1 rounded-full w-fit capitalize ${statusColor}`}
+                >
+                  {agent.status}
+                </span>
+
+                {agent.distance !== undefined && agent.distance !== 999 && (
+                  <span className="text-xs font-semibold text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full shrink-0">
+                    {agent.distance.toFixed(1)} km away
+                  </span>
+                )}
+              </div>
 
               {/* ACTION */}
               {isAvailable && (

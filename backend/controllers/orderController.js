@@ -2,6 +2,9 @@ import Cart from "../models/cartModel.js";
 import Order from "../models/orderModel.js";
 import Customer from "../models/customerModel.js";
 import DeliveryAgent from "../models/deliveryAgentModel.js";
+import Address from "../models/addressModel.js";
+import Restaurant from "../models/restaurantModel.js";
+import { getDistanceInKm, calculateDeliveryCharge } from "../utils/distance.js";
 import {
   sendOrderPlacedEmail,
   sendOrderStatusUpdateEmail,
@@ -57,7 +60,20 @@ export const createOrder = async (req, res) => {
     /* =======================
        🔢 PRICE CALCULATION
     ======================= */
-    const DELIVERY_CHARGE = 40;
+    const address = await Address.findById(addressId);
+    const restaurant = await Restaurant.findById(restaurantId);
+
+    if (!address || !restaurant) {
+      return res.status(400).json({ message: "Address or Restaurant not found" });
+    }
+
+    const addrLat = address.location?.lat ?? 9.9312;
+    const addrLng = address.location?.lng ?? 76.2673;
+    const restLat = restaurant.location?.lat ?? 9.9312;
+    const restLng = restaurant.location?.lng ?? 76.2673;
+
+    const distanceInKm = getDistanceInKm(addrLat, addrLng, restLat, restLng);
+    const DELIVERY_CHARGE = calculateDeliveryCharge(distanceInKm);
 
     const itemsTotal = cart.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -76,7 +92,7 @@ export const createOrder = async (req, res) => {
 
       totalPrice: itemsTotal, // items total only
       deliveryCharge: DELIVERY_CHARGE,
-      agentEarning: DELIVERY_CHARGE, // agent revenue
+      agentEarning: Math.round(DELIVERY_CHARGE * 0.8), // agent gets 80% of delivery charge
 
       address: addressId,
 
@@ -179,10 +195,10 @@ export const getMyOrders = async (req, res) => {
 //get single order
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate(
-      "restaurantId",
-      "name"
-    );
+    const order = await Order.findById(req.params.id)
+      .populate("restaurantId", "name location")
+      .populate("deliveryAgentId", "name phone location")
+      .populate("address");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -220,6 +236,8 @@ export const getRestaurantOrders = async (req, res) => {
 
     const orders = await Order.find({ restaurantId })
       .populate("customerId", "name email phone")
+      .populate("deliveryAgentId", "name phone location")
+      .populate("address")
       .sort({ createdAt: -1 });
 
     res.status(200).json({ orders });
@@ -466,6 +484,39 @@ export const markReady = async (req, res) => {
       console.error("⚠️ Email failed (ignored):", err.message);
     }
 
+    // Broadcast notification to nearby agents
+    try {
+      const restaurant = await Restaurant.findById(restaurantId);
+      if (restaurant && restaurant.location?.lat) {
+        const agents = await DeliveryAgent.find({ approvalStatus: "approved" });
+        const nearbyAgents = agents.filter((agent) => {
+          if (!agent.location?.lat) return false;
+          const dist = getDistanceInKm(
+            restaurant.location.lat,
+            restaurant.location.lng,
+            agent.location.lat,
+            agent.location.lng
+          );
+          return dist <= 10;
+        });
+
+        // Send push notifications to nearby agents
+        for (const agent of nearbyAgents) {
+          if (agent.fcmToken && agent.fcmToken.length > 50) {
+            const dist = getDistanceInKm(restaurant.location.lat, restaurant.location.lng, agent.location.lat, agent.location.lng);
+            sendPushNotification({
+              token: agent.fcmToken,
+              title: "New Delivery Job Nearby! 🚚",
+              body: `A new order at ${restaurant.name} is ready for delivery (${dist.toFixed(1)} km away).`,
+              data: { orderId: order._id.toString() },
+            }).catch((err) => console.error("Agent FCM broadcast failed:", err));
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Agent notification broadcast error:", err);
+    }
+
     res.status(200).json({ message: "Order is ready for pickup", order });
   } catch (error) {
     res
@@ -541,7 +592,7 @@ export const getAssignedOrders = async (req, res) => {
 
     const orders = await Order.find({ deliveryAgentId: agentId })
       .populate("customerId", "name phone")
-      .populate("restaurantId", "name address")
+      .populate("restaurantId", "name address location")
       .populate("address")
       .sort({
         createdAt: -1,
@@ -639,5 +690,88 @@ export const markOrderDelivered = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error updating order status", error: error.message });
+  }
+};
+
+// get available nearby orders for a delivery agent
+export const getNearbyReadyOrders = async (req, res) => {
+  try {
+    const agentId = req.user.id;
+    const agent = await DeliveryAgent.findById(agentId);
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    const agentLat = agent.location?.lat;
+    const agentLng = agent.location?.lng;
+
+    if (agentLat === null || agentLng === null || agentLat === undefined || agentLng === undefined) {
+      return res.json([]); // Return empty if agent has no coordinates set yet
+    }
+
+    // Find all ready orders without any agent assigned
+    const orders = await Order.find({
+      status: "ready",
+      deliveryAgentId: null,
+    })
+      .populate("restaurantId", "name location address")
+      .populate("address");
+
+    // Filter to those within 10 km
+    const availableNearby = orders
+      .map((order) => {
+        const rest = order.restaurantId;
+        if (!rest?.location?.lat) return null;
+
+        const distance = getDistanceInKm(
+          agentLat,
+          agentLng,
+          rest.location.lat,
+          rest.location.lng
+        );
+
+        return {
+          ...order.toObject(),
+          distance,
+        };
+      })
+      .filter((order) => order !== null && order.distance <= 10)
+      .sort((a, b) => a.distance - b.distance);
+
+    res.json(availableNearby);
+  } catch (error) {
+    console.error("GET NEARBY READY ORDERS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch nearby orders" });
+  }
+};
+
+// Agent accepts a nearby ready order
+export const agentAcceptOrder = async (req, res) => {
+  try {
+    const agentId = req.user.id;
+    const { orderId } = req.params;
+
+    const agent = await DeliveryAgent.findById(agentId);
+    if (!agent) {
+      return res.status(404).json({ message: "Agent not found" });
+    }
+
+    const order = await Order.findOne({ _id: orderId, status: "ready", deliveryAgentId: null });
+    if (!order) {
+      return res.status(400).json({ message: "Order is already claimed or not ready." });
+    }
+
+    // Update order with agent details
+    order.deliveryAgentId = agentId;
+    await order.save();
+
+    // Update agent status
+    agent.status = "on-delivery";
+    await agent.save();
+
+    res.json({ message: "Order accepted successfully", order });
+  } catch (error) {
+    console.error("AGENT ACCEPT ORDER ERROR:", error);
+    res.status(500).json({ message: "Failed to accept order" });
   }
 };

@@ -121,7 +121,7 @@ export default function RestaurantDashboard() {
 
       orders.forEach((order) => {
         order.items.forEach((item) => {
-          // 🚫 Ignore dishes not in current menu
+          //  Ignore dishes not in current menu
           if (!menuImageMap[item.name]) return;
 
           if (!dishMap[item.name]) {
@@ -162,7 +162,7 @@ export default function RestaurantDashboard() {
     }).format(value);
 
   return (
-    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
+    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.webp')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       <div className="relative z-10 flex min-h-screen flex-col md:flex-row">
@@ -227,7 +227,7 @@ export default function RestaurantDashboard() {
                 {topDishes.length > 0 && (
                   <div className="mb-8">
                     <h3 className="text-lg font-semibold mb-4">
-                      🔥 Top Trending Dishes
+                       Top Trending Dishes
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {topDishes.map((dish, i) => (

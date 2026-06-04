@@ -59,7 +59,7 @@ export default function CustomerPayment() {
       cart.items?.[0]?.restaurantId;
 
     if (!restaurantId) {
-      console.error("❌ Restaurant missing in cart:", cart);
+      console.error(" Restaurant missing in cart:", cart);
       setToast({ type: "error", message: "Restaurant not found in cart" });
       return;
     }
@@ -77,7 +77,7 @@ export default function CustomerPayment() {
       });
 
       const options = {
-        key: rpOrder.key, // ✅ FIXED
+        key: rpOrder.key, //  FIXED
         amount: rpOrder.amount,
         currency: rpOrder.currency,
         name: "DineX",
@@ -113,12 +113,12 @@ export default function CustomerPayment() {
         theme: { color: "#22c55e" },
       };
 
-      console.log("🟢 Razorpay key used in frontend:", options.key);
-      console.log("🟡 Final Razorpay options:", options);
+      console.log(" Razorpay key used in frontend:", options.key);
+      console.log(" Final Razorpay options:", options);
 
       /* ================= 5️⃣ OPEN RAZORPAY ================= */
       if (!options.key) {
-        console.error("❌ Razorpay key missing in options");
+        console.error(" Razorpay key missing in options");
         setToast({ type: "error", message: "Payment configuration error" });
         return;
       }
@@ -126,7 +126,7 @@ export default function CustomerPayment() {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
-      console.error("❌ Payment error:", error);
+      console.error(" Payment error:", error);
       setToast({ type: "error", message: "Payment failed" });
     }
   };

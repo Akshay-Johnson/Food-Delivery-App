@@ -1,3 +1,12 @@
+function optimizeCloudinaryUrl(src) {
+  if (src && typeof src === "string" && src.includes("res.cloudinary.com")) {
+    if (src.includes("/upload/") && !src.includes("/f_auto")) {
+      return src.replace("/upload/", "/upload/f_auto,q_auto/");
+    }
+  }
+  return src;
+}
+
 function getWebpCandidate(src) {
   if (!src || typeof src !== "string") return src;
   if (src.startsWith("http")) return src;
@@ -20,8 +29,9 @@ export default function ResponsiveImage({
   fallbackSrc,
   ...props
 }) {
-  const webpSrc = getWebpCandidate(src);
-  const resolvedFallback = fallbackSrc || src;
+  const optimizedSrc = optimizeCloudinaryUrl(src);
+  const webpSrc = getWebpCandidate(optimizedSrc);
+  const resolvedFallback = fallbackSrc || optimizedSrc;
 
   if (!src) {
     return null;

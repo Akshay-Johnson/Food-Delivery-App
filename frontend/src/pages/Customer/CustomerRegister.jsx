@@ -42,7 +42,7 @@ export default function CustomerRegister() {
       setOtpSent(true);
       setToast({
         type: "success",
-        message: "OTP sent to your email 📩",
+        message: "OTP sent to your email ",
       });
     } catch (error) {
       setToast({
@@ -78,7 +78,7 @@ export default function CustomerRegister() {
 
       setToast({
         type: "success",
-        message: "Registration successful 🎉",
+        message: "Registration successful ",
       });
 
       setTimeout(() => {

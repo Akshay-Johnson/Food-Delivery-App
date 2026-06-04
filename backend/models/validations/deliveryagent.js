@@ -40,7 +40,7 @@ export const agentRegisterSchema = Joi.object({
     "string.empty": "Confirm Password is required",
   }),
 
-  image: Joi.string().uri().optional(),
+  image: Joi.string().allow("").optional(),
   vehicleType: Joi.string().optional(),
   vehicleNumber: Joi.string().optional(),
 }).with("password", "confirmPassword");
@@ -68,7 +68,7 @@ export const agentUpdateSchema = Joi.object({
       "string.pattern.base": "Phone number must be 10 digits",
     }),
 
-  image: Joi.string().uri().optional(),
+  image: Joi.string().allow("").optional(),
 
   vehicleType: Joi.string().optional(),
 

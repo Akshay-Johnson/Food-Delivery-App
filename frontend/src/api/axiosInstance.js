@@ -70,7 +70,7 @@ api.interceptors.response.use(
     return response;
   },
 
-  // 🔴 THIS IS THE IMPORTANT PART YOU ADD
+  //  THIS IS THE IMPORTANT PART YOU ADD
   (error) => {
     if (error.response?.status === 401) {
       // Token expired / invalid → force logout

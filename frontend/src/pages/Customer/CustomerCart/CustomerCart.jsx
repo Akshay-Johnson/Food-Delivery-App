@@ -34,7 +34,7 @@ export default function CustomerCart() {
   if (!cart) return <p className="text-white p-6">Loading Cart...</p>;
 
   return (
-    <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white pt-10">
+    <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.webp')] bg-cover bg-center text-white pt-10">
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 

@@ -34,7 +34,7 @@ export default function ContactUs() {
   return (
     <section
       id="contact"
-      className="relative py-20 sm:py-24 bg-[url('/assets/loginimage.jpg')] bg-cover bg-center text-white"
+      className="relative py-20 sm:py-24 bg-[url('/assets/loginimage.webp')] bg-cover bg-center text-white"
     >
       {/* Dark Overlay with Blur to match Testimonials */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-md"></div>

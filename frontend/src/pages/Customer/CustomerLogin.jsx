@@ -24,7 +24,7 @@ export default function CustomerLogin() {
 
     try {
       await Login("customer", form);
-      setToast({ type: "success", message: "Login successful 🎉" });
+      setToast({ type: "success", message: "Login successful " });
 
       const permission = await Notification.requestPermission();
       if (permission === "granted") {

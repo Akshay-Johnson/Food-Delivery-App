@@ -27,7 +27,10 @@ export default function CustomerEditAddress() {
         return;
       }
 
-      setForm(address);
+      setForm({
+        ...address,
+        location: address.location || { lat: 9.9312, lng: 76.2673 },
+      });
     } catch (err) {
       setToast({ message: "Failed to load address", type: "error" });
     } finally {
@@ -39,7 +42,8 @@ export default function CustomerEditAddress() {
     e.preventDefault();
 
     try {
-      await api.put(`/api/address/update/${id}`, form);
+      const { _id, customerId, createdAt, updatedAt, __v, ...payload } = form;
+      await api.put(`/api/address/update/${id}`, payload);
 
       setToast({ message: "Address updated successfully", type: "success" });
       navigate("/customer/address");

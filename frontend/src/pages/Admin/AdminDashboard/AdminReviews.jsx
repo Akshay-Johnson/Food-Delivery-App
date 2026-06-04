@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 
-/* ⭐ STAR RENDER */
+/*  STAR RENDER */
 function Stars({ rating }) {
   return (
     <div className="flex gap-1">
@@ -144,7 +144,7 @@ export default function AdminReviews() {
                 {/* FLAG */}
                 {r.isFlagged && (
                   <span className="text-xs text-red-400 font-semibold">
-                    🚩 Reported
+                     Reported
                   </span>
                 )}
 

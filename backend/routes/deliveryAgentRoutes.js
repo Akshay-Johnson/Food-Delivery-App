@@ -23,6 +23,8 @@ import {
   getAssignedOrders,
   markOrderPickedUp,
   markOrderDelivered,
+  getNearbyReadyOrders,
+  agentAcceptOrder,
 } from "../controllers/orderController.js";
 
 import { validate } from "../middlewares/validate.js";
@@ -63,6 +65,10 @@ router.get("/available", restaurantAuth, getAvailableAgents);
 router.put("/status", protectAgent, toggleAgentStatus);
 
 router.get("/orders", protectAgent, getAssignedOrders);
+
+router.get("/orders/available-nearby", protectAgent, getNearbyReadyOrders);
+
+router.put("/orders/accept/:orderId", protectAgent, agentAcceptOrder);
 
 router.put("/orders/picked/:id", protectAgent, markOrderPickedUp);
 

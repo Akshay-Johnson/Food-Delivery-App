@@ -13,6 +13,6 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-/* 🔑 EXPORT EVERYTHING FROM ONE PLACE */
+/*  EXPORT EVERYTHING FROM ONE PLACE */
 export const messaging = getMessaging(app);
 export const db = getFirestore(app);

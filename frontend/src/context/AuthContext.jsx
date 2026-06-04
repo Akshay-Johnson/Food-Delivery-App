@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔁 Restore auth on refresh
+  //  Restore auth on refresh
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     const storedUser = localStorage.getItem("user");
@@ -61,15 +61,16 @@ export function AuthProvider({ children }) {
     }
 
     const res = await api.post(route, credentials);
+    const userData = res.data.user || res.data.restaurant || res.data.agent || res.data.admin;
 
     localStorage.setItem(tokenKey, res.data.token);
     localStorage.setItem("role", selectedRole);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+    localStorage.setItem("user", JSON.stringify(userData));
 
     // api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
 
     setRole(selectedRole);
-    setUser(res.data.user);
+    setUser(userData);
 
     return res.data;
   };

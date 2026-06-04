@@ -10,7 +10,7 @@ body {
   color: #fff;
   background:
     radial-gradient(circle at top, rgba(249, 115, 22, 0.18), transparent 30%),
-    linear-gradient(180deg, #0f172a 0%, #020617 100%);
+    linear-gradient(180deg, #09090b 0%, #020202 100%);
 }
 
 img,

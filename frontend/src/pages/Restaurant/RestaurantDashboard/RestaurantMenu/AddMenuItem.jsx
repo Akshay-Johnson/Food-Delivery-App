@@ -3,6 +3,7 @@ import api from "../../../../api/axiosInstance";
 import { Upload, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/toast/toast";
+import ResponsiveImage from "../../../../components/ResponsiveImage";
 
 export default function AddMenuItem() {
   const navigate = useNavigate();
@@ -79,8 +80,8 @@ export default function AddMenuItem() {
         <form onSubmit={submit} className="space-y-4">
           {/* IMAGE */}
           <div className="flex flex-col items-center">
-            <img
-              src={(form.image || "/assets/dishimage.jpg") + "?t=" + Date.now()}
+            <ResponsiveImage
+              src={form.image || "/assets/dishimage.jpg"}
               className="w-full max-w-md h-40 sm:h-44 rounded-xl object-cover border border-white/30"
               alt="Dish"
             />

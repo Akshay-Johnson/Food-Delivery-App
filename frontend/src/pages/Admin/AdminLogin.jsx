@@ -24,7 +24,7 @@ export default function AdminLogin() {
 
     try {
       await Login("admin", form);
-      setToast({ type: "success", message: "Login Successful 🎉" });
+      setToast({ type: "success", message: "Login Successful " });
       setTimeout(() => {
         setToast(null);
         navigate("/admin/dashboard");

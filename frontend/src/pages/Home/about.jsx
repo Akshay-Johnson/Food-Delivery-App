@@ -4,7 +4,7 @@ export default function About() {
   return (
     <section
       id="about"
-      className="relative flex flex-col items-center text-center py-20 sm:py-24 min-h-[unset] bg-[url('/assets/loginimage.jpg')] bg-cover bg-center"
+      className="relative flex flex-col items-center text-center py-20 sm:py-24 min-h-[unset] bg-[url('/assets/loginimage.webp')] bg-cover bg-center"
     >
       <div className="absolute inset-0 bg-black/55 backdrop-blur-md"></div>
 

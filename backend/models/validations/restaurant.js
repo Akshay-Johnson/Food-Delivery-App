@@ -44,7 +44,7 @@ export const restaurantRegisterSchema = Joi.object({
     "string.empty": "OTP is required",
   }),
 
-  image: Joi.string().uri().optional(),
+  image: Joi.string().allow("").optional(),
   description: Joi.string().max(500).optional(),
   cuisineType: Joi.string().optional(),
   categories: Joi.array().items(Joi.string()).optional(),
@@ -77,7 +77,7 @@ export const restaurantUpdateSchema = Joi.object({
 
   address: Joi.string().min(5).optional(),
 
-  image: Joi.string().uri().optional(),
+  image: Joi.string().allow("").optional(),
 
   description: Joi.string().max(500).optional(),
 
@@ -98,4 +98,9 @@ export const restaurantUpdateSchema = Joi.object({
       "string.pattern.base":
         "Password must contain at least one uppercase letter, one number, and one special character",
     }),
+
+  location: Joi.object({
+    lat: Joi.number().required(),
+    lng: Joi.number().required(),
+  }).optional(),
 });

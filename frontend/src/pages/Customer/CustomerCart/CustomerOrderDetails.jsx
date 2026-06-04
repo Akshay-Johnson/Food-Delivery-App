@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link, } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import { Home, ArrowLeft } from "lucide-react";
+import OrderTrackingMap from "../../../components/OrderTrackingMap";
 
-/* 🔁 REUSABLE BUTTON STYLES (SAME AS CustomerOrders) */
+/*  REUSABLE BUTTON STYLES (SAME AS CustomerOrders) */
 const headerBtnBase =
   "h-11 flex items-center justify-center  rounded bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition";
 
@@ -34,17 +35,14 @@ export default function CustomerOrderDetails() {
   };
 
   useEffect(() => {
-    if (!order?.deliveryAgentId) return;
+    if (!order || ["delivered", "rejected", "cancelled"].includes(order.status)) return;
 
-    const unsubscribe = listenToAgentLocation(
-      order.deliveryAgentId,
-      (location) => {
-        setAgentLocation(location);
-      }
-    );
+    const interval = setInterval(() => {
+      fetchOrder();
+    }, 5000);
 
-    return () => unsubscribe();
-  }, [order?.deliveryAgentId]);
+    return () => clearInterval(interval);
+  }, [order?.status]);
 
   if (loading) {
     return (
@@ -61,7 +59,7 @@ export default function CustomerOrderDetails() {
   return (
     <div className="relative min-h-screen text-white">
       {/* BACKGROUND */}
-      <div className="fixed inset-0 bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center -z-10" />
+      <div className="fixed inset-0 bg-[url('/assets/restaurant/bg.webp')] bg-cover bg-center -z-10" />
       <div className="fixed inset-0 bg-black/60 backdrop-blur-md -z-10" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 pt-4">
@@ -138,34 +136,21 @@ export default function CustomerOrderDetails() {
             ))}
           </div>
 
-          {/* LIVE TRACKING
-          {order.deliveryAgentId && (
+          {/* LIVE TRACKING MAP */}
+          {order.restaurantId?.location && order.address?.location && (
             <>
               <hr className="my-4 border-white/20" />
-
-              <h2 className="text-xl font-semibold mb-2">
-                Live Delivery Tracking
-              </h2>
-
-              {agentLocation ? (
-                <div className="bg-black/40 p-4 rounded-lg">
-                  <p>
-                    <strong>Agent Latitude:</strong>{" "}
-                    {agentLocation.lat}
-                  </p>
-                  <p>
-                    <strong>Agent Longitude:</strong>{" "}
-                    {agentLocation.lng}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-gray-400">
-                  Waiting for delivery agent
-                  location...
-                </p>
-              )}
+              <h2 className="text-xl font-semibold mb-2">Live Delivery Route Map</h2>
+              <OrderTrackingMap
+                restaurantLoc={order.restaurantId.location}
+                customerLoc={order.address.location}
+                agentLoc={order.deliveryAgentId?.location}
+                restaurantName={order.restaurantId.name}
+                customerName={order.address.fullName || "Delivery Address"}
+                agentName={order.deliveryAgentId?.name || "Delivery Agent"}
+              />
             </>
-          )} */}
+          )}
         </div>
       </div>
     </div>

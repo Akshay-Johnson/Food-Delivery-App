@@ -114,7 +114,7 @@ export default function AgentDashboard() {
   };
 
   return (
-    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
+    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.webp')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       <div className="relative z-10 flex min-h-screen flex-col md:flex-row">

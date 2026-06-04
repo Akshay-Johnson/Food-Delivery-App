@@ -10,13 +10,39 @@ export default function CustomerCheckout() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [toast, setToast] = useState(null);
-
+  const [restaurant, setRestaurant] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     loadCheckoutInfo();
   }, []);
+
+  const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
+    if (lat1 === null || lon1 === null || lat2 === null || lon2 === null ||
+        lat1 === undefined || lon1 === undefined || lat2 === undefined || lon2 === undefined) {
+      return 0;
+    }
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  };
+
+  const calculateDeliveryCharge = (dist) => {
+    const baseCharge = 30;
+    const freeKm = 3;
+    const perKmRate = 10;
+    if (dist <= freeKm) return baseCharge;
+    return baseCharge + Math.round((dist - freeKm) * perKmRate);
+  };
 
   const loadCheckoutInfo = async () => {
     try {
@@ -28,6 +54,12 @@ export default function CustomerCheckout() {
 
       const defaultAddress = addressRes.data?.find((a) => a.isDefault);
       if (defaultAddress) setSelectedAddress(defaultAddress._id);
+
+      const rId = cartRes.data.restaurantId || cartRes.data.items?.[0]?.restaurantId;
+      if (rId) {
+        const restRes = await api.get(`/api/restaurants/${rId}`);
+        setRestaurant(restRes.data);
+      }
     } catch (error) {
       console.error("Checkout load error:", error);
     }
@@ -90,8 +122,14 @@ export default function CustomerCheckout() {
 
       try {
         // Step A: Create Razorpay Order on Backend
+        const activeAddr = addresses.find((a) => a._id === selectedAddress);
+        const dist = (activeAddr?.location?.lat && restaurant?.location?.lat)
+          ? getDistanceInKm(activeAddr.location.lat, activeAddr.location.lng, restaurant.location.lat, restaurant.location.lng)
+          : 0;
+        const fee = calculateDeliveryCharge(dist);
+
         const { data: rpOrder } = await api.post("/api/payments/create-order", {
-          amount: cart.totalPrice,
+          amount: cart.totalPrice + fee,
         });
 
         const options = {
@@ -136,7 +174,7 @@ export default function CustomerCheckout() {
           },
           theme: { color: "#22c55e" },
         };
-        console.log("🟢 Razorpay key used in frontend:", options.key);
+        console.log(" Razorpay key used in frontend:", options.key);
 
         const rzp = new window.Razorpay(options);
         rzp.open();
@@ -151,7 +189,7 @@ export default function CustomerCheckout() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center text-white">
+    <div className="relative min-h-screen bg-[url('/assets/restaurant/bg.webp')] bg-cover bg-center text-white">
       {/* BLUR OVERLAY */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-none"></div>
 
@@ -227,18 +265,29 @@ export default function CustomerCheckout() {
           </div>
 
           {/* DELIVERY CHARGE */}
-          <div className="flex justify-between text-sm">
-            <p>Delivery Charge</p>
-            <p>₹40</p>
-          </div>
+          {(() => {
+            const activeAddr = addresses.find((a) => a._id === selectedAddress);
+            const dist = (activeAddr?.location?.lat && restaurant?.location?.lat)
+              ? getDistanceInKm(activeAddr.location.lat, activeAddr.location.lng, restaurant.location.lat, restaurant.location.lng)
+              : 0;
+            const fee = calculateDeliveryCharge(dist);
+            return (
+              <>
+                <div className="flex justify-between text-sm">
+                  <p>Delivery Charge {dist > 0 && `(${dist} km)`}</p>
+                  <p>₹{fee}</p>
+                </div>
 
-          <hr className="border-white/30 my-2" />
+                <hr className="border-white/30 my-2" />
 
-          {/* FINAL TOTAL */}
-          <div className="flex justify-between text-lg font-bold">
-            <p>Total Payable</p>
-            <p>₹{cart.totalPrice + 40}</p>
-          </div>
+                {/* FINAL TOTAL */}
+                <div className="flex justify-between text-lg font-bold">
+                  <p>Total Payable</p>
+                  <p>₹{cart.totalPrice + fee}</p>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* PAYMENT METHODS */}

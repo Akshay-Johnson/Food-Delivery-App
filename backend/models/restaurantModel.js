@@ -66,6 +66,10 @@ const restaurantSchema = new mongoose.Schema(
     closingTime: {
       type: String,
     },
+    location: {
+      lat: { type: Number, default: 9.9312 },
+      lng: { type: Number, default: 76.2673 },
+    },
   },
   {
     timestamps: true,

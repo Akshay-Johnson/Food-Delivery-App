@@ -51,6 +51,13 @@ export default function Hero() {
             </Link>
 
             <Link
+              to="/agent/login"
+              className="hero-btn w-full max-w-xs bg-white/5 border border-white/10 hover:bg-white/10 text-orange-300"
+            >
+              Deliver with us
+            </Link>
+
+            <Link
               to="/restaurant/register"
               className="hero-btn w-full max-w-xs bg-white/10 hover:bg-white/20"
             >

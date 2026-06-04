@@ -1,4 +1,6 @@
 import DeliveryAgent from "../models/deliveryAgentModel.js";
+import Restaurant from "../models/restaurantModel.js";
+import { getDistanceInKm } from "../utils/distance.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Order from "../models/orderModel.js";
@@ -140,7 +142,8 @@ export const loginAgent = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error logging in delivery agent" });
+    console.error("Agent login error:", error);
+    res.status(500).json({ message: "Error logging in delivery agent", error: error.message });
   }
 };
 
@@ -425,5 +428,45 @@ export const toggleAgentStatus = async (req, res) => {
   } catch (error) {
     console.error("TOGGLE AGENT STATUS ERROR:", error);
     res.status(500).json({ message: "Failed to update status" });
+  }
+};
+
+// Find available agents within 10 km of the restaurant
+export const getNearbyAgents = async (req, res) => {
+  try {
+    const restaurantId = req.user.id;
+    const restaurant = await Restaurant.findById(restaurantId);
+    if (!restaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    const restLat = restaurant.location?.lat ?? 9.9312;
+    const restLng = restaurant.location?.lng ?? 76.2673;
+
+    // Find all active, available agents
+    const agents = await DeliveryAgent.find({
+      approvalStatus: "approved",
+      status: "available",
+    }).select("name phone location vehicleType");
+
+    // Calculate distance and filter within 10 km
+    const nearby = agents.map(agent => {
+      const agentLat = agent.location?.lat;
+      const agentLng = agent.location?.lng;
+      const distance = (agentLat !== null && agentLng !== null)
+        ? getDistanceInKm(restLat, restLng, agentLat, agentLng)
+        : 999;
+      return {
+        ...agent.toObject(),
+        distance
+      };
+    })
+    .filter(a => a.distance <= 10)
+    .sort((a, b) => a.distance - b.distance);
+
+    res.json(nearby);
+  } catch (error) {
+    console.error("GET NEARBY AGENTS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch nearby agents" });
   }
 };

@@ -22,6 +22,7 @@ import {
   getAssignedOrders,
   assignOrderToAgent,
 } from "../controllers/orderController.js";
+import { getNearbyAgents } from "../controllers/deliveryAgentController.js";
 
 import restaurantAuth from "../middlewares/restaurantAuth.js";
 import { validate } from "../middlewares/validate.js";
@@ -58,6 +59,7 @@ router.put(
 );
 
 router.get("/orders", restaurantAuth, getRestaurantOrders);
+router.get("/agents/nearby", restaurantAuth, getNearbyAgents);
 
 router.put("/assign/orders", restaurantAuth, getAssignedOrders);
 

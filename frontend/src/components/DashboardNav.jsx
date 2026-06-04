@@ -8,18 +8,15 @@ export default function DashboardNav({
   logoutLabel = "Logout",
 }) {
   return (
-    <aside className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/80 backdrop-blur-lg md:sticky md:h-screen md:w-24 md:border-b-0 md:border-r">
-      <div className="flex items-center justify-between gap-4 px-4 py-3 md:flex-col md:items-stretch md:justify-start md:px-3 md:py-4">
-        <div className="flex items-center gap-3 md:mb-8 md:flex-col md:items-center md:gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-lg font-black text-white shadow-lg shadow-blue-500/30">
+    <aside className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/85 backdrop-blur-xl md:sticky md:h-screen md:w-64 md:border-b-0 md:border-r md:flex md:flex-col md:justify-between shrink-0">
+      <div className="flex items-center justify-between gap-4 px-4 py-3 md:flex-row md:items-center md:gap-3 md:px-5 md:py-6 md:border-b md:border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-lg font-black text-white shadow-lg shadow-blue-500/30">
             {brand}
           </div>
 
-          <div className="md:text-center">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-white/60 md:hidden">
-              {title}
-            </p>
-            <p className="hidden text-xs uppercase tracking-[0.35em] text-white/50 md:block">
+          <div>
+            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.35em] bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               {title}
             </p>
           </div>
@@ -27,41 +24,38 @@ export default function DashboardNav({
 
         <button
           onClick={onLogout}
-          className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-600/90 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600 md:hidden"
+          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-red-500/20 bg-red-600/90 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 md:hidden"
         >
           {logoutLabel}
         </button>
       </div>
 
-      <nav className="grid grid-cols-2 gap-2 px-3 pb-3 sm:grid-cols-3 md:flex md:flex-col md:gap-3 md:px-3 md:pb-4">
+      <nav className="grid grid-cols-2 gap-2 px-3 pb-3 sm:grid-cols-3 md:flex md:flex-col md:gap-2 md:px-4 md:py-6 md:flex-1">
         {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end ?? false}
             className={({ isActive }) =>
-              `group flex items-center justify-start gap-3 rounded-2xl px-3 py-3 text-sm transition md:justify-center md:px-2 md:py-3 ${
+              `group flex items-center justify-start gap-3 rounded-2xl px-4 py-3 text-sm transition ${
                 isActive
-                  ? "bg-blue-600/25 text-blue-300"
-                  : "text-gray-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-blue-600/25 text-blue-300 border border-blue-500/20"
+                  : "text-gray-300 hover:bg-white/10 hover:text-white border border-transparent"
               }`
             }
           >
-            <item.icon size={18} />
-            <span className="truncate md:hidden">{item.label}</span>
-            <span className="hidden text-xs leading-none md:block md:text-[10px]">
-              {item.label}
-            </span>
+            <item.icon size={20} className="shrink-0" />
+            <span className="font-semibold text-sm truncate">{item.label}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="mt-auto hidden p-3 md:block">
+      <div className="p-4 hidden md:block border-t border-white/10">
         <button
           onClick={onLogout}
-          className="group relative flex w-full items-center justify-center rounded-2xl bg-red-600/90 p-3 text-white transition hover:bg-red-600"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600/90 py-3 text-white transition hover:bg-red-600 font-bold text-sm shadow-md"
         >
-          <span className="text-xs font-semibold">{logoutLabel}</span>
+          {logoutLabel}
         </button>
       </div>
     </aside>

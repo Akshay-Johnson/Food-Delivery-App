@@ -125,7 +125,7 @@ export default function AdminDashboard() {
     }).format(value);
 
   return (
-    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.jpg')] bg-cover bg-center">
+    <div className="relative min-h-screen text-white bg-[url('/assets/restaurant/bg.webp')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
       <div className="relative z-10 flex min-h-screen flex-col md:flex-row">
@@ -203,10 +203,10 @@ export default function AdminDashboard() {
                         <div className="flex-1">
                           <p className="font-semibold truncate">{r.name}</p>
                           <p className="text-sm text-yellow-400">
-                            ⭐ {r.averageRating?.toFixed(1) || "0.0"}
+                             {r.averageRating?.toFixed(1) || "0.0"}
                           </p>
                           <p className="text-sm text-blue-400">
-                            🧾 {r.orderCount || 0} orders
+                             {r.orderCount || 0} orders
                           </p>
                         </div>
 

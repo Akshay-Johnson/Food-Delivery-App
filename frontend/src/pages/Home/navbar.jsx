@@ -58,6 +58,13 @@ export default function Navbar() {
             ))}
 
             <Link
+              to="/agent/login"
+              className="nav-btn bg-white/5 border border-white/10 text-sm font-semibold hover:bg-white/10 text-orange-300 hover:text-orange-200"
+            >
+              Agent Login
+            </Link>
+
+            <Link
               to="/customer/login"
               className="nav-btn bg-gradient-to-r from-orange-500 to-red-600 text-sm font-semibold"
             >
@@ -78,6 +85,15 @@ export default function Navbar() {
                   {link.label}
                 </button>
               ))}
+              
+              <Link
+                to="/agent/login"
+                className="nav-btn w-full bg-white/5 border border-white/10 text-sm font-semibold text-orange-300"
+                onClick={() => setMenuOpen(false)}
+              >
+                Agent Login
+              </Link>
+
               <Link
                 to="/customer/login"
                 className="nav-btn w-full bg-gradient-to-r from-orange-500 to-red-600 text-sm font-semibold"
